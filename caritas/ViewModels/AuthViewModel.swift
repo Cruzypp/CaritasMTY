@@ -13,20 +13,32 @@ import FirebaseFirestore
 @MainActor
 final class AuthViewModel: ObservableObject {
     @Published var user: User?
+    @Published var role: String?          // ← nuevo
     @Published var error: String?
     @Published var isLoading = false
+
+    var isAdmin: Bool { role == "admin" } // ← helper
 
     private let db = Firestore.firestore()
     private var authHandle: AuthStateDidChangeListenerHandle?
 
     init() {
         authHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            self?.user = user
+            guard let self else { return }
+            self.user = user
+            Task { await self.loadProfile() } // carga role tras cambios de sesión
         }
     }
+    deinit { if let h = authHandle { Auth.auth().removeStateDidChangeListener(h) } }
 
-    deinit {
-        if let h = authHandle { Auth.auth().removeStateDidChangeListener(h) }
+    private func loadProfile() async {
+        guard let uid = Auth.auth().currentUser?.uid else { role = nil; return }
+        do {
+            let snap = try await db.collection("users").document(uid).getDocument()
+            self.role = (snap.data()?["role"] as? String) ?? "donador"
+        } catch {
+            self.role = "donador"
+        }
     }
 
     func signIn(email: String, password: String) async {
@@ -35,9 +47,8 @@ final class AuthViewModel: ObservableObject {
         do {
             _ = try await Auth.auth().signIn(withEmail: email, password: password)
             error = nil
-        } catch {
-            self.error = (error as NSError).localizedDescription
-        }
+            await loadProfile()
+        } catch { self.error = (error as NSError).localizedDescription }
     }
 
     func signUp(email: String, password: String, acceptedPolicies: Bool) async {
@@ -54,13 +65,13 @@ final class AuthViewModel: ObservableObject {
                 "acceptedPoliciesAt": FieldValue.serverTimestamp()
             ], merge: true)
             error = nil
-        } catch {
-            self.error = (error as NSError).localizedDescription
-        }
+            await loadProfile()
+        } catch { self.error = (error as NSError).localizedDescription }
     }
 
     func signOut() {
         try? Auth.auth().signOut()
         user = nil
+        role = nil
     }
 }

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
+
 
 struct TestFirestoreView: View {
     @State private var bazaars: [Bazar] = []
