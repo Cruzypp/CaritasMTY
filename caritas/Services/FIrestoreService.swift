@@ -12,16 +12,19 @@ final class FirestoreService {
     static let shared = FirestoreService()
     private init() {}
 
-    private let db = Firestore.firestore()
+    let db = Firestore.firestore()
 
     // MARK: - DONOR FLOW
 
-    /// Crea una donación para el usuario actual
+    /// Crea una donación para el usuario actual (puede iniciar sin fotos).
+    /// Devuelve el ID del documento creado en `donations`.
+    @discardableResult
     func createDonation(for uid: String,
                         title: String,
                         description: String,
                         categoryText: String,
-                        bazarId: String? = nil) async throws -> String {
+                        bazarId: String? = nil,
+                        photoUrls: [String] = []) async throws -> String {
 
         let categories = categoryText
             .split(separator: ",")
@@ -32,10 +35,10 @@ final class FirestoreService {
             id: nil,
             bazarId: bazarId,
             categoryId: categories,
-            day: nil, // lo pondrá el server
+            day: nil, // lo pondrá el servidor
             description: description,
             folio: nil,
-            photoUrl: nil,
+            photoUrls: photoUrls, // arreglo (puede iniciar vacío)
             status: "pending",
             title: title,
             userId: uid
@@ -43,19 +46,32 @@ final class FirestoreService {
 
         let ref = db.collection("donations").document()
         var data = donation.toDict()
-        data["day"] = FieldValue.serverTimestamp()
+        data["day"] = FieldValue.serverTimestamp() // timestamp del servidor
 
         try await ref.setData(data)
         return ref.documentID
     }
 
-    /// Donaciones del usuario autenticado (descendentes por fecha)
+    /// Sobrescribe el arreglo `photoUrls` del documento con las URLs provistas.
+    func updateDonationPhotoURLs(docId: String, urls: [String]) async throws {
+        try await db.collection("donations")
+            .document(docId)
+            .setData(["photoUrls": urls], merge: true)
+    }
+
+    /// (Opcional) Agrega URLs al arreglo `photoUrls` sin borrar las existentes.
+    func appendDonationPhotoURLs(docId: String, urls: [String]) async throws {
+        try await db.collection("donations")
+            .document(docId)
+            .setData(["photoUrls": FieldValue.arrayUnion(urls)], merge: true)
+    }
+
+    /// Donaciones del usuario autenticado (ordenadas por fecha desc).
     func myDonations(for uid: String) async throws -> [Donation] {
         let snap = try await db.collection("donations")
             .whereField("userId", isEqualTo: uid)
             .order(by: "day", descending: true)
             .getDocuments()
-
         return snap.documents.map { Donation.from(doc: $0) }
     }
 
@@ -64,7 +80,6 @@ final class FirestoreService {
     func fetchBazaars() async throws -> [Bazar] {
         let snap = try await db.collection("bazars").getDocuments()
         return snap.documents.map { doc in
-            // Simple mapeo manual usando Codable por clave
             let d = doc.data()
             return Bazar(
                 id: doc.documentID,
@@ -101,10 +116,27 @@ final class FirestoreService {
         return snap.data() ?? [:]
     }
 
-    // MARK: - STUBS ADMIN (para que compile)
-    func pendingDonations() async throws -> [Donation] { [] }
+    // MARK: - ADMIN FLOW
 
-    func setDonationStatus(donationId: String, status: String, reviewerId: String) async throws {
-        // más adelante implementamos
+    /// Donaciones con `status == "pending"`, ordenadas por `day` desc.
+    func pendingDonations() async throws -> [Donation] {
+        let snap = try await db.collection("donations")
+            .whereField("status", isEqualTo: "pending")
+            .order(by: "day", descending: true)
+            .getDocuments()
+        return snap.documents.map { Donation.from(doc: $0) }
+    }
+
+    /// Actualiza estatus y registra quién revisó.
+    func setDonationStatus(donationId: String,
+                           status: String,
+                           reviewerId: String) async throws {
+        try await db.collection("donations")
+            .document(donationId)
+            .setData([
+                "status": status,
+                "reviewerId": reviewerId,
+                "reviewedAt": FieldValue.serverTimestamp()
+            ], merge: true)
     }
 }
