@@ -17,6 +17,17 @@ struct Bazar: Identifiable, Codable, Equatable {
     var location: String?
 }
 
+// MARK: - Bazar con Imagenes
+
+struct BazarUI: Identifiable, Codable, Equatable {
+    var id: String?
+    var address: String?
+    var horario: String?
+    var categoryIds: [String]?
+    var location: String?
+    var imageUrl: String?
+}
+
 // MARK: - Donation
 /// Modelo compatible con Firestore (sin FirebaseFirestoreSwift).
 /// - Soporta 1 o varias fotos:

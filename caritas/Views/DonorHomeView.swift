@@ -17,6 +17,12 @@ struct DonorHomeView: View {
     var body: some View {
         NavigationStack {
             List {
+                
+                NavigationLink{
+                    HomeView()
+                } label: {
+                    Text("Home View")
+                }
                 // MARK: - Nueva donación
                 Section("Nueva donación") {
 

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import FirebaseAuth
 import FirebaseFirestore
-import UIKit   // solo por UIImage
+import UIKit
 
 @MainActor
 final class DonationViewModel: ObservableObject {
@@ -67,7 +67,9 @@ final class DonationViewModel: ObservableObject {
             // 2) Subir fotos a Storage
             let urls = try await StorageService.shared.uploadDonationImages(
                 docId: docId,
-                images: images
+                images: images,
+                maxDimension: 1600,
+                targetKB: 400
             )
 
             // 3) Guardar URLs en Firestore
@@ -94,3 +96,5 @@ final class DonationViewModel: ObservableObject {
         }
     }
 }
+
+

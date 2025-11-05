@@ -95,6 +95,30 @@ final class FirestoreService {
         let snap = try await db.collection("donations").getDocuments()
         return snap.documents.map { Donation.from(doc: $0) }
     }
+    
+    /// Obtiene todas las donaciones y resuelve las URLs de Firebase Storage
+    /// Este método es útil cuando las imágenes están guardadas en Storage pero no hay URLs en Firestore
+    func fetchDonationsWithStorageURLs() async throws -> [Donation] {
+        let snap = try await db.collection("donations").getDocuments()
+        var donations: [Donation] = []
+        
+        for doc in snap.documents {
+            var donation = Donation.from(doc: doc)
+            
+            // Si no hay photoUrls, intentar obtenerlas de Storage
+            if donation.photoUrls?.isEmpty ?? true, let donationId = donation.id {
+                do {
+                    let storageURLs = try await StorageService.shared.getDonationImageURLs(for: donationId)
+                    donation.photoUrls = storageURLs
+                } catch {
+                    print("No se pudieron obtener imágenes de Storage para \(donationId): \(error)")
+                }
+            }
+            donations.append(donation)
+        }
+        
+        return donations
+    }
 
     func fetchUsers() async throws -> [UserDoc] {
         let snap = try await db.collection("users").getDocuments()
