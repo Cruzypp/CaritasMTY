@@ -15,6 +15,7 @@ struct DonateView: View {
     @State private var photosPickerPresented = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var showErrorAlert = false
+    @State private var showValidDonation = false
     
     var body: some View {
         NavigationStack {
@@ -173,6 +174,8 @@ struct DonateView: View {
                                 await viewModel.submitDonation(userId: userId)
                                 if viewModel.errorMessage != nil {
                                     showErrorAlert = true
+                                } else if viewModel.successMessage != nil {
+                                    showValidDonation = true
                                 }
                             } else {
                                 viewModel.errorMessage = "Debes estar autenticado para donar"
@@ -199,6 +202,10 @@ struct DonateView: View {
                     }
                     .disabled(viewModel.isLoading || authViewModel.user == nil)
                     .padding()
+                    
+                    NavigationLink(destination: ValidDonationView(), isActive: $showValidDonation) {
+                        EmptyView()
+                    }
                 }
                 .padding(.bottom, 20)
             }

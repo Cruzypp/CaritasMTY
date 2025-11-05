@@ -8,7 +8,7 @@ struct RootView: View {
         if auth.user == nil {
             ContentView()
         } else {
-            DonorHomeView()
+            HomeView()
                 .environmentObject(donationVM)
         }
     }

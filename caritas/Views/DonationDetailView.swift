@@ -25,11 +25,12 @@ struct DonationDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // MARK: - Título
                     Text("FOLIO: \(donation.folio ?? "")")
-                        .font(.gotham(.bold, style: .title3))
+                        .font(.gotham(.bold, style: .caption))
                         .foregroundColor(.azulMarino)
-                        .padding(.horizontal)
                         .padding(.top, 20)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
                     
                     // MARK: - Galería de Imágenes
                     VStack(spacing: 10) {
@@ -41,25 +42,37 @@ struct DonationDetailView: View {
                                         AsyncImage(url: url) { phase in
                                             switch phase {
                                             case .success(let image):
-                                                image
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 370, height: 300)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                                                    .tag(index)
+                                                GeometryReader { geometry in
+                                                    image
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: geometry.size.width, height: geometry.size.height)
+                                                        .clipped()
+                                                }
+                                                .frame(height: 300)
+                                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                                .tag(index)
 
                                             case .failure(_):
-                                                Image(.logotipo)
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(maxWidth: 370, maxHeight: 300)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                                                    .tag(index)
+                                                ZStack {
+                                                    Color(.systemGray6)
+                                                    Image(.logotipo)
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 150, height: 150)
+                                                }
+                                                .frame(height: 300)
+                                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                                .tag(index)
 
                                             case .empty:
-                                                ProgressView()
-                                                    .frame(width: 370, height: 300)
-                                                    .tag(index)
+                                                ZStack {
+                                                    Color(.systemGray6)
+                                                    ProgressView()
+                                                }
+                                                .frame(height: 300)
+                                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                                .tag(index)
 
                                             @unknown default:
                                                 EmptyView()
@@ -69,7 +82,7 @@ struct DonationDetailView: View {
                                 }
                             }
                             .tabViewStyle(.page(indexDisplayMode: .automatic))
-                            .frame(width: 370, height: 300)
+                            .frame(height: 300)
 
                             // Miniaturas - Carrusel
                             if photoUrls.count > 1 {
@@ -84,7 +97,7 @@ struct DonationDetailView: View {
                                                             .resizable()
                                                             .scaledToFill()
                                                             .frame(width: 70, height: 70)
-                                                            .cornerRadius(8)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
                                                             .overlay(
                                                                 RoundedRectangle(cornerRadius: 8)
                                                                     .stroke(
@@ -98,9 +111,10 @@ struct DonationDetailView: View {
                                                     case .failure(_):
                                                         Image(.logotipo)
                                                             .resizable()
-                                                            .scaledToFill()
+                                                            .scaledToFit()
                                                             .frame(width: 70, height: 70)
-                                                            .cornerRadius(8)
+                                                            .background(Color(.systemGray6))
+                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
                                                     case .empty:
                                                         ProgressView()
                                                             .frame(width: 70, height: 70)
@@ -111,7 +125,7 @@ struct DonationDetailView: View {
                                             }
                                         }
                                     }
-                                    .padding(.horizontal, 20)
+                                    .padding(.horizontal, 40)
                                 }
                             }
                         }
@@ -147,10 +161,9 @@ struct DonationDetailView: View {
                         }
                     }
                     .padding(.top, 40)
-                    .padding(.horizontal)
                     
                     Divider()
-                        .padding(.horizontal)
+                        .padding(.vertical, 10)
                     
                     // MARK: - Comentario (Description)
                     VStack(alignment: .leading, spacing: 8) {
@@ -165,10 +178,9 @@ struct DonationDetailView: View {
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
                     }
-                    .padding(.horizontal)
                     
                     Divider()
-                        .padding(.horizontal)
+                        .padding(.vertical, 10)
                     
                     // MARK: - Bazar a Entregar
                     VStack(alignment: .leading, spacing: 8) {
@@ -194,15 +206,14 @@ struct DonationDetailView: View {
                                 .font(.gotham(.regular, style: .body))
                                 .foregroundColor(.secondary)
                                 .padding()
-                                .frame(width: 370)
+                                .frame(maxWidth: .infinity)
                                 .background(Color(.systemGray6))
                                 .cornerRadius(10)
                         }
                     }
-                    .padding(.horizontal)
                     
                     Divider()
-                        .padding(.horizontal)
+                        .padding(.vertical, 10)
                     
                     // MARK: - Ubicación (Mapa)
                     VStack(alignment: .leading, spacing: 8) {
@@ -225,8 +236,8 @@ struct DonationDetailView: View {
                             .cornerRadius(10)
                         }
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
             .navigationTitle("")
@@ -278,7 +289,6 @@ struct MapPreview: View {
         folio: "FOL-001",
         photoUrls: [
             "https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3",
-            "https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3"
         ],
         status: "pending",
         title: "Ropa de invierno",
