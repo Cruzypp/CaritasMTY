@@ -48,29 +48,31 @@ struct DonateView: View {
                             .cornerRadius(12)
                         }
                         
-                        // Miniaturas de fotos seleccionadas
                         if !viewModel.selectedImages.isEmpty {
-                            HStack(spacing: 10) {
-                                ForEach(Array(viewModel.selectedImages.enumerated()), id: \.offset) { index, image in
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 80, height: 80)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            Button(action: {
-                                                viewModel.selectedImages.remove(at: index)
-                                            }) {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .font(.title3)
-                                                    .foregroundColor(.red)
-                                                    .background(Circle().fill(Color.white))
-                                            }
-                                            .offset(x: 10, y: -10),
-                                            alignment: .topTrailing
-                                        )
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(Array(viewModel.selectedImages.enumerated()), id: \.offset) { index, image in
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 80, height: 80)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                Button{
+                                                    viewModel.selectedImages.remove(at: index)
+                                                } label: {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .font(.title3)
+                                                        .foregroundColor(.red)
+                                                        .background(Circle().fill(Color.white))
+                                                }
+                                                .offset(x: 10, y: -10),
+                                                alignment: .topTrailing
+                                            )
+                                    }
                                 }
-                                Spacer()
+                                .padding(.horizontal, 10)
+                                .padding(.top, 10)
                             }
                         }
                     }
