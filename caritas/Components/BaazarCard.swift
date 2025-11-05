@@ -28,8 +28,7 @@ struct BaazarCard: View {
                     
                     ZStack {
                         Text(nombre)
-                            .font(.title3)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .title3))
                             .padding(6)
                             .foregroundStyle(.white)
                             .frame(width: 190)
@@ -40,17 +39,20 @@ struct BaazarCard: View {
                     HStack{
                         VStack(alignment: .leading ){
                             Text(horarios)
-                                .fontWeight(.medium)
+                                .font(.gotham(.regular, style: .body))
                             
                             Text(categoria)
-                                .fontWeight(.light)
+                                .font(.gotham(.regular, style: .caption))
+                                .padding(.top, 3)
                         }
+                        
+                        Spacer()
                         
                         Image(systemName: "mappin.circle.fill")
                             .resizable()
                             .frame(width: 30, height: 30)
-                            .padding(.leading, 35)
                     }
+                    .frame(width: 185)
                 }
                 .padding(.leading, 20)
                 .shadow(radius: 2)

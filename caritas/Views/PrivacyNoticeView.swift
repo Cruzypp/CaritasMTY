@@ -31,7 +31,7 @@ struct PrivacyNoticeView: View {
 
                     // Título organizacional
                     Text("Cáritas de Monterrey, A.B.P.")
-                        .font(.title2.weight(.bold))
+                        .font(.gotham(.bold, style: .title2))
                         .foregroundStyle(brandPrimary)
 
                     // CONTENIDO TARJETA
@@ -39,7 +39,7 @@ struct PrivacyNoticeView: View {
 
                         Group {
                             Text("Fundamento y objeto")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("""
@@ -52,7 +52,7 @@ CÁRITAS DE MONTERREY, A.B.P. pone a su disposición este Aviso de Privacidad co
 
                         Group {
                             Text("Responsable del tratamiento")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("""
@@ -67,7 +67,7 @@ Somos responsables de **recabar**, **usar** y **proteger** sus datos personales.
 
                         Group {
                             Text("A quiénes aplican estas disposiciones")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("Cuidamos en todo momento los datos personales de **beneficiarios, donantes, voluntarios, prestadores de servicio social** y el **personal** que labora en la institución.")
@@ -77,7 +77,7 @@ Somos responsables de **recabar**, **usar** y **proteger** sus datos personales.
                         // Finalidades principales
                         Group {
                             Text("Finalidades principales")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             BulletList(items: [
@@ -96,7 +96,7 @@ Somos responsables de **recabar**, **usar** y **proteger** sus datos personales.
                         // Finalidades secundarias
                         Group {
                             Text("Finalidades secundarias (opcionales)")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("Nos ayudan a brindarte una mejor atención, pero **no son indispensables** para el servicio:")
@@ -113,7 +113,7 @@ Somos responsables de **recabar**, **usar** y **proteger** sus datos personales.
                         // Limitar uso secundario
                         Group {
                             Text("¿Cómo limitar el uso para finalidades secundarias?")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("Si **no** deseas que tus datos se utilicen con finalidades secundarias, envía tu negativa a:")
@@ -132,7 +132,7 @@ Somos responsables de **recabar**, **usar** y **proteger** sus datos personales.
                         // Cambios
                         Group {
                             Text("Cambios al Aviso de Privacidad")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("Cualquier modificación derivada de cambios administrativos, operativos o de la normatividad aplicable se notificará **a través del sitio web** de la institución.")
@@ -142,7 +142,7 @@ Somos responsables de **recabar**, **usar** y **proteger** sus datos personales.
                         // Derechos ARCO
                         Group {
                             Text("Derechos ARCO")
-                                .font(.headline)
+                                .font(.gotham(.bold, style: .headline))
                                 .foregroundStyle(brandPrimary)
 
                             Text("""
@@ -155,6 +155,7 @@ El titular podrá ejercer en todo momento sus derechos de **Acceso, Rectificaci�
                         HStack {
                             Image(systemName: "calendar")
                             Text("Última actualización: **08/01/2025**")
+                                .font(.gotham(.regular, style: .body))
                         }
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -172,7 +173,7 @@ El titular podrá ejercer en todo momento sus derechos de **Acceso, Rectificaci�
                         dismiss()
                     } label: {
                         Text("Cerrar")
-                            .font(.headline)
+                            .font(.gotham(.bold, style: .headline))
                             .foregroundStyle(.white)
                             .padding()
                             .frame(maxWidth: .infinity)

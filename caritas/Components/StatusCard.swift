@@ -49,7 +49,7 @@ struct StatusCard: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text(donation.folio ?? "")
-                        .font(.headline.bold())
+                        .font(.gotham(.bold, style: .headline))
                         .frame(maxWidth: 200, alignment: .center)
                         .padding(5)
                         .background(Color.naranja)
@@ -57,7 +57,7 @@ struct StatusCard: View {
                         .clipShape(.rect(cornerRadius: 8))
 
                     Text((donation.status ?? "pending").uppercased())
-                        .font(.title3.bold())
+                        .font(.gotham(.bold, style: .title3))
                         .frame(height: 40)
                         .frame(maxWidth: 200, alignment: .center)
                         .padding(5)

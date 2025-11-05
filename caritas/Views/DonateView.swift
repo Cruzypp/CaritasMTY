@@ -22,8 +22,7 @@ struct DonateView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // MARK: - Título
                     Text("CREAR DONACIÓN")
-                        .font(.title)
-                        .fontWeight(.bold)
+                        .font(.gotham(.bold, style: .title))
                         .foregroundColor(.azulMarino)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 20)
@@ -36,10 +35,10 @@ struct DonateView: View {
                                     .font(.title)
                                     .foregroundColor(.naranja)
                                 Text("Selecciona 2 o más fotos")
-                                    .font(.headline)
+                                    .font(.gotham(.regular, style: .headline))
                                     .foregroundColor(.azulMarino)
                                 Text("(\(viewModel.selectedImages.count)/10)")
-                                    .font(.caption)
+                                    .font(.gotham(.regular, style: .caption))
                                     .foregroundColor(.secondary)
                             }
                             .frame(maxWidth: .infinity)
@@ -84,8 +83,7 @@ struct DonateView: View {
                     // MARK: - Título de la Donación
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Título")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .headline))
                         
                         TextField("Ej: Ropa de invierno", text: $viewModel.title)
                             .textFieldStyle(.roundedBorder)
@@ -99,8 +97,7 @@ struct DonateView: View {
                     // MARK: - Descripción
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Descripción")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .headline))
                         
                         TextEditor(text: $viewModel.description)
                             .frame(height: 100)
@@ -119,11 +116,11 @@ struct DonateView: View {
                     // MARK: - Categorías
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Categoría")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .headline))
                             .padding(.horizontal)
                         
                         VStack(spacing: 10) {
+                            Spacer()
                             ForEach(viewModel.availableCategories, id: \.self) { category in
                                 HStack(spacing: 12) {
                                     Image(systemName: viewModel.selectedCategories.contains(category) ? "checkmark.square.fill" : "square")
@@ -131,8 +128,7 @@ struct DonateView: View {
                                         .font(.title3)
                                     
                                     Text(category)
-                                        .font(.body)
-                                        .foregroundColor(.black)
+                                        .font(.gotham(.regular, style: .body))
                                     
                                     Spacer()
                                 }
@@ -141,8 +137,9 @@ struct DonateView: View {
                                     viewModel.toggleCategory(category)
                                 }
                                 .padding(.horizontal)
-                                .padding(.vertical, 8)
+                                .padding(.vertical, 1)
                             }
+                            Spacer()
                         }
                         .background(Color(.systemGray6))
                         .cornerRadius(10)

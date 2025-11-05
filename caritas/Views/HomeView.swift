@@ -86,7 +86,7 @@ struct HomeView: View {
                     goToDonateView.toggle()
                 } label: {
                     Text("DONAR")
-                        .font(.title2).bold()
+                        .font(.gotham(.bold, style: .title2))
                         .frame(width: 250, height: 60)
                         .foregroundStyle(.white)
                 }
@@ -98,8 +98,8 @@ struct HomeView: View {
 
                 // Título
                 Text("Bazares")
-                    .font(.largeTitle).bold()
-                    .padding(.top, 8)
+                    .font(.gotham(.bold, style: .largeTitle))
+                    .padding(.top, 10)
                     .padding(.horizontal, 20)
 
                 
@@ -107,6 +107,7 @@ struct HomeView: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
                     TextField("Buscar bazar…", text: $search)
+                        .font(.gotham(.regular, style: .body))
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
                     Button {
@@ -126,6 +127,7 @@ struct HomeView: View {
                     ForEach(filteredBazaars) { bazar in
                         NavigationLink {
                             Text(bazar.location ?? "Detalle")
+                                .font(.gotham(.regular, style: .body))
                         } label: {
                             BaazarCard(
                                 nombre: bazar.location ?? (bazar.address ?? "Sin nombre"),

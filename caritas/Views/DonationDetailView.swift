@@ -25,8 +25,7 @@ struct DonationDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // MARK: - Título
                     Text("FOLIO: \(donation.folio ?? "")")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                        .font(.gotham(.bold, style: .title3))
                         .foregroundColor(.azulMarino)
                         .padding(.horizontal)
                         .padding(.top, 20)
@@ -124,11 +123,10 @@ struct DonationDetailView: View {
                         // Título y Descripción
                         VStack(alignment: .leading, spacing: 8) {
                             Text(donation.title ?? "Sin título")
-                                .font(.headline)
-                                .fontWeight(.bold)
+                                .font(.gotham(.bold, style: .title3))
                             
                             Text(donation.description ?? "Sin descripción")
-                                .font(.body)
+                                .font(.gotham(.regular, style: .callout))
                                 .foregroundColor(.secondary)
                                 .lineLimit(3)
                         }
@@ -136,7 +134,7 @@ struct DonationDetailView: View {
                         // Status
                         HStack {
                             Text("Estado:")
-                                .fontWeight(.semibold)
+                                .font(.gotham(.bold, style: .body))
                             Spacer()
                             Text((donation.status ?? "pending").uppercased())
                                 .font(.caption)
@@ -157,11 +155,11 @@ struct DonationDetailView: View {
                     // MARK: - Comentario (Description)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Comentario")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .headline))
                         
                         Text(donation.description ?? "Sin comentarios")
-                            .font(.body)
+                            .font(.gotham(.regular, style: .body))
+                            .frame(maxWidth: .infinity)
                             .foregroundColor(.secondary)
                             .padding()
                             .background(Color(.systemGray6))
@@ -175,14 +173,12 @@ struct DonationDetailView: View {
                     // MARK: - Bazar a Entregar
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Bazar a entregar")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .headline))
                         
                         if let bazar = viewModel.bazar {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(bazar.location ?? "Ubicación desconocida")
-                                    .font(.body)
-                                    .fontWeight(.semibold)
+                                    .font(.gotham(.regular, style: .body))
                                 
                                 if let address = bazar.address {
                                     Text(address)
@@ -195,7 +191,7 @@ struct DonationDetailView: View {
                             .cornerRadius(10)
                         } else {
                             Text("Bazar no disponible")
-                                .font(.body)
+                                .font(.gotham(.regular, style: .body))
                                 .foregroundColor(.secondary)
                                 .padding()
                                 .frame(width: 370)
@@ -211,8 +207,7 @@ struct DonationDetailView: View {
                     // MARK: - Ubicación (Mapa)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Ubicación")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                            .font(.gotham(.bold, style: .headline))
                         
                         if let bazar = viewModel.bazar,
                            let location = bazar.location {
@@ -223,6 +218,7 @@ struct DonationDetailView: View {
                             ZStack {
                                 Color(.systemGray6)
                                 Text("Ubicación no disponible")
+                                    .font(.gotham(.regular, style: .body))
                                     .foregroundColor(.secondary)
                             }
                             .frame(height: 200)
@@ -278,7 +274,7 @@ struct MapPreview: View {
         bazarId: "B001",
         categoryId: ["ropa"],
         day: Timestamp(date: Date()),
-        description: "Donación de ropa en buen estado. Incluye abrigos, bufandas y suéteres.",
+        description: "ey.",
         folio: "FOL-001",
         photoUrls: [
             "https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3",

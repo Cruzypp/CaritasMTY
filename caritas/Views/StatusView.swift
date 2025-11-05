@@ -17,8 +17,7 @@ struct StatusView: View {
                 Text("Estatus de\nDonaciones")
                     .padding(.top, 40)
                     .padding(.leading, 20)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.gotham(.bold, style: .largeTitle))
                     .foregroundColor(.azulMarino)
                 
                 if viewModel.isLoading {

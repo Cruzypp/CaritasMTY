@@ -30,8 +30,7 @@ struct SignUpView: View {
 
             // Title
             Text("Crear cuenta")
-                .font(.title)
-                .fontWeight(.bold)
+                .font(.gotham(.bold, style: .largeTitle))
                 .multilineTextAlignment(.center)
                 .foregroundColor(Color("azulMarino"))
 
@@ -39,10 +38,10 @@ struct SignUpView: View {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("EMAIL")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .font(.gotham(.bold, style: .caption))
                         .foregroundColor(.gray)
                     TextField("hello@reallygreatsite.com", text: $email)
+                        .font(.gotham(.regular, style: .body))
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
@@ -53,10 +52,10 @@ struct SignUpView: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text("PASSWORD")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .font(.gotham(.bold, style: .caption))
                         .foregroundColor(.gray)
                     SecureField("••••••••", text: $password)
+                        .font(.gotham(.regular, style: .body))
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
@@ -86,14 +85,14 @@ struct SignUpView: View {
                 .accessibilityLabel("Aceptar políticas de privacidad")
                 .accessibilityValue(acceptPolicies ? "Activado" : "Desactivado")
                 Text("Acepto el")
-                    .font(.callout)
+                    .font(.gotham(.regular, style: .callout))
                     .foregroundColor(.gray)
 
                 Button {
                     mostrarPoliticas.toggle()
                 } label: {
                     Text("Aviso de Privacidad")
-                        .font(.callout)
+                        .font(.gotham(.bold, style: .callout))
                         .foregroundColor(Color("aqua"))
                         .underline()
                 }
@@ -108,7 +107,7 @@ struct SignUpView: View {
                 Task { await auth.signUp(email: email, password: password, acceptedPolicies: acceptPolicies) }
             } label: {
                 Text("Registrarme")
-                    .font(.headline)
+                    .font(.gotham(.bold, style: .headline))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -122,13 +121,16 @@ struct SignUpView: View {
             // Link a Login
             HStack(spacing: 6) {
                 Text("¿Ya tienes cuenta?")
+                    .font(.gotham(.regular, style: .body))
                     .foregroundColor(.secondary)
                 // Usamos dismiss para volver, pero también sirve como link explícito
-                NavigationLink("Inicia sesión") {
+                NavigationLink{
                     ContentView()
+                } label: {
+                    Text("Inicia sesión")
+                        .font(.gotham(.bold, style: .body))
                 }
                 .foregroundColor(Color("azulMarino"))
-                .fontWeight(.semibold)
             }
 
             // Error

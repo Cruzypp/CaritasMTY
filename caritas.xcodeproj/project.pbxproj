@@ -21,9 +21,22 @@
 		FCEC6FC32EB3DCCB00B4FC17 /* caritas.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = caritas.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FCBC81D02EBBE8B500355381 /* Exceptions for "caritas" folder in "caritas" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FCEC6FC22EB3DCCB00B4FC17 /* caritas */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		FCEC6FC52EB3DCCB00B4FC17 /* caritas */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FCBC81D02EBBE8B500355381 /* Exceptions for "caritas" folder in "caritas" target */,
+			);
 			path = caritas;
 			sourceTree = "<group>";
 		};
@@ -294,6 +307,7 @@
 				DEVELOPMENT_TEAM = YKZJR6NCMN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = caritas/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -326,6 +340,7 @@
 				DEVELOPMENT_TEAM = YKZJR6NCMN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = caritas/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

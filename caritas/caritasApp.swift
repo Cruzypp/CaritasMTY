@@ -35,6 +35,7 @@ struct caritasApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(auth)
+                .environment(\.font, .gotham(.regular, style: .body))
         }
     }
 }
