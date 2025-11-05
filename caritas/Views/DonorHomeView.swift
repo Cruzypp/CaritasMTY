@@ -6,190 +6,216 @@
 //
 
 import SwiftUI
-import PhotosUI
-import UIKit
 
 struct DonorHomeView: View {
-    @EnvironmentObject var donationVM: DonationViewModel
-    @EnvironmentObject var auth: AuthViewModel              // ← para cerrar sesión
+    @EnvironmentObject var auth: AuthViewModel
 
-    // El picker vive en la View para no depender de PhotosUI en el ViewModel
-    @State private var pickerItems: [PhotosPickerItem] = []
-    @State private var showLogoutConfirm = false            // ← confirmación opcional
+    // Colores desde Assets
+    private let brand = (
+        primary: Color("azulMarino"),
+        accent:  Color("aqua"),
+        surface: Color("grisClaro"),
+        ink:     Color("negro")
+    )
+
+    // Pequeños KPIs para dar contexto
+    private let highlights: [(title: String, value: String, systemIcon: String)] = [
+        ("Personas beneficiadas", "376,460", "person.3.fill"),
+        ("Toneladas distribuidas", "7,315", "shippingbox.fill"),
+        ("Voluntariado", "8,046", "hands.sparkles.fill"),
+        ("Clínicas & Posadas", "3 + 3", "cross.case.fill")
+    ]
 
     var body: some View {
         NavigationStack {
-            List {
-                
-                NavigationLink{
-                    HomeView()
-                } label: {
-                    Text("Home View")
-                }
-                // MARK: - Nueva donación
-                Section("Nueva donación") {
+            ScrollView {
+                VStack(spacing: 20) {
 
-                    // Selector de fotos + previews
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Sube al menos 2 fotos")
+                    // LOGO + TITULAR
+                    VStack(spacing: 12) {
+                        // Centrado del logo
+                        HStack { Spacer()
+                            Image("Logotipo Cáritas de Monterrey, A.B.P.")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 120, height: 120)
+                            Spacer() }
+                        Text("Cáritas de Monterrey, A.B.P.")
+                            .font(.title2.bold())
+                            .foregroundStyle(brand.primary)
+                            .multilineTextAlignment(.center)
+                        Text("“Servíos por amor, los unos a los otros”. (Gál 5,13)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 8)
+
+                    // HIGHLIGHTS
+                    LazyVGrid(
+                        columns: [.init(.flexible()), .init(.flexible())],
+                        spacing: 12
+                    ) {
+                        ForEach(highlights, id: \.title) { h in
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: h.systemIcon)
+                                    .font(.title3)
+                                    .foregroundStyle(brand.accent)
+                                    .frame(width: 28)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(h.value)
+                                        .font(.headline)
+                                        .foregroundStyle(brand.primary)
+                                    Text(h.title)
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            .padding(12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(brand.surface)
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    // MISIÓN
+                    InfoCard(
+                        title: "Misión",
+                        color: brand.primary,
+                        text:
+"""
+Cáritas de Monterrey, A.B.P. es un organismo de la Iglesia Católica, fundamentado en el amor, que proporciona servicios asistenciales, de promoción humana y desarrollo comunitario a nuestros hermanos más desprotegidos, sin distinción de credo o religión.
+"""
+                    )
+
+                    // VISIÓN
+                    InfoCard(
+                        title: "Visión",
+                        color: brand.primary,
+                        text:
+"""
+Contar con un liderazgo que optimice recursos y multiplique los servicios asistenciales, de promoción humana y administrativos; atendiendo a los más desprotegidos con infraestructura adecuada y personas en capacitación continua, comprometidas por amor.
+"""
+                    )
+
+                    // VALORES
+                    ValuesCard(
+                        title: "Valores",
+                        color: brand.primary,
+                        bullets: [
+                            "Caridad", "Espiritualidad", "Servicio",
+                            "Humildad", "Respeto", "Profesionalismo",
+                            "Mejora continua"
+                        ],
+                        accent: brand.accent
+                    )
+
+                    // CTA suave
+                    VStack(spacing: 8) {
+                        Text("Tu ayuda transforma vidas")
+                            .font(.headline)
+                            .foregroundStyle(brand.primary)
+                        Text("Súmate como donante o voluntario. Juntos llegamos más lejos.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
-
-                        // Previews horizontales
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 10) {
-                                ForEach(Array(donationVM.images.enumerated()), id: \.offset) { _, img in
-                                    Image(uiImage: img)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 100, height: 100)
-                                        .clipped()
-                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                }
-                            }
-                            .padding(.vertical, donationVM.images.isEmpty ? 0 : 4)
-                        }
-
-                        PhotosPicker(
-                            selection: $pickerItems,
-                            maxSelectionCount: 6,
-                            matching: .images
-                        ) {
-                            HStack {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 18, weight: .semibold))
-                                Text("Añadir fotos")
-                            }
-                        }
-                        // iOS 17+: firma con dos parámetros (oldValue, newValue)
-                        .onChange(of: pickerItems) { _, newItems in
-                            Task { await loadImages(from: newItems) }
-                        }
+                            .multilineTextAlignment(.center)
                     }
-                    .listRowSeparator(.hidden)
-
-                    // Campos
-                    TextField("Título", text: $donationVM.title)
-
-                    TextField("Descripción", text: $donationVM.description, axis: .vertical)
-                        .lineLimit(1...4)
-
-                    TextField("Categorías (coma separadas) ej. ropa,comida",
-                              text: $donationVM.categoryText)
-
-                    TextField("Bazar (opcional, id)", text: Binding(
-                        get: { donationVM.bazarId ?? "" },
-                        set: { donationVM.bazarId = $0.isEmpty ? nil : $0 }
-                    ))
-
-                    Button(donationVM.isSending ? "Enviando..." : "Enviar donación") {
-                        Task { await donationVM.sendDonation() }
-                    }
-                    .disabled(!donationVM.canSubmit)
+                    .padding(.bottom, 24)
                 }
-
-                // MARK: - Mis donaciones
-                Section("Mis donaciones") {
-                    if donationVM.loadingMy {
-                        ProgressView()
-                    } else if donationVM.myDonations.isEmpty {
-                        Text("Aún no tienes donaciones.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(donationVM.myDonations) { d in
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(d.title ?? "—").font(.headline)
-
-                                if let desc = d.description, !desc.isEmpty {
-                                    Text(desc).font(.subheadline).foregroundStyle(.secondary)
-                                }
-
-                                // Mini preview (primera foto)
-                                if let urls = d.photoUrls,
-                                   let first = urls.first,
-                                   let url = URL(string: first) {
-                                    AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(height: 120)
-                                                .clipped()
-                                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                        case .failure(_):
-                                            EmptyView()
-                                        case .empty:
-                                            ProgressView().frame(height: 120)
-                                        @unknown default:
-                                            EmptyView()
-                                        }
-                                    }
-                                }
-
-                                HStack {
-                                    Text("Estado: \(d.status ?? "—")")
-                                    if let cats = d.categoryId, !cats.isEmpty {
-                                        Text("• \(cats.joined(separator: ", "))")
-                                    }
-                                }
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                            }
-                            .padding(.vertical, 2)
-                        }
-                    }
-                }
-
-                if let msg = donationVM.message {
-                    Section("Mensaje") { Text(msg).font(.footnote) }
-                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
             }
             .navigationTitle("Donaciones")
             .toolbar {
-                // Botón de cerrar sesión (izquierda)
+                // Log out (izquierda)
                 ToolbarItem(placement: .topBarLeading) {
                     Button(role: .destructive) {
-                        showLogoutConfirm = true
+                        auth.signOut()
                     } label: {
                         Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
                     }
                     .accessibilityLabel("Cerrar sesión")
                 }
-
-                // Botón de actualizar (derecha)
+                // HomeView (derecha)
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Actualizar") { Task { await donationVM.loadMyDonations() } }
+                    NavigationLink {
+                        HomeView()
+                    } label: {
+                        Label("Home", systemImage: "house.fill")
+                    }
+                    .accessibilityLabel("Ir a Home")
                 }
             }
-            .confirmationDialog("¿Cerrar sesión?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
-                Button("Cerrar sesión", role: .destructive) {
-                    auth.signOut()
-                }
-                Button("Cancelar", role: .cancel) { }
-            }
-            .task { await donationVM.loadMyDonations() }
+            .background(Color(.systemGroupedBackground))
         }
-    }
-
-    // Carga UIImage desde los PhotosPickerItem y los pasa al VM
-    private func loadImages(from items: [PhotosPickerItem]) async {
-        var result: [UIImage] = []
-        for item in items {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let img = UIImage(data: data) {
-                result.append(img)
-            }
-        }
-        donationVM.images = result
     }
 }
 
+// MARK: - Subviews
+
+private struct InfoCard: View {
+    let title: String
+    let color: Color
+    let text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(color)
+            Text(text)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color("grisClaro"))
+        )
+    }
+}
+
+private struct ValuesCard: View {
+    let title: String
+    let color: Color
+    let bullets: [String]
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(color)
+
+            LazyVGrid(columns: [.init(.flexible()), .init(.flexible())], spacing: 8) {
+                ForEach(bullets, id: \.self) { item in
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(accent)
+                            .frame(width: 6, height: 6)
+                        Text(item)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color("grisClaro"))
+        )
+    }
+}
+
+// MARK: - Preview
+
 #Preview {
-    // Stubs para que el canvas no truene
-    let vm = DonationViewModel()
-    vm.images = [UIImage(systemName: "photo")!, UIImage(systemName: "photo")!]
-    return DonorHomeView()
-        .environmentObject(AuthViewModel())   // ← importante para el Preview
-        .environmentObject(vm)
+    DonorHomeView()
+        .environmentObject(AuthViewModel())
 }
