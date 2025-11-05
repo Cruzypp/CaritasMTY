@@ -72,47 +72,48 @@ struct DonationDetailView: View {
                             .tabViewStyle(.page(indexDisplayMode: .automatic))
                             .frame(width: 370, height: 300)
 
-                            // Miniaturas
+                            // Miniaturas - Carrusel
                             if photoUrls.count > 1 {
-                                HStack(spacing: 10) {
-                                    ForEach(Array(photoUrls.enumerated()), id: \.offset) { index, urlString in
-                                        if let url = URL(string: urlString) {
-                                            AsyncImage(url: url) { phase in
-                                                switch phase {
-                                                case .success(let image):
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 70, height: 70)
-                                                        .cornerRadius(8)
-                                                        .overlay(
-                                                            RoundedRectangle(cornerRadius: 8)
-                                                                .stroke(
-                                                                    selectedImageIndex == index ? Color.naranja : Color.clear,
-                                                                    lineWidth: 2
-                                                                )
-                                                        )
-                                                        .onTapGesture {
-                                                            selectedImageIndex = index
-                                                        }
-                                                case .failure(_):
-                                                    Image(.logotipo)
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 70, height: 70)
-                                                        .cornerRadius(8)
-                                                case .empty:
-                                                    ProgressView()
-                                                        .frame(width: 70, height: 70)
-                                                @unknown default:
-                                                    EmptyView()
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 10) {
+                                        ForEach(Array(photoUrls.enumerated()), id: \.offset) { index, urlString in
+                                            if let url = URL(string: urlString) {
+                                                AsyncImage(url: url) { phase in
+                                                    switch phase {
+                                                    case .success(let image):
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 70, height: 70)
+                                                            .cornerRadius(8)
+                                                            .overlay(
+                                                                RoundedRectangle(cornerRadius: 8)
+                                                                    .stroke(
+                                                                        selectedImageIndex == index ? Color.naranja : Color.clear,
+                                                                        lineWidth: 2
+                                                                    )
+                                                            )
+                                                            .onTapGesture {
+                                                                selectedImageIndex = index
+                                                            }
+                                                    case .failure(_):
+                                                        Image(.logotipo)
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 70, height: 70)
+                                                            .cornerRadius(8)
+                                                    case .empty:
+                                                        ProgressView()
+                                                            .frame(width: 70, height: 70)
+                                                    @unknown default:
+                                                        EmptyView()
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                    Spacer()
+                                    .padding(.horizontal, 20)
                                 }
-                                .padding(.leading, 20)
                             }
                         }
                     }
