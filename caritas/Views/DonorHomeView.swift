@@ -11,8 +11,11 @@ import UIKit
 
 struct DonorHomeView: View {
     @EnvironmentObject var donationVM: DonationViewModel
+    @EnvironmentObject var auth: AuthViewModel              // ← para cerrar sesión
+
     // El picker vive en la View para no depender de PhotosUI en el ViewModel
     @State private var pickerItems: [PhotosPickerItem] = []
+    @State private var showLogoutConfirm = false            // ← confirmación opcional
 
     var body: some View {
         NavigationStack {
@@ -144,9 +147,26 @@ struct DonorHomeView: View {
             }
             .navigationTitle("Donaciones")
             .toolbar {
+                // Botón de cerrar sesión (izquierda)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .destructive) {
+                        showLogoutConfirm = true
+                    } label: {
+                        Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                    .accessibilityLabel("Cerrar sesión")
+                }
+
+                // Botón de actualizar (derecha)
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Actualizar") { Task { await donationVM.loadMyDonations() } }
                 }
+            }
+            .confirmationDialog("¿Cerrar sesión?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
+                Button("Cerrar sesión", role: .destructive) {
+                    auth.signOut()
+                }
+                Button("Cancelar", role: .cancel) { }
             }
             .task { await donationVM.loadMyDonations() }
         }
@@ -170,5 +190,6 @@ struct DonorHomeView: View {
     let vm = DonationViewModel()
     vm.images = [UIImage(systemName: "photo")!, UIImage(systemName: "photo")!]
     return DonorHomeView()
+        .environmentObject(AuthViewModel())   // ← importante para el Preview
         .environmentObject(vm)
 }
