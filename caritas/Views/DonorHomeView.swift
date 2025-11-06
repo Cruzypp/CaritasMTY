@@ -9,7 +9,9 @@ import SwiftUI
 
 struct DonorHomeView: View {
     @EnvironmentObject var auth: AuthViewModel
-
+    @State private var showLogoutConfirm = false
+    @State private var showHomeView = false
+    
     // Colores desde Assets
     private let brand = (
         primary: Color("azulMarino"),
@@ -17,7 +19,7 @@ struct DonorHomeView: View {
         surface: Color("grisClaro"),
         ink:     Color("negro")
     )
-
+    
     // Pequeños KPIs para dar contexto
     private let highlights: [(title: String, value: String, systemIcon: String)] = [
         ("Personas beneficiadas", "376,460", "person.3.fill"),
@@ -25,194 +27,176 @@ struct DonorHomeView: View {
         ("Voluntariado", "8,046", "hands.sparkles.fill"),
         ("Clínicas & Posadas", "3 + 3", "cross.case.fill")
     ]
-
+    
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-
-                    // LOGO + TITULAR
-                    VStack(spacing: 12) {
-                        // Centrado del logo
-                        HStack { Spacer()
-                            Image("Logito")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 400)
-                            Spacer() }
-                        Text("Cáritas de Monterrey, A.B.P.")
-                            .font(.title2.bold())
-                            .foregroundStyle(brand.primary)
-                            .multilineTextAlignment(.center)
-                        Text("“Servíos por amor, los unos a los otros”. (Gál 5,13)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                  
-
-                    // HIGHLIGHTS
-                    LazyVGrid(
-                        columns: [.init(.flexible()), .init(.flexible())],
-                        spacing: 12
-                    ) {
-                        ForEach(highlights, id: \.title) { h in
-                            HStack(alignment: .top, spacing: 10) {
-                                Image(systemName: h.systemIcon)
-                                    .font(.title3)
-                                    .foregroundStyle(brand.accent)
-                                    .frame(width: 28)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(h.value)
-                                        .font(.headline)
-                                        .foregroundStyle(brand.primary)
-                                    Text(h.title)
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer(minLength: 0)
+        ScrollView {
+            VStack(spacing: 20) {
+                
+                // LOGO + TITULAR
+                VStack(spacing: 12) {
+                    // Centrado del logo
+                    HStack { Spacer()
+                        Image("Logito")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 400)
+                        Spacer() }
+                    Text("Cáritas de Monterrey, A.B.P.")
+                        .font(.gotham(.bold, style: .title2))
+                        .foregroundStyle(brand.primary)
+                        .multilineTextAlignment(.center)
+                    Text("""
+"Servíos por amor, los unos a los otros". (Gál 5,13)
+""")
+                    .font(.gotham(.bold, style: .body))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                }
+                
+                
+                // HIGHLIGHTS
+                LazyVGrid(
+                    columns: [.init(.flexible(), spacing: 16, alignment: .trailing), .init(.flexible(), spacing: 16, alignment: .leading)],
+                    spacing: 15
+                ) {
+                    ForEach(highlights, id: \.title) { h in
+                        VStack(alignment: .center, spacing: 10) {
+                            Image(systemName: h.systemIcon)
+                                .font(.title3)
+                                .foregroundStyle(brand.accent)
+                                .frame(height: 28)
+                            VStack(alignment: .center, spacing: 2) {
+                                Text(h.value)
+                                    .font(.gotham(.bold, style: .headline))
+                                    .foregroundStyle(brand.primary)
+                                    .lineLimit(1)
+                                Text(h.title)
+                                    .font(.gotham(.regular, style: .footnote))
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.center)
                             }
-                            .padding(12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(brand.surface)
-                            )
                         }
+                        .frame(width: 155, height: 140)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(brand.surface)
+                        )
                     }
-                    .padding(.horizontal)
-
-                    // MISIÓN
-                    InfoCard(
-                        title: "Misión",
-                        color: brand.primary,
-                        text:
-"""
-Cáritas de Monterrey, A.B.P. es un organismo de la Iglesia Católica, fundamentado en el amor, que proporciona servicios asistenciales, de promoción humana y desarrollo comunitario a nuestros hermanos más desprotegidos, sin distinción de credo o religión.
-"""
-                    )
-
-                    // VISIÓN
-                    InfoCard(
-                        title: "Visión",
-                        color: brand.primary,
-                        text:
-"""
-Contar con un liderazgo que optimice recursos y multiplique los servicios asistenciales, de promoción humana y administrativos; atendiendo a los más desprotegidos con infraestructura adecuada y personas en capacitación continua, comprometidas por amor.
-"""
-                    )
-
-                    // VALORES
-                    ValuesCard(
-                        title: "Valores",
-                        color: brand.primary,
-                        bullets: [
-                            "Caridad", "Espiritualidad", "Servicio",
-                            "Humildad", "Respeto", "Profesionalismo",
-                            "Mejora continua"
-                        ],
-                        accent: brand.accent
-                    )
-
-                    // CTA suave
-                    VStack(spacing: 8) {
-                        Text("Tu ayuda transforma vidas")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal)
+                
+                // MISIÓN
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Misión")
+                        .font(.gotham(.bold, style: .headline))
+                        .foregroundStyle(brand.primary)
+                    Text("Cáritas de Monterrey, A.B.P. es un organismo de la Iglesia Católica, fundamentado en el amor, que proporciona servicios asistenciales, de promoción humana y desarrollo comunitario a nuestros hermanos más desprotegidos, sin distinción de credo o religión.")
+                        .font(.gotham(.regular, style: .body))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(width: 300, height: 190, alignment: .topLeading)
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(brand.surface)
+                )
+                .padding(.horizontal)
+                
+                // VISIÓN
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Visión")
+                        .font(.gotham(.bold, style: .headline))
+                        .foregroundStyle(brand.primary)
+                    Text("Contar con un liderazgo que optimice recursos y multiplique los servicios asistenciales, de promoción humana y administrativos; atendiendo a los más desprotegidos con infraestructura adecuada y personas en capacitación continua, comprometidas por amor.")
+                        .font(.gotham(.regular, style: .body))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(width: 300, height: 180, alignment: .topLeading)
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(brand.surface)
+                )
+                .padding(.horizontal)
+                
+                // VALORES
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Valores")
+                        .font(.gotham(.bold, style: .body))
+                        .foregroundStyle(brand.primary)
+                    
+                    LazyVGrid(columns:
+                                [.init(.flexible(), alignment: .leading),
+                                 .init(.flexible(), alignment: .leading)], spacing: 4) {
+                                     ForEach(["Caridad", "Espiritualidad", "Servicio", "Humildad", "Respeto", "Profesionalismo", "Mejora continua"], id: \.self) { item in
+                                         HStack(spacing: 4) {
+                                             Circle()
+                                                 .fill(brand.accent)
+                                                 .frame(width: 6, height: 6)
+                                             Text(item)
+                                                 .font(.gotham(.regular, style: .subheadline))
+                                                 .foregroundStyle(.secondary)
+                                                 .lineLimit(2)
+                                                 .padding(.leading, 10)
+                                         }
+                                         .frame(height: 30)
+                                     }
+                                 }
+                }
+                .frame(width: 300, height: 160, alignment: .topLeading)
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(brand.surface)
+                )
+                .padding(.horizontal)
+                
+                // CTA suave
+                VStack(spacing: 8) {
+                    Text("Tu ayuda transforma vidas")
+                        .font(.gotham(.bold, style: .headline))
+                        .foregroundStyle(brand.primary)
+                    Text("Súmate como donante o voluntario. Juntos llegamos más lejos.")
+                        .font(.gotham(.regular, style: .body))
+                        .padding(.top, 10)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(width: 300)
+                .padding(.top, 24)
+                .padding(.bottom, 24)
+                
+                // Botón OK para ir a HomeView
+                Button(action: {
+                    showHomeView = true
+                }) {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
                             .font(.headline)
-                            .foregroundStyle(brand.primary)
-                        Text("Súmate como donante o voluntario. Juntos llegamos más lejos.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
+                        Text("OK")
+                            .font(.gotham(.bold, style: .headline))
                     }
-                    .padding(.bottom, 24)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.azulMarino)
+                    .cornerRadius(12)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 24)
             }
-            .navigationTitle("Donaciones")
-            .toolbar {
-                // Botón de logout (izquierda)
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        showLogoutConfirm = true
-                    }) {
-                        Image(systemName: "power.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.naranja)
-                    }
-                }
-                // HomeView (derecha)
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        Task { await donationVM.loadMyDonations() }
-                    }) {
-                        Image(systemName: "arrow.clockwise.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.azulMarino)
-                    }
-                    .accessibilityLabel("Actualizar")
-                }
-            }
-            .background(Color(.systemGroupedBackground))
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
-    }
-}
-
-// MARK: - Subviews
-
-private struct InfoCard: View {
-    let title: String
-    let color: Color
-    let text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(color)
-            Text(text)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+        .background(Color(.systemGroupedBackground))
+        .fullScreenCover(isPresented: $showHomeView) {
+            HomeView()
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color("grisClaro"))
-        )
-    }
-}
-
-private struct ValuesCard: View {
-    let title: String
-    let color: Color
-    let bullets: [String]
-    let accent: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(color)
-
-            LazyVGrid(columns: [.init(.flexible()), .init(.flexible())], spacing: 8) {
-                ForEach(bullets, id: \.self) { item in
-                    HStack(spacing: 8) {
-                        Circle()
-                            .fill(accent)
-                            .frame(width: 6, height: 6)
-                        Text(item)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
+        .transaction { transaction in
+            transaction.animation = .easeInOut(duration: 0.5)
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color("grisClaro"))
-        )
     }
 }
 

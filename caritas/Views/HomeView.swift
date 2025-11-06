@@ -155,9 +155,10 @@ struct HomeView: View {
                     Button(action: {
                         showLogoutConfirm = true
                     }) {
-                        Image(systemName: "power.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.naranja)
+                        Image(systemName: "rectangle.portrait.and.arrow.forward.fill")
+                            .imageScale(.medium)
+                            .foregroundColor(.black)
+                            .environment(\.layoutDirection, .rightToLeft)
                     }
                     .accessibilityLabel("Cerrar sesión")
                 }

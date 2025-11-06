@@ -25,7 +25,7 @@ struct DonationDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // MARK: - Título
                     Text("FOLIO: \(donation.folio ?? "")")
-                        .font(.gotham(.bold, style: .caption))
+                        .font(.gotham(.bold, style: .body))
                         .foregroundColor(.azulMarino)
                         .padding(.top, 20)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -125,7 +125,7 @@ struct DonationDetailView: View {
                                             }
                                         }
                                     }
-                                    .padding(.horizontal, 40)
+                                    .padding(.horizontal, 2)
                                 }
                             }
                         }
@@ -160,17 +160,17 @@ struct DonationDetailView: View {
                                 .cornerRadius(20)
                         }
                     }
-                    .padding(.top, 40)
+                    .padding(.top, 5)
                     
                     Divider()
                         .padding(.vertical, 10)
                     
-                    // MARK: - Comentario (Description)
+                    // MARK: - Comentario del Administrador
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Comentario")
+                        Text("Feedback")
                             .font(.gotham(.bold, style: .headline))
                         
-                        Text(donation.description ?? "Sin comentarios")
+                        Text(donation.adminComment ?? "Sin comentarios")
                             .font(.gotham(.regular, style: .body))
                             .frame(maxWidth: .infinity)
                             .foregroundColor(.secondary)
@@ -216,51 +216,56 @@ struct DonationDetailView: View {
                         .padding(.vertical, 10)
                     
                     // MARK: - Ubicación (Mapa)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Ubicación")
-                            .font(.gotham(.bold, style: .headline))
-                        
-                        NavigationLink(destination: MapFullView(location: "Centro de Distribución Caritas")) {
-                            ZStack {
-                                // Minipreview del mapa con marcador
-                                let markerCoordinate = CLLocationCoordinate2D(latitude: 25.651782507136957, longitude: -100.28943807606117)
-                                
-                                Map(position: .constant(.region(MKCoordinateRegion(
-                                    center: markerCoordinate,
-                                    span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
-                                )))) {
-                                    Annotation("", coordinate: markerCoordinate) {
-                                        VStack(spacing: 0) {
-                                            Image(systemName: "mappin")
-                                                .font(.system(size: 32))
-                                                .foregroundColor(.azulMarino)
-                                                .shadow(radius:4)
+                    if donation.status?.lowercased() == "approved" {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Ubicación")
+                                .font(.gotham(.bold, style: .headline))
+                            
+                            NavigationLink(destination: MapFullView(location: "Centro de Distribución Caritas")) {
+                                ZStack {
+                                    // Minipreview del mapa con marcador
+                                    let markerCoordinate = CLLocationCoordinate2D(latitude: 25.651782507136957, longitude: -100.28943807606117)
+                                    
+                                    Map(position: .constant(.region(MKCoordinateRegion(
+                                        center: markerCoordinate,
+                                        span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
+                                    )))) {
+                                        Annotation("", coordinate: markerCoordinate) {
+                                            VStack(spacing: 0) {
+                                                Image(systemName: "mappin")
+                                                    .font(.system(size: 32))
+                                                    .foregroundColor(.azulMarino)
+                                                    .shadow(radius:4)
+                                            }
                                         }
                                     }
-                                }
-                                .mapStyle(.standard)
-                                .disabled(true)
-                                .overlay{
-                                    HStack{
-                                        Text("Bazar Cáritas")
-                                            .font(.gotham(.bold, style: .body))
-                                            .foregroundStyle(Color.azulMarino)
-                                            .frame(width: 140, height: 50)
-                                            .background(Color.white)
+                                    .mapStyle(.standard)
+                                    .disabled(true)
+                                    .overlay{
+                                        HStack{
+                                            Text("Bazar Cáritas")
+                                                .font(.gotham(.bold, style: .body))
+                                                .foregroundStyle(Color.azulMarino)
+                                                .frame(width: 140, height: 50)
+                                                .background(Color.white)
+                                        }
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .offset(x: -95, y: -60)
+                                        .shadow(color: .black, radius: 0.5)
+                                        
                                     }
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .offset(x: -95, y: -60)
-                                    .shadow(color: .black, radius: 0.5)
-                                    
                                 }
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.naranja.opacity(0.3), lineWidth: 1)
+                                )
                             }
-                            .frame(height: 200)
-                            .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.naranja.opacity(0.3), lineWidth: 1)
-                            )
                         }
+                        
+                        Divider()
+                            .padding(.vertical, 10)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -295,8 +300,11 @@ struct DonationDetailView: View {
         categoryId: ["ropa"],
         day: Timestamp(date: Date()),
         description: "ey.",
+        adminComment: "Hola",
         folio: "FOL-001",
         photoUrls: [
+            "https://picsum.photos/400/300",
+            "https://picsum.photos/400/300",
             "https://picsum.photos/400/300"
         ],
         status: "pending",

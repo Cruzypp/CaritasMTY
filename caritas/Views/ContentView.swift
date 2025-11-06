@@ -27,8 +27,7 @@ struct ContentView: View {
 
                 // Title
                 Text("Iniciar Sesión")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.gotham(.bold, style: .largeTitle))
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color("azulMarino"))
 
@@ -36,10 +35,10 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("EMAIL")
-                            .font(.caption)
-                            .fontWeight(.semibold)
+                            .font(.gotham(.bold, style: .caption))
                             .foregroundColor(.gray)
                         TextField("hello@reallygreatsite.com", text: $email)
+                            .font(.gotham(.regular, style: .headline))
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
@@ -50,10 +49,10 @@ struct ContentView: View {
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text("PASSWORD")
-                            .font(.caption)
-                            .fontWeight(.semibold)
+                            .font(.gotham(.bold, style: .caption))
                             .foregroundColor(.gray)
                         SecureField("••••••••", text: $password)
+                            .font(.gotham(.regular, style: .headline))
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
@@ -66,7 +65,7 @@ struct ContentView: View {
                     Task { await auth.signIn(email: email, password: password) }
                 } label: {
                     Text("Iniciar Sesión")
-                        .font(.headline)
+                        .font(.gotham(.bold, style: .headline))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -80,11 +79,12 @@ struct ContentView: View {
                 HStack(spacing: 6) {
                     Text("¿No tienes cuenta?")
                         .foregroundColor(.secondary)
+                        .font(.gotham(.regular, style: .body))
                     NavigationLink("Crea una") {
                         SignUpView()
                     }
-                    .foregroundColor(Color("aqua"))
-                    .fontWeight(.semibold)
+                    .foregroundColor(Color(.azulMarino))
+                    .font(.gotham(.bold, style: .body))
                 }
 
                 // Error

@@ -47,6 +47,7 @@ struct DonateView: View {
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
                         }
+                        .padding(.horizontal, 10)
                         
                         if !viewModel.selectedImages.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -120,32 +121,10 @@ struct DonateView: View {
                             .font(.gotham(.bold, style: .headline))
                             .padding(.horizontal)
                         
-                        VStack(spacing: 10) {
-                            Spacer()
-                            ForEach(viewModel.availableCategories, id: \.self) { category in
-                                HStack(spacing: 12) {
-                                    Image(systemName: viewModel.selectedCategories.contains(category) ? "checkmark.square.fill" : "square")
-                                        .foregroundColor(viewModel.selectedCategories.contains(category) ? .naranja : .gray)
-                                        .font(.title3)
-                                    
-                                    Text(category)
-                                        .font(.gotham(.regular, style: .body))
-                                    
-                                    Spacer()
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.toggleCategory(category)
-                                }
-                                .padding(.horizontal)
-                                .padding(.vertical, 1)
-                            }
-                            Spacer()
-                        }
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
+                        CategoriesView(viewModel: viewModel)
+                            .padding(.horizontal, 30)
                     }
+                    .frame(width: 400)
                     
                     Divider()
                         .padding(.horizontal)
@@ -199,6 +178,7 @@ struct DonateView: View {
                         .padding()
                         .background(Color.naranja)
                         .cornerRadius(12)
+                        .padding(.horizontal, 10)
                     }
                     .disabled(viewModel.isLoading || authViewModel.user == nil)
                     .padding()
@@ -230,6 +210,48 @@ struct DonateView: View {
                 selectedPhotoItems = []
             }
         }
+    }
+}
+
+// MARK: - Categories View Helper
+private struct CategoriesView: View {
+    @ObservedObject var viewModel: DonateViewModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Spacer()
+            ForEach(viewModel.availableCategories, id: \.self) { category in
+                CategoryRow(category: category, viewModel: viewModel)
+            }
+            Spacer()
+        }
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+    }
+}
+
+// MARK: - Category Row Helper
+private struct CategoryRow: View {
+    let category: String
+    @ObservedObject var viewModel: DonateViewModel
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: viewModel.selectedCategories.contains(category) ? "checkmark.square.fill" : "square")
+                .foregroundColor(viewModel.selectedCategories.contains(category) ? .naranja : .gray)
+                .font(.title3)
+            
+            Text(category)
+                .font(.gotham(.regular, style: .body))
+            
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            viewModel.toggleCategory(category)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 1)
     }
 }
 
