@@ -17,12 +17,17 @@ final class DonationDetailViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     private let firestoreService = FirestoreService.shared
+    private let isPreview: Bool
     
-    init(donation: Donation) {
+    init(donation: Donation, isPreview: Bool = false) {
         self.donation = donation
+        self.isPreview = isPreview
     }
     
     func loadBazarDetails() async {
+        // No cargar datos en preview
+        if isPreview { return }
+        
         isLoading = true
         errorMessage = nil
         

@@ -14,9 +14,9 @@ struct DonationDetailView: View {
     @StateObject private var viewModel: DonationDetailViewModel
     @State private var selectedImageIndex: Int = 0
     
-    init(donation: Donation) {
+    init(donation: Donation, isPreview: Bool = false) {
         self.donation = donation
-        _viewModel = StateObject(wrappedValue: DonationDetailViewModel(donation: donation))
+        _viewModel = StateObject(wrappedValue: DonationDetailViewModel(donation: donation, isPreview: isPreview))
     }
 
     var body: some View {
@@ -220,20 +220,46 @@ struct DonationDetailView: View {
                         Text("Ubicación")
                             .font(.gotham(.bold, style: .headline))
                         
-                        if let bazar = viewModel.bazar,
-                           let location = bazar.location {
-                            MapPreview(location: location)
-                                .frame(height: 200)
-                                .cornerRadius(10)
-                        } else {
+                        NavigationLink(destination: MapFullView(location: "Centro de Distribución Caritas")) {
                             ZStack {
-                                Color(.systemGray6)
-                                Text("Ubicación no disponible")
-                                    .font(.gotham(.regular, style: .body))
-                                    .foregroundColor(.secondary)
+                                // Minipreview del mapa con marcador
+                                let markerCoordinate = CLLocationCoordinate2D(latitude: 25.651782507136957, longitude: -100.28943807606117)
+                                
+                                Map(position: .constant(.region(MKCoordinateRegion(
+                                    center: markerCoordinate,
+                                    span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
+                                )))) {
+                                    Annotation("", coordinate: markerCoordinate) {
+                                        VStack(spacing: 0) {
+                                            Image(systemName: "mappin")
+                                                .font(.system(size: 32))
+                                                .foregroundColor(.azulMarino)
+                                                .shadow(radius:4)
+                                        }
+                                    }
+                                }
+                                .mapStyle(.standard)
+                                .disabled(true)
+                                .overlay{
+                                    HStack{
+                                        Text("Bazar Cáritas")
+                                            .font(.gotham(.bold, style: .body))
+                                            .foregroundStyle(Color.azulMarino)
+                                            .frame(width: 140, height: 50)
+                                            .background(Color.white)
+                                    }
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .offset(x: -95, y: -60)
+                                    .shadow(color: .black, radius: 0.5)
+                                    
+                                }
                             }
                             .frame(height: 200)
                             .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.naranja.opacity(0.3), lineWidth: 1)
+                            )
                         }
                     }
                 }
@@ -260,23 +286,6 @@ struct DonationDetailView: View {
     }
 }
 
-// MARK: - MapPreview Component
-
-struct MapPreview: View {
-    let location: String
-    @State private var position: MapCameraPosition = .automatic
-    
-    var body: some View {
-        Map(position: $position)
-            .mapStyle(.standard)
-            .overlay(alignment: .center) {
-                Image(systemName: "mappin.circle.fill")
-                    .font(.title)
-                    .foregroundColor(.naranja)
-            }
-    }
-}
-
 // MARK: - Preview
 
 #Preview {
@@ -288,12 +297,12 @@ struct MapPreview: View {
         description: "ey.",
         folio: "FOL-001",
         photoUrls: [
-            "https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3",
+            "https://picsum.photos/400/300"
         ],
         status: "pending",
         title: "Ropa de invierno",
         userId: "U001"
     )
     
-    DonationDetailView(donation: testDonation)
+    DonationDetailView(donation: testDonation, isPreview: true)
 }

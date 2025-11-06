@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseFirestore
 import Combine
+import FirebaseAuth
 
 @MainActor
 final class StatusViewModel: ObservableObject {
@@ -21,23 +22,33 @@ final class StatusViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
+        // Obtener el ID del usuario autenticado
+        guard let userId = Auth.auth().currentUser?.uid else {
+            errorMessage = "No estás autenticado"
+            isLoading = false
+            return
+        }
+        
         do {
-            // Intentar cargar desde Firestore con URLs de Storage
-            donations = try await firestoreService.fetchDonationsWithStorageURLs()
+            // Cargar todas las donaciones
+            var allDonations = try await firestoreService.fetchDonationsWithStorageURLs()
             
-            // Si está vacío, usar datos de prueba
-            if donations.isEmpty {
-                donations = getDummyDonations()
-            }
+            // Filtrar solo las del usuario actual
+            allDonations = allDonations.filter { $0.userId == userId }
+            
+            donations = allDonations
         } catch {
-            donations = getDummyDonations()
+            donations = []
         }
         
         isLoading = false
     }
     
-    private func getDummyDonations() -> [Donation] {
-        [
+    // MARK: - Solo para Preview
+    static func getDummyDonationsForPreview() -> [Donation] {
+        let currentUserId = Auth.auth().currentUser?.uid ?? "U001"
+        
+        return [
             Donation(
                 id: "D001",
                 bazarId: "B001",
@@ -50,7 +61,7 @@ final class StatusViewModel: ObservableObject {
                 ],
                 status: "pending",
                 title: "Ropa de invierno",
-                userId: "U001"
+                userId: currentUserId
             ),
             Donation(
                 id: "D002",
@@ -64,7 +75,7 @@ final class StatusViewModel: ObservableObject {
                 ],
                 status: "approved",
                 title: "Despensa familiar",
-                userId: "U002"
+                userId: currentUserId
             ),
             Donation(
                 id: "D003",
@@ -78,8 +89,18 @@ final class StatusViewModel: ObservableObject {
                 ],
                 status: "rejected",
                 title: "Juguetes para niños",
-                userId: "U003"
+                userId: currentUserId
             )
         ]
+    }
+}
+
+// MARK: - Preview Extension
+
+extension StatusViewModel {
+    static func previewWithDummyData() -> StatusViewModel {
+        let vm = StatusViewModel()
+        vm.donations = getDummyDonationsForPreview()
+        return vm
     }
 }

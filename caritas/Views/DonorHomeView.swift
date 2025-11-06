@@ -147,19 +147,28 @@ struct DonorHomeView: View {
             }
             .navigationTitle("Donaciones")
             .toolbar {
-                // Botón de cerrar sesión (izquierda)
+                // Botón de logout (izquierda)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(role: .destructive) {
+                    Button(action: {
                         showLogoutConfirm = true
-                    } label: {
-                        Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
+                    }) {
+                        Image(systemName: "power.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.naranja)
                     }
                     .accessibilityLabel("Cerrar sesión")
                 }
 
                 // Botón de actualizar (derecha)
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Actualizar") { Task { await donationVM.loadMyDonations() } }
+                    Button(action: {
+                        Task { await donationVM.loadMyDonations() }
+                    }) {
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.azulMarino)
+                    }
+                    .accessibilityLabel("Actualizar")
                 }
             }
             .confirmationDialog("¿Cerrar sesión?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {

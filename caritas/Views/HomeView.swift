@@ -20,6 +20,8 @@ enum Category: String, CaseIterable, Identifiable {
 }
 
 struct HomeView: View {
+    @EnvironmentObject var auth: AuthViewModel
+    @State private var showLogoutConfirm = false
 
     private let sampleBazaars: [BaazarUI] = [
         BaazarUI(
@@ -152,6 +154,17 @@ struct HomeView: View {
             }
             .padding(.top, 30)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        showLogoutConfirm = true
+                    }) {
+                        Image(systemName: "power.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.naranja)
+                    }
+                    .accessibilityLabel("Cerrar sesión")
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         goToNotifications.toggle()
@@ -160,6 +173,12 @@ struct HomeView: View {
                             .imageScale(.large)
                     }
                 }
+            }
+            .confirmationDialog("¿Cerrar sesión?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
+                Button("Cerrar sesión", role: .destructive) {
+                    auth.signOut()
+                }
+                Button("Cancelar", role: .cancel) { }
             }
             .navigationDestination(isPresented: $goToNotifications){
                 StatusView()
