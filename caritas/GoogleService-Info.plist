@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAxjgIeQ4R8gMZtTjEfkGVOZJSeUG6091k</string>
+	<string>AIzaSyAR_2IQZM6rbR3dJ_3UB_CM4r2Hv47W_kE</string>
 	<key>GCM_SENDER_ID</key>
-	<string>422728424559</string>
+	<string>467076245799</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>LosMisioneros.CaritasApp</string>
+	<string>LosMisioneros.caritas</string>
 	<key>PROJECT_ID</key>
-	<string>caritasapp-31573</string>
+	<string>lostemplariosbackend</string>
 	<key>STORAGE_BUCKET</key>
-	<string>caritasapp-31573.firebasestorage.app</string>
+	<string>lostemplariosbackend.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:422728424559:ios:fca69eaff0eb5aab6c019a</string>
+	<string>1:467076245799:ios:450668b613806918eb6102</string>
 </dict>
 </plist>
