@@ -73,17 +73,16 @@ struct HomeView: View {
             (b.categoryIds?.map { $0.rawValue.lowercased() }.joined(separator: " ").contains(q) ?? false)
         }
     }
-    
-    @State var goToNotifications: Bool = false
-    @State var goToDonateView: Bool = false
+
+    @State private var goToNotifications: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
 
-                // Botón DONAR
-                Button {
-                    goToDonateView.toggle()
+                // Navegación correcta con NavigationLink (empuja DonateView en el mismo stack)
+                NavigationLink {
+                    DonateView()
                 } label: {
                     Text("DONAR")
                         .font(.title2).bold()
@@ -102,7 +101,7 @@ struct HomeView: View {
                     .padding(.top, 8)
                     .padding(.horizontal, 20)
 
-                
+                // Buscador
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
@@ -110,7 +109,7 @@ struct HomeView: View {
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
                     Button {
-
+                        // futuro filtro avanzado
                     } label: {
                         Image(systemName: "line.3.horizontal.decrease.circle")
                             .foregroundColor(.gray)
@@ -121,7 +120,7 @@ struct HomeView: View {
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
 
-                // Lista
+                // Lista de bazares
                 List {
                     ForEach(filteredBazaars) { bazar in
                         NavigationLink {
@@ -130,16 +129,14 @@ struct HomeView: View {
                             BaazarCard(
                                 nombre: bazar.location ?? (bazar.address ?? "Sin nombre"),
                                 categoria: (bazar.categoryIds ?? [])
-                                    .map { categoria in
-                                        categoria.rawValue
-                                    }
+                                    .map { $0.rawValue }
                                     .joined(separator: ", ")
                                     .ifEmpty("Sin categoría"),
                                 horarios: bazar.horario ?? "—",
                                 imagen: bazar.imagen ?? Image(.logotipo)
                             )
                         }
-                        .buttonStyle(.plain) // si no quieres el chevron visual
+                        .buttonStyle(.plain)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                     }
@@ -159,11 +156,9 @@ struct HomeView: View {
                     }
                 }
             }
-            .navigationDestination(isPresented: $goToNotifications){
+            // Sólo mantenemos esta navegación para notificaciones
+            .navigationDestination(isPresented: $goToNotifications) {
                 StatusView()
-            }
-            .navigationDestination(isPresented: $goToDonateView){
-                DonateView()
             }
         }
     }

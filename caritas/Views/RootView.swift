@@ -12,7 +12,7 @@ struct RootView: View {
                 // Aún cargando el perfil desde Firestore
                 ProgressView("Cargando perfil…")
             } else if auth.isAdmin {
-                AdminHomeView()
+                AdminReviewsView()
             } else {
                 DonorHomeView()
             }

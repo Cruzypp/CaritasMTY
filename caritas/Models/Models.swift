@@ -17,8 +17,7 @@ struct Bazar: Identifiable, Codable, Equatable {
     var location: String?
 }
 
-// MARK: - Bazar con Imagenes
-
+// MARK: - Bazar con Imágenes
 struct BazarUI: Identifiable, Codable, Equatable {
     var id: String?
     var address: String?
@@ -41,16 +40,21 @@ struct Donation: Identifiable, Codable, Equatable {
     var categoryId: [String]?
     var day: Timestamp?
     var description: String?
+    var adminComment: String?      // Comentario del admin para el donante
     var folio: String?
     /// Preferencia por múltiples fotos; si sólo hay una, igual funciona.
     var photoUrls: [String]?
-    var status: String?           // "pending" | "approved" | "rejected"
+    var status: String?            // "pending" | "approved" | "rejected"
     var title: String?
     var userId: String?
 
     // Conveniencias
     var createdAtDate: Date? { day?.dateValue() }
     var hasImages: Bool { !(photoUrls ?? []).isEmpty }
+    var firstPhotoURL: URL? {
+        guard let s = photoUrls?.first else { return nil }
+        return URL(string: s)
+    }
 
     // MARK: Firestore <-> Modelo (sin FirebaseFirestoreSwift)
 
@@ -73,6 +77,7 @@ struct Donation: Identifiable, Codable, Equatable {
             categoryId: d["categoryId"] as? [String],
             day: d["day"] as? Timestamp,
             description: d["description"] as? String,
+            adminComment: (d["adminComment"] as? String) ?? (d["admin_comment"] as? String),
             folio: d["folio"] as? String,
             photoUrls: photos,
             status: d["status"] as? String,
@@ -87,6 +92,7 @@ struct Donation: Identifiable, Codable, Equatable {
         if let bazarId { m["bazarId"] = bazarId }
         if let categoryId { m["categoryId"] = categoryId }
         if let description { m["description"] = description }
+        if let adminComment { m["adminComment"] = adminComment }   // ← escribe el comentario del admin
         if let folio { m["folio"] = folio }
         if let status { m["status"] = status }
         if let title { m["title"] = title }

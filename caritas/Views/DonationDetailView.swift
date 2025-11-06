@@ -160,7 +160,7 @@ struct DonationDetailView: View {
                             .font(.headline)
                             .fontWeight(.bold)
                         
-                        Text(donation.description ?? "Sin comentarios")
+                        Text(donation.adminComment ?? "Sin comentarios")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .padding()

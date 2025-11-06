@@ -35,10 +35,10 @@ struct DonorHomeView: View {
                     VStack(spacing: 12) {
                         // Centrado del logo
                         HStack { Spacer()
-                            Image("Logotipo Cáritas de Monterrey, A.B.P.")
+                            Image("Logito")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 120, height: 120)
+                                .frame(width: 400)
                             Spacer() }
                         Text("Cáritas de Monterrey, A.B.P.")
                             .font(.title2.bold())
@@ -49,7 +49,7 @@ struct DonorHomeView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.top, 8)
+                  
 
                     // HIGHLIGHTS
                     LazyVGrid(
@@ -132,12 +132,17 @@ Contar con un liderazgo que optimice recursos y multiplique los servicios asiste
             .toolbar {
                 // Log out (izquierda)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(role: .destructive) {
-                        auth.signOut()
+                    Menu {
+                        Button(role: .destructive) {
+                            auth.signOut()
+                        } label: {
+                            Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
+                        }
                     } label: {
-                        Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
+                        Image(systemName: "gearshape")
+                            .font(.title2.bold())
+                            .foregroundStyle(.gray)
                     }
-                    .accessibilityLabel("Cerrar sesión")
                 }
                 // HomeView (derecha)
                 ToolbarItem(placement: .topBarTrailing) {
