@@ -16,6 +16,7 @@ struct DonateView: View {
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var showErrorAlert = false
     @State private var showValidDonation = false
+    @State private var showPicker = false
     
     var body: some View {
         NavigationStack {
@@ -120,32 +121,28 @@ struct DonateView: View {
                             .font(.gotham(.bold, style: .headline))
                             .padding(.horizontal)
                         
-                        VStack(alignment: .leading, spacing: 10) {
-                            ForEach(viewModel.availableCategories, id: \.self) { category in
-                                HStack(spacing: 12) {
-                                    Image(systemName: viewModel.selectedCategories.contains(category) ? "checkmark.square.fill" : "square")
-                                        .foregroundColor(viewModel.selectedCategories.contains(category) ? .naranja : .gray)
-                                        .font(.title3)
-                                    
-                                    Text(category)
-                                        .font(.gotham(.regular, style: .body))
-                                    
-                                    Spacer()
+                        Button {
+                            showPicker.toggle()
+                        } label: {
+                            HStack {
+                                if viewModel.selectedCategories.isEmpty {
+                                    Text("Ninguna")
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    Text(viewModel.selectedCategories.joined(separator: ", "))
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
                                 }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.toggleCategory(category)
-                                }
-                                .padding(.horizontal)
-                                .padding(.vertical, 1)
                             }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
                         }
-                        .padding(.vertical, 10)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                        .padding(.horizontal, 30)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
                     }
-                    .frame(width: 400)
+                    .padding()
                     
                     Divider()
                         .padding(.horizontal)
@@ -232,12 +229,16 @@ struct DonateView: View {
             .navigationDestination(isPresented: $showValidDonation) {
                 ValidDonationView()
             }
+            .sheet(isPresented: $showPicker) {
+                CategoryList()
+            }
         }
     }
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
+
 }
 
 #Preview {

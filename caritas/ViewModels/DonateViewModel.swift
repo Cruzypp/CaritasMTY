@@ -22,17 +22,17 @@ final class DonateViewModel: ObservableObject {
     private let firestoreService = FirestoreService.shared
     private let storageService = StorageService.shared
     
-    // Categorías disponibles
+    // MARK: Categerías Actualizadas
     let availableCategories = [
-        "Ropa",
-        "Alimentos",
-        "Juguetes",
-        "Libros",
+        "Deportes",
+        "Electrodomésticos",
         "Electrónica",
+        "Ferretería",
+        "Juguetes",
         "Muebles",
-        "Calzado",
-        "Accesorios"
+        "Personal"
     ]
+    
     
     /// Valida los datos de la donación
     func validateDonation() -> Bool {
