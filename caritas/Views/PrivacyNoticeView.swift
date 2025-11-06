@@ -22,7 +22,7 @@ struct PrivacyNoticeView: View {
                 VStack(alignment: .leading, spacing: 20) {
 
                     // Logo
-                    Image("Logotipo Cáritas de Monterrey, A.B.P.")
+                    Image("Logito")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 320)

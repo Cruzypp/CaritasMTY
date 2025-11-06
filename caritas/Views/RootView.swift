@@ -1,15 +1,22 @@
 import SwiftUI
+import FirebaseAuth
 
 struct RootView: View {
     @EnvironmentObject var auth: AuthViewModel
-    @StateObject private var donationVM = DonationViewModel()
-    
+
     var body: some View {
-        if auth.user == nil {
-            ContentView()
-        } else {
-            HomeView()
-                .environmentObject(donationVM)
+        Group {
+            if auth.user == nil {
+                ContentView() // tu ContentView dividido
+            } else if auth.role == nil {
+                // Aún cargando el perfil desde Firestore
+                ProgressView("Cargando perfil…")
+            } else if auth.isAdmin {
+                AdminReviewsView()
+            } else {
+                DonorHomeView()
+            }
         }
+        .animation(.default, value: auth.user?.uid)
     }
 }
