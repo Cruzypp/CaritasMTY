@@ -198,10 +198,6 @@ private struct AdminDonationRow: View {
             }
 
             Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
         }
         .padding(.vertical, 6)
     }

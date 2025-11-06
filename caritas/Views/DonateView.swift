@@ -59,7 +59,7 @@ struct DonateView: View {
                                             .frame(width: 80, height: 80)
                                             .cornerRadius(8)
                                             .overlay(
-                                                Button{
+                                                Button {
                                                     viewModel.selectedImages.remove(at: index)
                                                 } label: {
                                                     Image(systemName: "xmark.circle.fill")
@@ -103,7 +103,6 @@ struct DonateView: View {
                         
                         TextEditor(text: $viewModel.description)
                             .frame(height: 100)
-                            .textFieldStyle(.roundedBorder)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(Color(.systemGray3), lineWidth: 1)
@@ -121,15 +120,37 @@ struct DonateView: View {
                             .font(.gotham(.bold, style: .headline))
                             .padding(.horizontal)
                         
-                        CategoriesView(viewModel: viewModel)
-                            .padding(.horizontal, 30)
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(viewModel.availableCategories, id: \.self) { category in
+                                HStack(spacing: 12) {
+                                    Image(systemName: viewModel.selectedCategories.contains(category) ? "checkmark.square.fill" : "square")
+                                        .foregroundColor(viewModel.selectedCategories.contains(category) ? .naranja : .gray)
+                                        .font(.title3)
+                                    
+                                    Text(category)
+                                        .font(.gotham(.regular, style: .body))
+                                    
+                                    Spacer()
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.toggleCategory(category)
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 1)
+                            }
+                        }
+                        .padding(.vertical, 10)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .padding(.horizontal, 30)
                     }
                     .frame(width: 400)
                     
                     Divider()
                         .padding(.horizontal)
                     
-                    
+                    // MARK: - Success Message
                     if let successMessage = viewModel.successMessage {
                         VStack(spacing: 8) {
                             HStack {
@@ -182,76 +203,40 @@ struct DonateView: View {
                     }
                     .disabled(viewModel.isLoading || authViewModel.user == nil)
                     .padding()
-                    
-                    NavigationLink(destination: ValidDonationView(), isActive: $showValidDonation) {
-                        EmptyView()
-                    }
                 }
                 .padding(.bottom, 20)
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-        }
-        .alert("Error en la Donación", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {
-                showErrorAlert = false
+            .onTapGesture {
+                hideKeyboard()
             }
-        } message: {
-            Text(viewModel.errorMessage ?? "Ocurrió un error desconocido")
-        }
-        .onChange(of: selectedPhotoItems) { oldValue, newValue in
-            Task {
-                for item in newValue {
-                    if let data = try? await item.loadTransferable(type: Data.self),
-                       let uiImage = UIImage(data: data) {
-                        viewModel.selectedImages.append(uiImage)
-                    }
+            .alert("Error en la Donación", isPresented: $showErrorAlert) {
+                Button("OK", role: .cancel) {
+                    showErrorAlert = false
                 }
-                selectedPhotoItems = []
+            } message: {
+                Text(viewModel.errorMessage ?? "Ocurrió un error desconocido")
+            }
+            .onChange(of: selectedPhotoItems) { oldValue, newValue in
+                Task {
+                    for item in newValue {
+                        if let data = try? await item.loadTransferable(type: Data.self),
+                           let uiImage = UIImage(data: data) {
+                            viewModel.selectedImages.append(uiImage)
+                        }
+                    }
+                    selectedPhotoItems = []
+                }
+            }
+            .navigationDestination(isPresented: $showValidDonation) {
+                ValidDonationView()
             }
         }
     }
-}
-
-// MARK: - Categories View Helper
-private struct CategoriesView: View {
-    @ObservedObject var viewModel: DonateViewModel
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Spacer()
-            ForEach(viewModel.availableCategories, id: \.self) { category in
-                CategoryRow(category: category, viewModel: viewModel)
-            }
-            Spacer()
-        }
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
-    }
-}
-
-// MARK: - Category Row Helper
-private struct CategoryRow: View {
-    let category: String
-    @ObservedObject var viewModel: DonateViewModel
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: viewModel.selectedCategories.contains(category) ? "checkmark.square.fill" : "square")
-                .foregroundColor(viewModel.selectedCategories.contains(category) ? .naranja : .gray)
-                .font(.title3)
-            
-            Text(category)
-                .font(.gotham(.regular, style: .body))
-            
-            Spacer()
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            viewModel.toggleCategory(category)
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 1)
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
