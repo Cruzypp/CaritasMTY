@@ -15,21 +15,21 @@ struct AdminDonationDetailView: View {
     let donation: Donation
     @StateObject private var vm: AdminDonationDetailVM
     @State private var selectedImageIndex: Int = 0
-
+    
     init(donation: Donation) {
         self.donation = donation
         _vm = StateObject(wrappedValue: AdminDonationDetailVM(donation: donation))
     }
-
+    
     // Colores desde Assets
     private let azul   = Color("azulMarino")
     private let aqua   = Color("aqua")
     private let naranja = Color("naranja")
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-
+                
                 // MARK: - Folio
                 Text("FOLIO: \(donation.folio ?? "")")
                     .font(.title2.weight(.bold))
@@ -37,7 +37,7 @@ struct AdminDonationDetailView: View {
                     .padding(.horizontal)
                     .padding(.top, 20)
                     .frame(maxWidth: .infinity, alignment: .center)
-
+                
                 // MARK: - Galería (igual que donador)
                 VStack(spacing: 10) {
                     if let photoUrls = donation.photoUrls, !photoUrls.isEmpty {
@@ -73,7 +73,7 @@ struct AdminDonationDetailView: View {
                         }
                         .tabViewStyle(.page(indexDisplayMode: .automatic))
                         .frame(width: 370, height: 300)
-
+                        
                         if photoUrls.count > 1 {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
@@ -114,19 +114,19 @@ struct AdminDonationDetailView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-
+                
                 // MARK: - Información (título, descripción corta, estado)
                 VStack(alignment: .leading, spacing: 15) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(donation.title ?? "Sin título")
                             .font(.headline.weight(.bold))
-
+                        
                         Text(donation.description ?? "Sin descripción")
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .lineLimit(3)
                     }
-
+                    
                     HStack {
                         Text("Estado:")
                             .fontWeight(.semibold)
@@ -142,15 +142,15 @@ struct AdminDonationDetailView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 10)
-
+                
                 Divider().padding(.horizontal)
-
+                
                 // MARK: - Comentario del admin
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Comentario para el donante (opcional)")
                         .font(.headline.weight(.bold))
                         .foregroundStyle(azul)
-
+                    
                     TextEditor(text: $vm.adminComment)
                         .scrollContentBackground(.hidden)
                         .frame(minHeight: 120)
@@ -159,7 +159,7 @@ struct AdminDonationDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
                 .padding(.horizontal)
-
+                
                 // MARK: - Acciones
                 VStack(spacing: 12) {
                     Button {
@@ -177,7 +177,7 @@ struct AdminDonationDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .disabled(vm.isWorking)
-
+                    
                     Button(role: .destructive) {
                         Task { await vm.updateStatus(to: "rejected") }
                     } label: {
@@ -217,8 +217,11 @@ struct AdminDonationDetailView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: vm.toast)
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
-
+    
     // MARK: - Helpers
     private func statusColor(_ status: String) -> Color {
         switch status.lowercased() {
@@ -227,6 +230,10 @@ struct AdminDonationDetailView: View {
         case "rejected": return .red
         default:         return .gray
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
@@ -238,11 +245,11 @@ final class AdminDonationDetailVM: ObservableObject {
     @Published var isWorking = false
     @Published var errorMessage: String?
     @Published var toast: String?
-
+    
     init(donation: Donation) {
         self.donation = donation
     }
-
+    
     func updateStatus(to status: String) async {
         guard let id = donation.id else { return }
         isWorking = true; defer { isWorking = false }

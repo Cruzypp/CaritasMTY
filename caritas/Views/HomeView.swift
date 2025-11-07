@@ -122,6 +122,10 @@ struct HomeView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
+                .onTapGesture {
+                    // Cierra el teclado cuando se toca el search bar
+                    hideKeyboard()
+                }
 
                 // Lista de bazares
                 List {
@@ -148,8 +152,16 @@ struct HomeView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .padding(.top, -8)
+                .onTapGesture {
+                    // Cierra el teclado cuando se toca la lista
+                    hideKeyboard()
+                }
             }
             .padding(.top, 30)
+            .onTapGesture {
+                // Cierra el teclado cuando se toca cualquier parte de la pantalla
+                hideKeyboard()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
@@ -172,16 +184,22 @@ struct HomeView: View {
                     }
                 }
             }
-            .confirmationDialog("¿Cerrar sesión?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
+            .alert("¿Cerrar sesión?", isPresented: $showLogoutConfirm) {
+                Button("Cancelar", role: .cancel) { }
                 Button("Cerrar sesión", role: .destructive) {
                     auth.signOut()
                 }
-                Button("Cancelar", role: .cancel) { }
+            } message: {
+                Text("¿Estás seguro de que deseas cerrar sesión?")
             }
             .navigationDestination(isPresented: $goToNotifications){
                 StatusView()
             }
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

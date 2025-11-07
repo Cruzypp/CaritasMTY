@@ -124,7 +124,14 @@ struct ContentView: View {
             .background(Color.white)
             .navigationBarBackButtonHidden(true)
             .ignoresSafeArea()
+            .onTapGesture {
+                hideKeyboard()
+            }
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

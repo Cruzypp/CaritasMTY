@@ -25,6 +25,7 @@ struct caritasApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .preferredColorScheme(.light)
                 .environmentObject(auth)
                 .environment(\.font, .gotham(.regular, style: .body))
                 // Manejo del callback de Google
