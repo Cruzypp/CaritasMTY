@@ -62,7 +62,6 @@ private struct ReviewsScreen: View {
         case .rejected:  return vm.donations.filter { ($0.status ?? "").lowercased() == "rejected" }
         }
     }
-
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {

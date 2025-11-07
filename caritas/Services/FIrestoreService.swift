@@ -86,7 +86,14 @@ final class FirestoreService {
                 acceptingDonations: d["acceptingDonations"] as? Bool,
                 address: d["address"] as? String,
                 categoryIds: d["categoryIds"] as? [String],
-                location: d["location"] as? String
+                location: d["location"] as? String,
+                nombre: d["nombre"] as? String,
+                direccion: d["direccion"] as? String,
+                latitud: d["latitud"] as? Double,
+                longitud: d["longitud"] as? Double,
+                horarios: d["horarios"] as? String,
+                telefono: d["telefono"] as? String,
+                categorias: d["categorias"] as? [String: String]
             )
         }
     }

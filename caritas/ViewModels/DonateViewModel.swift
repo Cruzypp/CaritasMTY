@@ -22,16 +22,19 @@ final class DonateViewModel: ObservableObject {
     private let firestoreService = FirestoreService.shared
     private let storageService = StorageService.shared
     
-    // MARK: Categerías Actualizadas
-    let availableCategories = [
-        "Deportes",
-        "Electrodomésticos",
-        "Electrónica",
-        "Ferretería",
-        "Juguetes",
-        "Muebles",
-        "Personal"
-    ]
+    enum Categoria: String, CaseIterable, Hashable {
+        case deportes = "Deportes"
+        case electrodomesticos = "Electrodomésticos"
+        case electronica = "Electrónica"
+        case ferreteria = "Ferretería"
+        case juguetes = "Juguetes"
+        case muebles = "Muebles"
+        case personal = "Personal"
+        
+        var nombre: String {
+            return self.rawValue
+        }
+    }
     
     
     /// Valida los datos de la donación

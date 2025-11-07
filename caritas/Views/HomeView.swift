@@ -1,15 +1,6 @@
 import SwiftUI
 import MapKit
 
-struct BaazarUI: Identifiable, Equatable {
-    var id = UUID()
-    var address: String?
-    var horario: String?
-    var categoryIds: [Category]?
-    var location: String?
-    var imagen: Image?
-}
-
 enum Category: String, CaseIterable, Identifiable {
     case food = "Comida"
     case medicine = "Medicamento"
@@ -21,62 +12,14 @@ enum Category: String, CaseIterable, Identifiable {
 
 struct HomeView: View {
     @EnvironmentObject var auth: AuthViewModel
+    @StateObject private var viewModel = HomeViewModel()
     @State private var showLogoutConfirm = false
-
-    private let sampleBazaars: [BaazarUI] = [
-        BaazarUI(
-            address: "Av. Juárez 102, Puebla, Pue.",
-            horario: "9:00–18:00",
-            categoryIds: [.food, .toys],
-            location: "Centro Histórico",
-            imagen: Image(.logotipo)
-        ),
-        BaazarUI(
-            address: "Calle Hidalgo 56, Cholula, Pue.",
-            horario: "10:00–17:00",
-            categoryIds: [.clothes, .furniture],
-            location: "Plaza Principal",
-            imagen: Image(.logotipo)
-        ),
-        BaazarUI(
-            address: "Blvd. Atlixco 2001, Puebla, Pue.",
-            horario: "9:00–15:00",
-            categoryIds: [.medicine, .food],
-            location: "Parque Ecológico",
-            imagen: Image(.logotipo)
-        ),
-        BaazarUI(
-            address: "Av. Reforma 350, Puebla, Pue.",
-            horario: "11:00–20:00",
-            categoryIds: [.furniture, .toys],
-            location: "Zona Rosa",
-            imagen: Image(.logotipo)
-        ),
-        BaazarUI(
-            address: "Calle 25 Sur 1410, Puebla, Pue.",
-            horario: "10:00–19:00",
-            categoryIds: [.clothes, .medicine, .food],
-            location: "Colonia El Carmen",
-            imagen: Image(.logotipo)
-        )
-    ]
-
     @State private var search = ""
-
-    private var filteredBazaars: [BaazarUI] {
-        guard !search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return sampleBazaars
-        }
-        let q = search.lowercased()
-        return sampleBazaars.filter { b in
-            (b.location?.lowercased().contains(q) ?? false) ||
-            (b.address?.lowercased().contains(q) ?? false) ||
-            (b.horario?.lowercased().contains(q) ?? false) ||
-            (b.categoryIds?.map { $0.rawValue.lowercased() }.joined(separator: " ").contains(q) ?? false)
-        }
-    }
-
     @State private var goToNotifications: Bool = false
+
+    private var filteredBazaars: [Bazar] {
+        viewModel.searchBazares(query: search)
+    }
 
     var body: some View {
         NavigationStack {
@@ -128,39 +71,71 @@ struct HomeView: View {
                 }
 
                 // Lista de bazares
-                List {
-                    ForEach(filteredBazaars) { bazar in
-                        NavigationLink {
-                            Text(bazar.location ?? "Detalle")
-                                .font(.gotham(.regular, style: .body))
-                        } label: {
-                            BaazarCard(
-                                nombre: bazar.location ?? (bazar.address ?? "Sin nombre"),
-                                categoria: (bazar.categoryIds ?? [])
-                                    .map { $0.rawValue }
-                                    .joined(separator: ", ")
-                                    .ifEmpty("Sin categoría"),
-                                horarios: bazar.horario ?? "—",
-                                imagen: bazar.imagen ?? Image(.logotipo)
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                if viewModel.isLoading {
+                    VStack {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     }
-                }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .padding(.top, -8)
-                .onTapGesture {
-                    // Cierra el teclado cuando se toca la lista
-                    hideKeyboard()
+                } else if let error = viewModel.errorMessage {
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.title)
+                            .foregroundColor(.red)
+                        Text(error)
+                            .font(.gotham(.regular, style: .body))
+                            .multilineTextAlignment(.center)
+                        Button("Reintentar") {
+                            viewModel.fetchBazares()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.aqua)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .padding(20)
+                } else if filteredBazaars.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title)
+                            .foregroundColor(.gray)
+                        Text("No se encontraron bazares")
+                            .font(.gotham(.regular, style: .body))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                } else {
+                    List {
+                        ForEach(filteredBazaars) { bazar in
+                            NavigationLink {
+                                Text(bazar.location ?? "Detalle")
+                                    .font(.gotham(.regular, style: .body))
+                            } label: {
+                                BaazarCard(
+                                    nombre: bazar.nombre ?? bazar.location ?? (bazar.address ?? "Sin nombre"),
+                                    horarios: bazar.horarios ?? "—",
+                                    telefono: bazar.telefono ?? "—",
+                                    imagen: Image(.logotipo)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .padding(.top, -8)
+                    .onTapGesture {
+                        // Cierra el teclado cuando se toca la lista
+                        hideKeyboard()
+                    }
                 }
             }
             .padding(.top, 30)
             .onTapGesture {
                 // Cierra el teclado cuando se toca cualquier parte de la pantalla
                 hideKeyboard()
+            }
+            .onAppear {
+                viewModel.fetchBazares()
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -211,4 +186,5 @@ private extension String {
 
 #Preview {
     HomeView()
+        .environmentObject(AuthViewModel())
 }
