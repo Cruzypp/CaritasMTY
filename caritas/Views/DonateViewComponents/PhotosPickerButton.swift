@@ -10,7 +10,7 @@ struct PhotosPickerButton: View {
             VStack(spacing: 10) {
                 Image(systemName: "photo.on.rectangle.angled")
                     .font(.title)
-                    .foregroundColor(.naranja)
+                    .foregroundColor(.morado)
                 Text("Selecciona 2 o más fotos")
                     .font(.gotham(.regular, style: .headline))
                     .foregroundColor(.azulMarino)

@@ -10,7 +10,7 @@ import MapKit
 
 struct FullMapComponent: View {
     
-    
+    @Environment(\.dismiss) var dismiss
     @State private var showDirections = false
     
     var nombre: String

@@ -17,28 +17,32 @@ struct DonateView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // MARK: - Título
                     FormHeaderTitle()
-
+                    
                     // MARK: - Fotos
                     PhotosPickerSection(viewModel: viewModel, selectedPhotoItems: $selectedPhotoItems)
                     SelectedImagesRow(viewModel: viewModel)
-
+                    
                     Divider().padding(.horizontal)
-
+                    
                     // MARK: - Título donación
                     TitleSection(viewModel: viewModel)
-
+                    
                     Divider().padding(.horizontal)
-
+                    
                     // MARK: - Descripción
                     DescriptionSection(viewModel: viewModel)
-
+                    
                     Divider().padding(.horizontal)
-
+                    
                     // MARK: - Categorías (pasando VM)
                     CategorySelectorView(vm: categoryVM)
-
+                    
                     Divider().padding(.horizontal)
-
+                    
+                    BazaarPicker()
+                    
+                    Divider().padding(.horizontal)
+                    
                     // MARK: - Mensaje éxito
                     SuccessMessageSection(viewModel: viewModel)
 
@@ -59,6 +63,7 @@ struct DonateView: View {
             .navigationDestination(isPresented: $showValidDonation) {
                 ValidDonationView()
             }
+            .background(DonationBackground())
         }
         // Alertas y onChange pueden ir aquí
         .alert("Error en la Donación", isPresented: $showErrorAlert) {

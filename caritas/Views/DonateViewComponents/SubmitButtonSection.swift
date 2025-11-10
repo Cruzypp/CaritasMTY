@@ -37,7 +37,7 @@ struct SubmitButtonSection: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.naranja)
+            .background(.azulMarino)
             .cornerRadius(12)
             .padding(.horizontal, 10)
         }
