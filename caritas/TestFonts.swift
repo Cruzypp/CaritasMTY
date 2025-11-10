@@ -3,12 +3,20 @@ import FirebaseFirestore
 
 struct BazarDTO: Codable {
     let nombre: String
-    let direccion: String
-    let latitud: Double
-    let longitud: Double
+    let address: String
+    let latitude: Double
+    let longitude: Double
     let horarios: String
     let telefono: String
     let categorias: [String: String]
+    
+    // Para compatibilidad con JSON que usan "direccion", "latitud", "longitud"
+    enum CodingKeys: String, CodingKey {
+        case nombre, horarios, telefono, categorias
+        case address = "direccion"
+        case latitude = "latitud"
+        case longitude = "longitud"
+    }
 }
 
 func seedBazaresIfNeeded() async throws {
@@ -27,11 +35,11 @@ func seedBazaresIfNeeded() async throws {
         let ref = col.document(id)
         batch.setData([
             "nombre": b.nombre,
-            "direccion": b.direccion,
+            "address": b.address,
             "telefono": b.telefono,
             "horarios": b.horarios,
-            // Guarda GeoPoint como diccionario {lat, lng} o usa GeoPoint con FieldValue:
-            "ubicacion": GeoPoint(latitude: b.latitud, longitude: b.longitud),
+            "latitude": b.latitude,
+            "longitude": b.longitude,
             "categorias": b.categorias
         ], forDocument: ref, merge: true)
     }

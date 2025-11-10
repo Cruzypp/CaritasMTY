@@ -42,7 +42,7 @@ class HomeViewModel: ObservableObject {
         let q = query.lowercased()
         return bazares.filter { bazar in
             (bazar.nombre?.lowercased().contains(q) ?? false) ||
-            (bazar.direccion?.lowercased().contains(q) ?? false) ||
+            (bazar.address?.lowercased().contains(q) ?? false) ||
             (bazar.location?.lowercased().contains(q) ?? false) ||
             (bazar.telefono?.lowercased().contains(q) ?? false)
         }
