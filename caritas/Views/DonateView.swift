@@ -19,23 +19,25 @@ struct DonateView: View {
                     FormHeaderTitle()
                     
                     // MARK: - Fotos
-                    PhotosPickerSection(viewModel: viewModel, selectedPhotoItems: $selectedPhotoItems)
+                    PhotoSourcePicker(viewModel: viewModel, selectedPhotoItems: $selectedPhotoItems)
                     SelectedImagesRow(viewModel: viewModel)
                     
-                    Divider().padding(.horizontal)
                     
                     // MARK: - Título donación
                     TitleSection(viewModel: viewModel)
-                    
-                    Divider().padding(.horizontal)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal)
                     
                     // MARK: - Descripción
                     DescriptionSection(viewModel: viewModel)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal)
                     
-                    Divider().padding(.horizontal)
                     
                     // MARK: - Categorías (pasando VM)
                     CategorySelectorView(vm: categoryVM)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal)
                     
                     Divider().padding(.horizontal)
                     
@@ -70,18 +72,6 @@ struct DonateView: View {
             Button("OK", role: .cancel) { showErrorAlert = false }
         } message: {
             Text(viewModel.errorMessage ?? "Ocurrió un error desconocido")
-        }
-        .onChange(of: selectedPhotoItems) {
-            Task { @MainActor in
-                for item in selectedPhotoItems {
-                    guard
-                        let data = try? await item.loadTransferable(type: Data.self),
-                        let uiImage = UIImage(data: data)
-                    else { continue }
-                    viewModel.selectedImages.append(uiImage)
-                }
-                selectedPhotoItems.removeAll()
-            }
         }
         .onChange(of: categoryVM.seleccionadas) {
             viewModel.selectedCategories = Array(categoryVM.seleccionadas.map(\.nombre))

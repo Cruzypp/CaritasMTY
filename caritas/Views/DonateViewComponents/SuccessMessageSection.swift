@@ -5,6 +5,7 @@ struct SuccessMessageSection: View {
 
     var body: some View {
         if let successMessage = viewModel.successMessage {
+            
             VStack(spacing: 8) {
                 HStack {
                     Image(systemName: "checkmark.circle")

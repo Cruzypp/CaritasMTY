@@ -22,6 +22,19 @@ final class DonateViewModel: ObservableObject {
     private let firestoreService = FirestoreService.shared
     private let storageService = StorageService.shared
     
+    // Límite máximo de fotos permitidas
+    let maxPhotos: Int = 10
+    
+    // Calcula cuántas fotos más se pueden agregar
+    var remainingPhotos: Int {
+        max(0, maxPhotos - selectedImages.count)
+    }
+    
+    // Verifica si se pueden agregar más fotos
+    var canAddMorePhotos: Bool {
+        selectedImages.count < maxPhotos
+    }
+    
     enum Categoria: String, CaseIterable, Hashable {
         case deportes = "Deportes"
         case electrodomesticos = "Electrodomésticos"

@@ -11,6 +11,6 @@
 		<string>Gotham-Regular.otf</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string></string>
+	<string>Esta app necesita acceso a la cámara para tomar fotos.</string>
 </dict>
 </plist>
