@@ -16,14 +16,25 @@ struct DonationDetailView: View {
     
     init(donation: Donation, isPreview: Bool = false) {
         self.donation = donation
-        _viewModel = StateObject(wrappedValue: DonationDetailViewModel(donation: donation, isPreview: isPreview))
+        _viewModel = StateObject(
+            wrappedValue: DonationDetailViewModel(
+                donation: donation,
+                isPreview: isPreview
+            )
+        )
+    }
+    
+    /// Cómodo para no repetir comparaciones
+    private var isApproved: Bool {
+        (donation.status ?? "").lowercased() == "approved"
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // MARK: - Título
+                    
+                    // MARK: - Título (folio)
                     Text("FOLIO: \(donation.folio ?? "")")
                         .font(.gotham(.bold, style: .body))
                         .foregroundColor(.azulMarino)
@@ -34,7 +45,6 @@ struct DonationDetailView: View {
                     
                     // MARK: - Galería de Imágenes
                     VStack(spacing: 10) {
-                        // Imagen principal
                         if let photoUrls = donation.photoUrls, !photoUrls.isEmpty {
                             TabView(selection: $selectedImageIndex) {
                                 ForEach(Array(photoUrls.enumerated()), id: \.offset) { index, urlString in
@@ -46,13 +56,16 @@ struct DonationDetailView: View {
                                                     image
                                                         .resizable()
                                                         .scaledToFill()
-                                                        .frame(width: geometry.size.width, height: geometry.size.height)
+                                                        .frame(
+                                                            width: geometry.size.width,
+                                                            height: geometry.size.height
+                                                        )
                                                         .clipped()
                                                 }
                                                 .frame(height: 300)
                                                 .clipShape(RoundedRectangle(cornerRadius: 15))
                                                 .tag(index)
-
+                                                
                                             case .failure(_):
                                                 ZStack {
                                                     Color(.systemGray6)
@@ -64,7 +77,7 @@ struct DonationDetailView: View {
                                                 .frame(height: 300)
                                                 .clipShape(RoundedRectangle(cornerRadius: 15))
                                                 .tag(index)
-
+                                                
                                             case .empty:
                                                 ZStack {
                                                     Color(.systemGray6)
@@ -73,7 +86,7 @@ struct DonationDetailView: View {
                                                 .frame(height: 300)
                                                 .clipShape(RoundedRectangle(cornerRadius: 15))
                                                 .tag(index)
-
+                                                
                                             @unknown default:
                                                 EmptyView()
                                             }
@@ -83,8 +96,8 @@ struct DonationDetailView: View {
                             }
                             .tabViewStyle(.page(indexDisplayMode: .automatic))
                             .frame(height: 300)
-
-                            // Miniaturas - Carrusel
+                            
+                            // Miniaturas
                             if photoUrls.count > 1 {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 10) {
@@ -101,7 +114,9 @@ struct DonationDetailView: View {
                                                             .overlay(
                                                                 RoundedRectangle(cornerRadius: 8)
                                                                     .stroke(
-                                                                        selectedImageIndex == index ? Color.naranja : Color.clear,
+                                                                        selectedImageIndex == index
+                                                                        ? Color.naranja
+                                                                        : Color.clear,
                                                                         lineWidth: 2
                                                                     )
                                                             )
@@ -132,9 +147,8 @@ struct DonationDetailView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     
-                    // MARK: - Información de la Donación
+                    // MARK: - Info de la donación
                     VStack(alignment: .leading, spacing: 15) {
-                        // Título y Descripción
                         VStack(alignment: .leading, spacing: 8) {
                             Text(donation.title ?? "Sin título")
                                 .font(.gotham(.bold, style: .title3))
@@ -145,7 +159,6 @@ struct DonationDetailView: View {
                                 .lineLimit(3)
                         }
                         
-                        // Status
                         HStack {
                             Text("Estado:")
                                 .font(.gotham(.bold, style: .body))
@@ -165,7 +178,7 @@ struct DonationDetailView: View {
                     Divider()
                         .padding(.vertical, 10)
                     
-                    // MARK: - Comentario del Administrador
+                    // MARK: - Comentario del admin
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Feedback")
                             .font(.gotham(.bold, style: .headline))
@@ -182,27 +195,38 @@ struct DonationDetailView: View {
                     Divider()
                         .padding(.vertical, 10)
                     
-                    // MARK: - Bazar a Entregar
+                    // MARK: - Bazar a entregar (solo si está aprobada)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Bazar a entregar")
                             .font(.gotham(.bold, style: .headline))
                         
-                        if let bazar = viewModel.bazar {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(bazar.location ?? "Ubicación desconocida")
-                                    .font(.gotham(.regular, style: .body))
-                                
-                                if let address = bazar.address {
-                                    Text(address)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                        if isApproved {
+                            if let bazar = viewModel.bazar {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(bazar.nombre ?? bazar.location ?? "Bazar Cáritas")
+                                        .font(.gotham(.regular, style: .body))
+                                    
+                                    if let address = bazar.address {
+                                        Text(address)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                            } else {
+                                Text("No se pudo cargar la información del bazar.")
+                                    .font(.gotham(.regular, style: .body))
+                                    .foregroundColor(.secondary)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
                             }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
                         } else {
-                            Text("Bazar no disponible")
+                            Text("El bazar se mostrará cuando tu donación sea aprobada.")
                                 .font(.gotham(.regular, style: .body))
                                 .foregroundColor(.secondary)
                                 .padding()
@@ -215,57 +239,52 @@ struct DonationDetailView: View {
                     Divider()
                         .padding(.vertical, 10)
                     
-                    // MARK: - Ubicación (Mapa)
-                    if donation.status?.lowercased() == "approved" {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Ubicación")
-                                .font(.gotham(.bold, style: .headline))
+                    // MARK: - Ubicación (solo si está aprobada y hay bazar con coords)
+                    if isApproved {
+                        if let bazar = viewModel.bazar,
+                           let lat = bazar.latitude,
+                           let lon = bazar.longitude {
                             
-                            NavigationLink(destination: MapFullView(location: "Centro de Distribución Caritas")) {
-                                ZStack {
-                                    // Minipreview del mapa con marcador
-                                    let markerCoordinate = CLLocationCoordinate2D(latitude: 25.651782507136957, longitude: -100.28943807606117)
-                                    
-                                    Map(position: .constant(.region(MKCoordinateRegion(
-                                        center: markerCoordinate,
-                                        span: MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.015)
-                                    )))) {
-                                        Annotation("", coordinate: markerCoordinate) {
-                                            VStack(spacing: 0) {
-                                                Image(systemName: "mappin")
-                                                    .font(.system(size: 32))
-                                                    .foregroundColor(.azulMarino)
-                                                    .shadow(radius:4)
-                                            }
-                                        }
-                                    }
-                                    .mapStyle(.standard)
-                                    .disabled(true)
-                                    .overlay{
-                                        HStack{
-                                            Text("Bazar Cáritas")
-                                                .font(.gotham(.bold, style: .body))
-                                                .foregroundStyle(Color.azulMarino)
-                                                .frame(width: 140, height: 50)
-                                                .background(Color.white)
-                                        }
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        .offset(x: -95, y: -60)
-                                        .shadow(color: .black, radius: 0.5)
-                                        
-                                    }
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Ubicación")
+                                    .font(.gotham(.bold, style: .headline))
+                                
+                                NavigationLink {
+                                    FullMapComponent(
+                                        nombre: bazar.nombre ?? bazar.location ?? "Bazar Cáritas",
+                                        lat: lat,
+                                        lon: lon
+                                    )
+                                } label: {
+                                    MapComponent(
+                                        nombre: bazar.nombre ?? bazar.location ?? "Bazar Cáritas",
+                                        lat: lat,
+                                        lon: lon,
+                                        address: bazar.address ?? "Sin dirección"
+                                    )
                                 }
-                                .frame(height: 200)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.naranja.opacity(0.3), lineWidth: 1)
-                                )
                             }
+                            
+                            Divider()
+                                .padding(.vertical, 10)
+                        } else {
+                            // Aprobada pero sin coordenadas
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Ubicación")
+                                    .font(.gotham(.bold, style: .headline))
+                                
+                                Text("Ubicación no disponible.")
+                                    .font(.gotham(.regular, style: .body))
+                                    .foregroundColor(.secondary)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
+                            }
+                            
+                            Divider()
+                                .padding(.vertical, 10)
                         }
-                        
-                        Divider()
-                            .padding(.vertical, 10)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -279,7 +298,7 @@ struct DonationDetailView: View {
         }
     }
     
-    // MARK: - Helper Functions
+    // MARK: - Helper
     
     private func statusColor(_ status: String) -> Color {
         switch status.lowercased() {
@@ -296,19 +315,18 @@ struct DonationDetailView: View {
 #Preview {
     let testDonation = Donation(
         id: "D001",
-        bazarId: "B001",
-        categoryId: ["ropa"],
+        bazarId: "Alameda",
+        categoryId: ["Electrodomésticos", "Ferretería"],
         day: Timestamp(date: Date()),
-        description: "ey.",
-        adminComment: "Hola",
-        folio: "FOL-001",
+        description: "X",
+        adminComment: "Bien",
+        folio: "e45b2500-c934-4126-8cea-4dbc83078fd7",
         photoUrls: [
-            "https://picsum.photos/400/300",
             "https://picsum.photos/400/300",
             "https://picsum.photos/400/300"
         ],
-        status: "pending",
-        title: "Ropa de invierno",
+        status: "approved",
+        title: "Y x",
         userId: "U001"
     )
     
