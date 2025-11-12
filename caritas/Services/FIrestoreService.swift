@@ -81,12 +81,35 @@ final class FirestoreService {
         let snap = try await db.collection("bazars").getDocuments()
         return snap.documents.map { doc in
             let d = doc.data()
+            // Mapea "direccion" de Firestore a "address" del modelo
+            let address = (d["address"] as? String) ?? (d["direccion"] as? String)
+            
+            // Extrae coordenadas de múltiples fuentes posibles
+            var latitude: Double?
+            var longitude: Double?
+            
+            // Intenta obtener de los campos directos primero
+            latitude = (d["latitude"] as? Double) ?? (d["latitud"] as? Double)
+            longitude = (d["longitude"] as? Double) ?? (d["longitud"] as? Double)
+            
+            // Si no están en campos directos, intenta extraer del GeoPoint "ubicacion"
+            if latitude == nil || longitude == nil, let geoPoint = d["ubicacion"] as? GeoPoint {
+                latitude = geoPoint.latitude
+                longitude = geoPoint.longitude
+            }
+            
             return Bazar(
                 id: doc.documentID,
                 acceptingDonations: d["acceptingDonations"] as? Bool,
-                address: d["address"] as? String,
+                address: address,
                 categoryIds: d["categoryIds"] as? [String],
-                location: d["location"] as? String
+                location: d["location"] as? String,
+                nombre: d["nombre"] as? String,
+                latitude: latitude,
+                longitude: longitude,
+                horarios: d["horarios"] as? String,
+                telefono: d["telefono"] as? String,
+                categorias: d["categorias"] as? [String: String]
             )
         }
     }

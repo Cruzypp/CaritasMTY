@@ -10,6 +10,7 @@ import SwiftUI
 struct SignUpView: View {
     @EnvironmentObject var auth: AuthViewModel
     @State private var mostrarPoliticas = false
+    @State private var showSuccessMessage = false
 
     @State private var email = ""
     @State private var password = ""
@@ -62,6 +63,9 @@ struct SignUpView: View {
                 }
             }
             .padding(.horizontal, 32)
+            .onTapGesture {
+                // No hace nada aquí, el tap es para mantener el focus en los campos
+            }
 
             // Aceptación de políticas
             HStack {
@@ -104,18 +108,31 @@ struct SignUpView: View {
 
             // Botón Registro
             Button {
-                Task { await auth.signUp(email: email, password: password, acceptedPolicies: acceptPolicies) }
+                Task {
+                    await auth.signUp(email: email, password: password, acceptedPolicies: acceptPolicies)
+                    if auth.error == nil && auth.user != nil {
+                        showSuccessMessage = true
+                        // Navega automáticamente después de 1.5 segundos
+                        try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    }
+                }
             } label: {
-                Text("Registrarme")
-                    .font(.gotham(.bold, style: .headline))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(canRegister ? Color("aqua") : Color.gray.opacity(0.4))
-                    .cornerRadius(10)
+                if auth.isLoading {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Text("Registrarme")
+                        .font(.gotham(.bold, style: .headline))
+                }
+
             }
-            .disabled(!canRegister)
+            .foregroundColor(.white)
+            .disabled(!canRegister || auth.isLoading)
             .shadow(color: Color.black.opacity(0.15), radius: 2, y: 2)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(canRegister && !auth.isLoading ? Color("aqua") : Color.gray.opacity(0.4))
+            .cornerRadius(10)
             .padding(.horizontal, 32)
 
             // Link a Login
@@ -133,7 +150,7 @@ struct SignUpView: View {
                 .foregroundColor(Color("azulMarino"))
             }
 
-            // Error
+            // Error o Éxito
             if let e = auth.error {
                 Text(e)
                     .foregroundColor(.red)
@@ -141,12 +158,39 @@ struct SignUpView: View {
                     .padding(.horizontal, 32)
                     .multilineTextAlignment(.center)
             }
+            
+            if showSuccessMessage && auth.user != nil {
+                VStack(spacing: 8) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.title3)
+                        Text("¡Cuenta creada exitosamente!")
+                            .font(.gotham(.bold, style: .body))
+                            .foregroundColor(.green)
+                    }
+                    Text("Redireccionando...")
+                        .font(.gotham(.regular, style: .caption))
+                        .foregroundColor(.green)
+                }
+                .padding()
+                .background(Color.green.opacity(0.1))
+                .cornerRadius(10)
+                .padding(.horizontal, 32)
+            }
 
             Spacer()
         }
         .background(Color.white)
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
+        .onTapGesture {
+            hideKeyboard()
+        }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

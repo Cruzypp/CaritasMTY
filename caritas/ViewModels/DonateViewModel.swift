@@ -22,17 +22,33 @@ final class DonateViewModel: ObservableObject {
     private let firestoreService = FirestoreService.shared
     private let storageService = StorageService.shared
     
-    // Categorías disponibles
-    let availableCategories = [
-        "Ropa",
-        "Alimentos",
-        "Juguetes",
-        "Libros",
-        "Electrónica",
-        "Muebles",
-        "Calzado",
-        "Accesorios"
-    ]
+    // Límite máximo de fotos permitidas
+    let maxPhotos: Int = 10
+    
+    // Calcula cuántas fotos más se pueden agregar
+    var remainingPhotos: Int {
+        max(0, maxPhotos - selectedImages.count)
+    }
+    
+    // Verifica si se pueden agregar más fotos
+    var canAddMorePhotos: Bool {
+        selectedImages.count < maxPhotos
+    }
+    
+    enum Categoria: String, CaseIterable, Hashable {
+        case deportes = "Deportes"
+        case electrodomesticos = "Electrodomésticos"
+        case electronica = "Electrónica"
+        case ferreteria = "Ferretería"
+        case juguetes = "Juguetes"
+        case muebles = "Muebles"
+        case personal = "Personal"
+        
+        var nombre: String {
+            return self.rawValue
+        }
+    }
+    
     
     /// Valida los datos de la donación
     func validateDonation() -> Bool {
