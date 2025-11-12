@@ -15,6 +15,27 @@ struct Bazar: Identifiable, Codable, Equatable {
     var address: String?
     var categoryIds: [String]?
     var location: String?
+    var nombre: String?
+    var latitude: Double?
+    var longitude: Double?
+    var horarios: String?
+    var telefono: String?
+    var categorias: [String: String]?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case acceptingDonations
+        case categoryIds
+        case location
+        case nombre
+        case horarios
+        case telefono
+        case categorias
+        case address
+        // Mapea los nombres antiguos en español a los nuevos en inglés
+        case latitude
+        case longitude
+    }
 }
 
 // MARK: - Bazar con Imágenes
@@ -25,6 +46,11 @@ struct BazarUI: Identifiable, Codable, Equatable {
     var categoryIds: [String]?
     var location: String?
     var imageUrl: String?
+    var nombre: String?
+    var latitude: Double?
+    var longitude: Double?
+    var telefono: String?
+    var categorias: [String: String]?
 }
 
 // MARK: - Donation

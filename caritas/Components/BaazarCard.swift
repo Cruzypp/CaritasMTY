@@ -10,8 +10,8 @@ import SwiftUI
 struct BaazarCard: View {
     
     @State var nombre: String
-    @State var categoria: String
     @State var horarios: String
+    @State var telefono: String
     @State var imagen: Image
     
     var body: some View {
@@ -24,7 +24,7 @@ struct BaazarCard: View {
                     .frame(width: 100, height: 100)
                     .clipShape(.rect(cornerRadius: 15))
                 
-                VStack(alignment: .leading){
+                VStack(alignment: .leading, spacing: 8){
                     
                     ZStack {
                         Text(nombre)
@@ -37,13 +37,22 @@ struct BaazarCard: View {
                     .clipShape(.rect(cornerRadius: 10))
                     
                     HStack{
-                        VStack(alignment: .leading ){
-                            Text(horarios)
-                                .font(.gotham(.regular, style: .body))
+                        VStack(alignment: .leading, spacing: 4){
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.gray)
+                                Text(horarios)
+                                    .font(.gotham(.regular, style: .caption))
+                            }
                             
-                            Text(categoria)
-                                .font(.gotham(.regular, style: .caption))
-                                .padding(.top, 3)
+                            HStack(spacing: 4) {
+                                Image(systemName: "phone.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.gray)
+                                Text(telefono)
+                                    .font(.gotham(.regular, style: .caption))
+                            }
                         }
                         
                         Spacer()
@@ -63,5 +72,5 @@ struct BaazarCard: View {
 }
 
 #Preview {
-    BaazarCard(nombre: "Bazar 1", categoria: "Comida", horarios: "10:00-18:00", imagen: Image(.logotipo))
+    BaazarCard(nombre: "Bazar 1", horarios: "10:00-18:00", telefono: "81 8335 2214", imagen: Image(.logotipo))
 }

@@ -1,0 +1,317 @@
+[
+  {
+    "nombre": "Valle",
+    "direccion": "Río Mississippi 44 Local H, Centrito del Valle, San Pedro Garza García, C.P. 66220",
+    "latitud": 25.6592833045,
+    "longitud": -100.368709922,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 2:00 p.m.",
+    "telefono": "81 8335 2214",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Juárez",
+    "direccion": "Monte Cristal 141, Monte Kristal 1 Sector, Juárez, N.L., C.P. 67280",
+    "latitud": 25.618200945879348,
+    "longitud": -100.14326336441783,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábados 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 2526 5537",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Puentes",
+    "direccion": "Av. Diego Díaz de Berlanga #172, local 11 Plaza San Marcos, Col. Villas de Santo Domingo frente a Smart, Monterrey, N.L.",
+    "latitud": 25.74951488359197,
+    "longitud": -100.25691461746126,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 1297 6459",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Buena Vista",
+    "direccion": "Av. Vista regia 580 entre Híades y Antares, Col. Buena Vista, Carmen, N.L.",
+    "latitud": 25.852541600428566,
+    "longitud": -100.37100241206848,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábados 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 3499 0553 / 81 3499 0557",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Eloy Cavazos",
+    "direccion": "Av. Eloy Cavazos #4301, Col. Residencial Las Avenidas, Guadalupe, N.L., C.P. 67185",
+    "latitud": 25.656877634553734,
+    "longitud": -100.21683041746383,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 1231 7306",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Solidaridad",
+    "direccion": "Criminólogos 601 lote 22, Trazo Marco, Monterrey, N.L., C.P. 64103",
+    "latitud": 25.784229829879262,
+    "longitud": -100.40721521746025,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 2704 3870",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Divina Providencia",
+    "direccion": "Florencio Antillón 1223, Centro, Monterrey, N.L., C.P. 64720",
+    "latitud": 25.668611658866286,
+    "longitud": -100.30311610397051,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábados 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 8340 4077",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Chula Vista",
+    "direccion": "Carretera a Reynosa (Ave. Benito Juárez) 225, Col. Chula Vista, Guadalupe, N.L., C.P. 67188",
+    "latitud": 25.675294976319115,
+    "longitud": -100.20857064629898,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 1093 7461",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Escobedo",
+    "direccion": "Ave. Benito Juárez 184-A, Residencial Escobedo, Escobedo, N.L., C.P. 66057",
+    "latitud": 25.792260417364425,
+    "longitud": -100.30735631746006,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábados 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 8058 3163",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Alameda",
+    "direccion": "Aramberri 913 Pte (frente a Alameda), Centro, Monterrey, N.L., C.P. 64000",
+    "latitud": 25.67747205775329,
+    "longitud": -100.32215046164153,
+    "horarios": "Lunes a Viernes 9:30 a.m. a 6:30 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 8342 7680",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "San Nicolás",
+    "direccion": "Escobedo 144 Pte., cruz con Treviño, Zona Centro, San Nicolás de los Garza, N.L., C.P. 66400",
+    "latitud": 25.754985498097422,
+    "longitud": -100.29163746873047,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábados 10:00 a.m. a 2:00 p.m.",
+    "telefono": "81 8007 4580",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "San Gilberto",
+    "direccion": "Ave. Perimetral Norte 512, Col. San Gilberto, Santa Catarina, N.L., C.P. 66369",
+    "latitud": 25.69946495821899,
+    "longitud": -100.46075737513395,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 1338 4036",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Bernardo Reyes",
+    "direccion": "Bernardo Reyes 5656, Col. Ferrocarrilera, Monterrey, N.L., C.P. 64250",
+    "latitud": 25.72819426035495,
+    "longitud": -100.33238695184647,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábados 10:00 a.m. a 2:00 p.m.",
+    "telefono": "81 1357 3308",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Guadalupe",
+    "direccion": "Ignacio Zaragoza 233, cruz con Morelos, Centro, Guadalupe, N.L., C.P. 67100",
+    "latitud": 25.68113072510911,
+    "longitud": -100.25598016295895,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 8191 1950",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Concordia",
+    "direccion": "Fresno 610, Col. Prados de Santa Rosa, Apodaca, N.L.",
+    "latitud": 25.796832748950543,
+    "longitud": -100.22467367328156,
+    "horarios": "Lunes 1:00 p.m. a 6:00 p.m.; Martes a Sábado 9:00 a.m. a 6:00 p.m.",
+    "telefono": "81 4285 1259",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Los Girasoles",
+    "direccion": "Paseo de la Amistad #542, Col. Praderas de Girasoles, Escobedo, N.L., C.P. 66074",
+    "latitud": 25.80191096669717,
+    "longitud": -100.31492751294236,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 1087 8154",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Tres Caminos",
+    "direccion": "1a Privada 901, Tres Caminos Nte 2a Etapa, Guadalupe, N.L., C.P. 67190",
+    "latitud": 25.667404889376414,
+    "longitud": -100.18642970397055,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 8007 4583",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Cristo Obrero",
+    "direccion": "Calle Casa del Obrero 317, Col. Infonavit la Huasteca, Santa Catarina, N.L., C.P. 66354",
+    "latitud": 25.659841930258263,
+    "longitud": -100.45910380184833,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 5:00 p.m.; Sábados 9:00 a.m. a 1:00 p.m.",
+    "telefono": "81 1159 6121 ext. 105",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Fama",
+    "direccion": "Manuel J. Clouthier 201, Local 3, Fama, Santa Catarina, N.L., C.P. 66100",
+    "latitud": 25.682947548587677,
+    "longitud": -100.42223811746304,
+    "horarios": "Lunes a Viernes 10:00 a.m. a 7:00 p.m.; Sábado 10:00 a.m. a 6:00 p.m.",
+    "telefono": "81 8315 8050",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "San Rafael",
+    "direccion": "Ave. San Rafael #90 Bodega 8, Col. Ángel Martínez Villarreal, Guadalupe, N.L., C.P. 67110",
+    "latitud": 25.695320424115845,
+    "longitud": -100.23155815979145,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 2:00 p.m.",
+    "telefono": "811 159 2629",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  },
+  {
+    "nombre": "Cumbres Premium",
+    "direccion": "Enrique C Livas 108, Cumbres 1 Sector, Monterrey, N.L., C.P. 64349",
+    "latitud": 25.69937146924966,
+    "longitud": -100.35738506164094,
+    "horarios": "Lunes a Viernes 9:00 a.m. a 6:00 p.m.; Sábado 10:00 a.m. a 2:00 p.m.",
+    "telefono": "81 8123 3576",
+    "categorias": {
+      "0": "Electrónica",
+      "1": "Ferretería",
+      "2": "Juguetes",
+      "3": "Muebles",
+      "4": "Personal"
+    }
+  }
+]
