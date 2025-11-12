@@ -74,7 +74,30 @@ struct ContentView: View {
                 }
                 .shadow(color: Color.black.opacity(0.2), radius: 2, y: 2)
                 .padding(.horizontal, 32)
+                // Botón Google
+                Button {
+                    Task { await auth.signInWithGoogle() }
+                } label: {
+                    HStack {
+                        Image("google_icon")
+                            .resizable()
+                            .frame(width: 18, height: 18)
 
+                        Text("Continuar con Google")
+                            .font(.gotham(.bold, style: .headline))
+                            .foregroundColor(.black)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(10)
+                }
+                .shadow(color: Color.black.opacity(0.05), radius: 2, y: 2)
+                .padding(.horizontal, 32)
                 // Link a Sign Up
                 HStack(spacing: 6) {
                     Text("¿No tienes cuenta?")
