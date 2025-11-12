@@ -69,5 +69,5 @@ struct BazaarPicker: View {
 }
 
 #Preview {
-    BazaarPicker()
+    BazaarPicker(donateViewModel: DonateViewModel())
 }
