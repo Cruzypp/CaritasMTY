@@ -12,7 +12,7 @@ final class FirestoreService {
     static let shared = FirestoreService()
     private init() {}
 
-    let db = Firestore.firestore()
+    private let db = Firestore.firestore()
 
     // MARK: - DONOR FLOW
 
@@ -37,6 +37,7 @@ final class FirestoreService {
             categoryId: categories,
             day: nil, // lo pondrá el servidor
             description: description,
+            adminComment: nil,
             folio: nil,
             photoUrls: photoUrls, // arreglo (puede iniciar vacío)
             status: "pending",
@@ -75,29 +76,44 @@ final class FirestoreService {
         return snap.documents.map { Donation.from(doc: $0) }
     }
 
+    // MARK: - BAZAR ADMIN FLOW
+
+    /// Donaciones APROBADAS para un bazar específico (ordenadas por fecha desc).
+    /// Útil para el rol `adminBazar` que necesita ver lo que llegará a su bazar.
+    func approvedDonations(forBazarId bazarId: String) async throws -> [Donation] {
+        let snap = try await db.collection("donations")
+            .whereField("status", isEqualTo: "approved")
+            .whereField("bazarId", isEqualTo: bazarId)
+            .order(by: "day", descending: true)
+            .getDocuments()
+        return snap.documents.map { Donation.from(doc: $0) }
+    }
+
     // MARK: - FETCH para pruebas / listas
 
     func fetchBazaars() async throws -> [Bazar] {
         let snap = try await db.collection("bazars").getDocuments()
         return snap.documents.map { doc in
             let d = doc.data()
+
             // Mapea "direccion" de Firestore a "address" del modelo
             let address = (d["address"] as? String) ?? (d["direccion"] as? String)
-            
+
             // Extrae coordenadas de múltiples fuentes posibles
             var latitude: Double?
             var longitude: Double?
-            
+
             // Intenta obtener de los campos directos primero
             latitude = (d["latitude"] as? Double) ?? (d["latitud"] as? Double)
             longitude = (d["longitude"] as? Double) ?? (d["longitud"] as? Double)
-            
+
             // Si no están en campos directos, intenta extraer del GeoPoint "ubicacion"
-            if latitude == nil || longitude == nil, let geoPoint = d["ubicacion"] as? GeoPoint {
+            if (latitude == nil || longitude == nil),
+               let geoPoint = d["ubicacion"] as? GeoPoint {
                 latitude = geoPoint.latitude
                 longitude = geoPoint.longitude
             }
-            
+
             return Bazar(
                 id: doc.documentID,
                 acceptingDonations: d["acceptingDonations"] as? Bool,
@@ -115,19 +131,21 @@ final class FirestoreService {
     }
 
     func fetchDonations() async throws -> [Donation] {
-        let snap = try await db.collection("donations").getDocuments()
+        let snap = try await db.collection("donations")
+            .order(by: "day", descending: true)
+            .getDocuments()
         return snap.documents.map { Donation.from(doc: $0) }
     }
-    
+
     /// Obtiene todas las donaciones y resuelve las URLs de Firebase Storage
     /// Este método es útil cuando las imágenes están guardadas en Storage pero no hay URLs en Firestore
     func fetchDonationsWithStorageURLs() async throws -> [Donation] {
         let snap = try await db.collection("donations").getDocuments()
         var donations: [Donation] = []
-        
+
         for doc in snap.documents {
             var donation = Donation.from(doc: doc)
-            
+
             // Si no hay photoUrls, intentar obtenerlas de Storage
             if donation.photoUrls?.isEmpty ?? true, let donationId = donation.id {
                 do {
@@ -139,7 +157,7 @@ final class FirestoreService {
             }
             donations.append(donation)
         }
-        
+
         return donations
     }
 
@@ -151,7 +169,9 @@ final class FirestoreService {
                 id: doc.documentID,
                 email: d["email"] as? String,
                 password: d["password"] as? String,
-                rol: d["rol"] as? String
+                // acepta tanto "role" como "rol" y también bazarId
+                rol: (d["role"] as? String) ?? (d["rol"] as? String),
+                bazarId: d["bazarId"] as? String
             )
         }
     }
@@ -163,7 +183,7 @@ final class FirestoreService {
         return snap.data() ?? [:]
     }
 
-    // MARK: - ADMIN FLOW
+    // MARK: - ADMIN (CALIDAD) FLOW
 
     /// Donaciones con `status == "pending"`, ordenadas por `day` desc.
     func pendingDonations() async throws -> [Donation] {
@@ -185,5 +205,23 @@ final class FirestoreService {
                 "reviewerId": reviewerId,
                 "reviewedAt": FieldValue.serverTimestamp()
             ], merge: true)
+        
     }
+    /// Guarda o actualiza el comentario del admin para una donación.
+    func setAdminComment(donationId: String, comment: String) async throws {
+        try await db.collection("donations")
+            .document(donationId)
+            .setData(["adminComment": comment], merge: true)
+    }
+    
+    func fetchApprovedDonations(forBazarId bazarId: String) async throws -> [Donation] {
+            let snapshot = try await db.collection("donations")
+                .whereField("bazarId", isEqualTo: bazarId)
+                .whereField("status", isEqualTo: "approved")
+                .order(by: "day", descending: false)
+                .getDocuments()
+
+            return snapshot.documents.map { Donation.from(doc: $0) }
+        }
+    
 }

@@ -263,9 +263,10 @@ final class AdminDonationDetailVM: ObservableObject {
             // Guarda comentario si hay
             let trimmed = adminComment.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
-                try? await FirestoreService.shared.db
-                    .collection("donations").document(id)
-                    .setData(["adminComment": trimmed], merge: true)
+                try await FirestoreService.shared.setAdminComment(
+                    donationId: id,
+                    comment: trimmed
+                )
             }
             donation.status = status
             toast = status == "approved" ? "Donación aprobada" : "Donación rechazada"
