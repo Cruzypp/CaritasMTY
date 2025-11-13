@@ -103,14 +103,9 @@ struct BazarAdminDonationsView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // Botón de logout en esquina superior derecha (menú con engrane)
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(role: .destructive) {
-                            auth.signOut()
-                        } label: {
-                            Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
-                        }
+                    NavigationLink {
+                        BazarAdminSettingsView()
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.title2.bold())

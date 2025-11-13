@@ -223,5 +223,18 @@ final class FirestoreService {
 
             return snapshot.documents.map { Donation.from(doc: $0) }
         }
-    
+    // MARK: - BAZAR ADMIN
+    /// Actualiza si un bazar está recibiendo donaciones o no.
+    func updateBazarAcceptingDonations(bazarId: String, isAccepting: Bool) async throws {
+        try await db.collection("bazars")
+            .document(bazarId)
+            .setData(["acceptingDonations": isAccepting], merge: true)
+    }
+
+    /// Lee el campo `acceptingDonations` de un bazar (default true si no existe).
+    func fetchBazarAcceptingDonations(bazarId: String) async throws -> Bool {
+        let snap = try await db.collection("bazars").document(bazarId).getDocument()
+        let data = snap.data() ?? [:]
+        return data["acceptingDonations"] as? Bool ?? true
+    }
 }
