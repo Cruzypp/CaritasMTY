@@ -79,7 +79,7 @@ struct BazarAdminDonationsView: View {
                             Image(systemName: "tray")
                                 .font(.title2)
                                 .foregroundStyle(.secondary)
-                            Text("No hay donaciones aprobadas")
+                            Text("Aún no hay donaciones asignadas a este bazar")
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                         }

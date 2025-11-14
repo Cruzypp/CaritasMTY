@@ -12,6 +12,10 @@ struct BazaarPicker: View {
     @StateObject private var homeViewModel = HomeViewModel()
     @ObservedObject var donateViewModel: DonateViewModel
     @State private var selectedOption: BazaarPickerOption? = nil
+
+    // Alert cuando el bazar no acepta donaciones
+    @State private var showClosedAlert = false
+    @State private var closedBazarName: String = "Este bazar"
     
     var bazaarOptions: [BazaarPickerOption] {
         homeViewModel.bazares.map { BazaarPickerOption(from: $0) }
@@ -33,14 +37,29 @@ struct BazaarPicker: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 8) {
                         ForEach(bazaarOptions) { option in
+                            
+                            // Buscamos el Bazar original para saber si acepta donaciones
+                            let bazar = homeViewModel.bazares.first { $0.id == option.id }
+                            let isAccepting = bazar?.acceptingDonations ?? true
+                            
                             BazaarSelectionCard(
                                 option: option,
                                 isSelected: selectedOption?.id == option.id,
                                 action: {
-                                    selectedOption = option
-                                    donateViewModel.selectedBazarId = option.id
+                                    if isAccepting {
+                                        // Solo permitimos seleccionar si sí acepta donaciones
+                                        withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                                            selectedOption = option
+                                        }
+                                    } else {
+                                        // Mostramos alerta si no acepta
+                                        closedBazarName = bazar?.nombre ?? "Este bazar"
+                                        showClosedAlert = true
+                                    }
                                 }
                             )
+                            // Visualmente un poco apagado si no acepta donaciones
+                            .opacity(isAccepting ? 1.0 : 0.45)
                         }
                     }
                 }
@@ -64,6 +83,12 @@ struct BazaarPicker: View {
         .padding()
         .onAppear {
             homeViewModel.fetchBazares()
+        }
+        // Alert cuando el bazar está “apagado”
+        .alert("Bazar no disponible", isPresented: $showClosedAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("\(closedBazarName) actualmente no está aceptando donaciones. Por favor elige otro bazar.")
         }
     }
 }

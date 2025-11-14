@@ -1,3 +1,9 @@
+//
+//  DonateView.swift
+//  caritas
+//
+//  Created by Juan Luis Alvarez Cisneros on 05/11/25.
+//
 import SwiftUI
 import PhotosUI
 import FirebaseAuth
