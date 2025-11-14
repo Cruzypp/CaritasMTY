@@ -41,7 +41,7 @@ struct DonateView: View {
                     
                     Divider().padding(.horizontal)
                     
-                    BazaarPicker()
+                    BazaarPicker(donateViewModel: viewModel)
                     
                     Divider().padding(.horizontal)
                     

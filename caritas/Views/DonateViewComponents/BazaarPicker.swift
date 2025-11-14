@@ -10,6 +10,7 @@ import SwiftUI
 struct BazaarPicker: View {
     
     @StateObject private var homeViewModel = HomeViewModel()
+    @ObservedObject var donateViewModel: DonateViewModel
     @State private var selectedOption: BazaarPickerOption? = nil
     
     var bazaarOptions: [BazaarPickerOption] {
@@ -35,7 +36,10 @@ struct BazaarPicker: View {
                             BazaarSelectionCard(
                                 option: option,
                                 isSelected: selectedOption?.id == option.id,
-                                action: { selectedOption = option }
+                                action: {
+                                    selectedOption = option
+                                    donateViewModel.selectedBazarId = option.id
+                                }
                             )
                         }
                     }
@@ -65,5 +69,5 @@ struct BazaarPicker: View {
 }
 
 #Preview {
-    BazaarPicker()
+    BazaarPicker(donateViewModel: DonateViewModel())
 }
