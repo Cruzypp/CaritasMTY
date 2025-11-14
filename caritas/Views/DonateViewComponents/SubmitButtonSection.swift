@@ -11,7 +11,7 @@ struct SubmitButtonSection: View {
         Button(action: {
             Task {
                 if let userId = authViewModel.user?.uid {
-                    await viewModel.submitDonation(userId: userId)
+                    await viewModel.submitDonation(userId: userId, bazarId: viewModel.selectedBazarId)
                     if viewModel.errorMessage != nil {
                         showErrorAlert = true
                     } else if viewModel.successMessage != nil {

@@ -1,0 +1,9 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# También recomendado
+*.DS_Store
+xcuserdata/
+*.xcuserstate

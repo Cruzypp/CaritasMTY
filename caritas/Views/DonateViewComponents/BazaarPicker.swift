@@ -10,6 +10,7 @@ import SwiftUI
 struct BazaarPicker: View {
     
     @StateObject private var homeViewModel = HomeViewModel()
+    @ObservedObject var donateViewModel: DonateViewModel
     @State private var selectedOption: BazaarPickerOption? = nil
 
     // Alert cuando el bazar no acepta donaciones
@@ -93,5 +94,5 @@ struct BazaarPicker: View {
 }
 
 #Preview {
-    BazaarPicker()
+    BazaarPicker(donateViewModel: DonateViewModel())
 }

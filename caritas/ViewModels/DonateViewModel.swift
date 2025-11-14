@@ -14,6 +14,7 @@ final class DonateViewModel: ObservableObject {
     @Published var title: String = ""
     @Published var description: String = ""
     @Published var selectedCategories: [String] = []
+    @Published var selectedBazarId: String? = nil
     
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
