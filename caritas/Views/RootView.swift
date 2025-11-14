@@ -13,6 +13,8 @@ struct RootView: View {
                 ProgressView("Cargando perfil…")
             } else if auth.isAdmin {
                 AdminReviewsView()
+            } else if auth.isBazarAdmin{
+                BazarAdminDonationsView()
             } else {
                 DonorHomeView()
             }

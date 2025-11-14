@@ -37,7 +37,7 @@ struct ContentView: View {
                         Text("EMAIL")
                             .font(.gotham(.bold, style: .caption))
                             .foregroundColor(.gray)
-                        TextField("hello@reallygreatsite.com", text: $email)
+                        TextField("correo", text: $email)
                             .font(.gotham(.regular, style: .headline))
                             .padding()
                             .background(Color(.systemGray6))
