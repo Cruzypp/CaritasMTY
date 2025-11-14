@@ -5,9 +5,6 @@
 //  Created by Juan Luis Alvarez Cisneros on 12/11/25.
 //
 
-
-//  BazarAdminSettingsView.swift
-
 import SwiftUI
 import FirebaseAuth
 
@@ -17,8 +14,9 @@ struct BazarAdminSettingsView: View {
 
     private let azul = Color("azulMarino")
 
-    // Hardcode de puntitos de contraseña
-    private let fakePasswordDots = "••••••••••"
+
+    // Alert para confirmar que se dejarán de aceptar donaciones
+    @State private var showStopDonationsAlert = false
 
     var body: some View {
         NavigationStack {
@@ -57,19 +55,7 @@ struct BazarAdminSettingsView: View {
                                 .cornerRadius(10)
                         }
 
-                        // Contraseña fake con puntitos
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Contraseña")
-                                .font(.gotham(.bold, style: .caption))
-                                .foregroundColor(.gray)
-
-                            Text(fakePasswordDots)
-                                .font(.gotham(.regular, style: .body))
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(10)
-                        }
+                        
                     }
                     .padding(.horizontal)
 
@@ -82,16 +68,24 @@ struct BazarAdminSettingsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Aceptar donaciones")
                                     .font(.gotham(.regular, style: .body))
-                                Text("Si desactivas esta opción, los donantes ya no podrán seleccionar este bazar al crear una nueva donación.")
+                                Text("¿Está seguro de que desea desactivar el estado de recepción de donaciones? Al hacerlo, el bazar dejará de aceptar nuevas donaciones hasta que el estado vuelva a activarse.")
                                     .font(.gotham(.regular, style: .caption))
                                     .foregroundStyle(.secondary)
                             }
                         }
                         .toggleStyle(SwitchToggleStyle(tint: azul))
-                        .onChange(of: vm.isAcceptingDonations) { newValue in
+                        // Nuevo onChange con (oldValue, newValue) para quitar el warning
+                        .onChange(of: vm.isAcceptingDonations) { oldValue, newValue in
                             guard let bazarId = auth.bazarId else { return }
-                            Task {
-                                await vm.save(for: bazarId)
+
+                            // Si pasan de true -> false, pedimos confirmación
+                            if oldValue == true && newValue == false {
+                                showStopDonationsAlert = true
+                            } else {
+                                // Encender o volver a true: se guarda directo
+                                Task {
+                                    await vm.save(for: bazarId)
+                                }
                             }
                         }
                     }
@@ -128,6 +122,21 @@ struct BazarAdminSettingsView: View {
         .task {
             guard let bazarId = auth.bazarId else { return }
             await vm.load(for: bazarId)
+        }
+        // Alert de confirmación cuando el admin apaga el switch
+        .alert("¿Dejar de aceptar donaciones?", isPresented: $showStopDonationsAlert) {
+            Button("Cancelar", role: .cancel) {
+                // Revertimos el switch a encendido
+                vm.isAcceptingDonations = true
+            }
+            Button("Confirmar", role: .destructive) {
+                guard let bazarId = auth.bazarId else { return }
+                Task {
+                    await vm.save(for: bazarId)
+                }
+            }
+        } message: {
+            Text("Los donantes ya no podrán seleccionar este bazar al crear nuevas donaciones.")
         }
     }
 }
