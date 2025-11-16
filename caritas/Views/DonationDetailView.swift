@@ -28,6 +28,16 @@ struct DonationDetailView: View {
     private var isApproved: Bool {
         (donation.status ?? "").lowercased() == "approved"
     }
+    
+    /// Determina si es donación de electrodoméstico o mueble
+    private var isLargeItem: Bool {
+        guard let categories = donation.categoryId else { return false }
+        return categories.contains { cat in
+            cat.lowercased().contains("electrodoméstico") || 
+            cat.lowercased().contains("electrodomestico") ||
+            cat.lowercased().contains("mueble")
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -159,6 +169,14 @@ struct DonationDetailView: View {
                     
                     Divider()
                         .padding(.vertical, 10)
+                    
+                    // MARK: - Ayuda con traslado (solo para electrodomésticos/muebles)
+                    if isLargeItem {
+                        TransportHelpCard(needsHelp: donation.needsTransportHelp)
+                        
+                        Divider()
+                            .padding(.vertical, 10)
+                    }
                     
                     // MARK: - Bazar a entregar (solo si está aprobada)
                     VStack(alignment: .leading, spacing: 8) {
@@ -296,7 +314,8 @@ struct DonationDetailView: View {
         ],
         status: "approved",
         title: "Y x",
-        userId: "U001"
+        userId: "U001",
+        needsTransportHelp: true
     )
     
     DonationDetailView(donation: testDonation, isPreview: true)

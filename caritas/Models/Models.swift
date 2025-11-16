@@ -73,6 +73,7 @@ struct Donation: Identifiable, Codable, Equatable {
     var status: String?            // "pending" | "approved" | "rejected"
     var title: String?
     var userId: String?
+    var needsTransportHelp: Bool?   // ¿Necesita ayuda con el traslado?
 
     // Conveniencias
     var createdAtDate: Date? { day?.dateValue() }
@@ -108,7 +109,8 @@ struct Donation: Identifiable, Codable, Equatable {
             photoUrls: photos,
             status: d["status"] as? String,
             title: d["title"] as? String,
-            userId: d["userId"] as? String
+            userId: d["userId"] as? String,
+            needsTransportHelp: d["needsTransportHelp"] as? Bool
         )
     }
 
@@ -124,6 +126,7 @@ struct Donation: Identifiable, Codable, Equatable {
         if let title { m["title"] = title }
         if let userId { m["userId"] = userId }
         if let day { m["day"] = day }
+        if let needsTransportHelp { m["needsTransportHelp"] = needsTransportHelp }
 
         // Escribir 1 o N fotos
         if let photos = photoUrls, !photos.isEmpty {
