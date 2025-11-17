@@ -8,13 +8,13 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore   // Timestamp
-import MapKit              // (por si más adelante quieres reusar MapPreview)
 import Combine
 
 struct AdminDonationDetailView: View {
     let donation: Donation
     @StateObject private var vm: AdminDonationDetailVM
     @State private var selectedImageIndex: Int = 0
+    @State private var showAllPhotos: Bool = false
     
     init(donation: Donation) {
         self.donation = donation
@@ -25,6 +25,16 @@ struct AdminDonationDetailView: View {
     private let azul   = Color("azulMarino")
     private let aqua   = Color("aqua")
     private let naranja = Color("naranja")
+    
+    // Mismo criterio que DonationDetailView
+    private var isLargeItem: Bool {
+        guard let categories = donation.categoryId else { return false }
+        return categories.contains { cat in
+            cat.lowercased().contains("electrodoméstico") ||
+            cat.lowercased().contains("electrodomestico") ||
+            cat.lowercased().contains("mueble")
+        }
+    }
     
     var body: some View {
         ScrollView {
@@ -37,83 +47,72 @@ struct AdminDonationDetailView: View {
                     .padding(.horizontal)
                     .padding(.top, 20)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                 
-                // MARK: - Galería (igual que donador)
+                // MARK: - Galería (replicada del donador: grid 2x2 + sheet)
                 VStack(spacing: 10) {
                     if let photoUrls = donation.photoUrls, !photoUrls.isEmpty {
-                        TabView(selection: $selectedImageIndex) {
-                            ForEach(Array(photoUrls.enumerated()), id: \.offset) { index, urlString in
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 10) {
+                            // Primeras 3 fotos
+                            ForEach(Array(photoUrls.prefix(3).enumerated()), id: \.offset) { index, urlString in
                                 if let url = URL(string: urlString) {
-                                    AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 370, height: 300)
-                                                .clipShape(RoundedRectangle(cornerRadius: 15))
-                                                .tag(index)
-                                        case .failure:
-                                            Image(.logotipo)
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(maxWidth: 370, maxHeight: 300)
-                                                .clipShape(RoundedRectangle(cornerRadius: 15))
-                                                .tag(index)
-                                        case .empty:
-                                            ProgressView()
-                                                .frame(width: 370, height: 300)
-                                                .tag(index)
-                                        @unknown default:
-                                            EmptyView().tag(index)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .tabViewStyle(.page(indexDisplayMode: .automatic))
-                        .frame(width: 370, height: 300)
-                        
-                        if photoUrls.count > 1 {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(Array(photoUrls.enumerated()), id: \.offset) { index, urlString in
-                                        if let url = URL(string: urlString) {
-                                            AsyncImage(url: url) { phase in
-                                                switch phase {
-                                                case .success(let image):
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 70, height: 70)
-                                                        .cornerRadius(8)
-                                                        .overlay(
-                                                            RoundedRectangle(cornerRadius: 8)
-                                                                .stroke(selectedImageIndex == index ? naranja : .clear, lineWidth: 2)
-                                                        )
-                                                        .onTapGesture { selectedImageIndex = index }
-                                                case .failure:
+                                    Button(action: { showAllPhotos = true }) {
+                                        AsyncImage(url: url) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 180, height: 150)
+                                                    .clipped()
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            case .failure(_):
+                                                ZStack {
+                                                    Color(.systemGray6)
                                                     Image(.logotipo)
                                                         .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 70, height: 70)
-                                                        .cornerRadius(8)
-                                                case .empty:
-                                                    ProgressView()
-                                                        .frame(width: 70, height: 70)
-                                                @unknown default:
-                                                    EmptyView()
+                                                        .scaledToFit()
+                                                        .frame(width: 50, height: 50)
                                                 }
+                                                .frame(height: 150)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            case .empty:
+                                                ZStack {
+                                                    Color(.systemGray6)
+                                                    ProgressView()
+                                                }
+                                                .frame(height: 150)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            @unknown default:
+                                                EmptyView()
                                             }
                                         }
                                     }
                                 }
-                                .padding(.horizontal, 20)
+                            }
+                            
+                            // Botón "+N" en la 4ta posición
+                            if photoUrls.count > 3 {
+                                Button(action: { showAllPhotos = true }) {
+                                    ZStack {
+                                        Color(.gray.opacity(0.8))
+                                        Text("+\(photoUrls.count - 3)")
+                                            .font(.system(size: 20, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                    .frame(height: 150)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
                             }
                         }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal)
+                .sheet(isPresented: $showAllPhotos) {
+                    AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
+                }
                 
                 // MARK: - Información (título, descripción corta, estado)
                 VStack(alignment: .leading, spacing: 15) {
@@ -144,6 +143,14 @@ struct AdminDonationDetailView: View {
                 .padding(.top, 10)
                 
                 Divider().padding(.horizontal)
+                
+                // MARK: - Ayuda con traslado (solo para electrodomésticos/muebles) - replicado
+                if isLargeItem {
+                    TransportHelpCard(needsHelp: donation.needsTransportHelp)
+                        .padding(.horizontal)
+                    
+                    Divider().padding(.horizontal)
+                }
                 
                 // MARK: - Comentario del admin
                 VStack(alignment: .leading, spacing: 8) {
@@ -280,17 +287,21 @@ final class AdminDonationDetailVM: ObservableObject {
     let testDonation = Donation(
         id: "D001",
         bazarId: "B001",
-        categoryId: ["ropa"],
+        categoryId: ["Electrodomésticos", "muebles"],
         day: Timestamp(date: Date()),
         description: "Donación de ropa en buen estado. Incluye abrigos, bufandas y suéteres.",
         folio: "FOL-001",
         photoUrls: [
             "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1200&auto=format&fit=crop"
+            "https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1558981285-6f0c94958bb6?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop"
         ],
         status: "pending",
         title: "Ropa de invierno",
-        userId: "U001"
+        userId: "U001",
+        needsTransportHelp: true
     )
     return NavigationStack {
         AdminDonationDetailView(donation: testDonation)
