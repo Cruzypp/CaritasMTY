@@ -147,4 +147,5 @@ struct UserDoc: Identifiable, Codable, Equatable {
     var email: String?
     var password: String?
     var rol: String?
+    var bazarId: String?
 }

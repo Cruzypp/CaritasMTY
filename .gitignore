@@ -1,2 +1,11 @@
-caritas.xcodeproj/project.xcworkspace/xcuserdata/cruz.xcuserdatad/UserInterfaceState.xcuserstate
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# También recomendado
+*.DS_Store
+xcuserdata/
+*.xcuserstate
+xcuserdata/
 *.xcuserstate

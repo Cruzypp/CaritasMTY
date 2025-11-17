@@ -17,11 +17,18 @@ import GoogleSignIn
 final class AuthViewModel: ObservableObject {
     // Estado de sesión
     @Published var user: User?
-    @Published var role: String?              // "admin" | "donador"
+    @Published var role: String?              // "admin" | "donador" | "adminBazar"
+    @Published var bazarId: String?          // bazar asignado (solo para adminBazar)
     @Published var error: String?
     @Published var isLoading = false
 
-    var isAdmin: Bool { (role ?? "").lowercased() == "admin" }
+    var isAdmin: Bool {
+        (role ?? "").lowercased() == "admin"
+    }
+
+    var isBazarAdmin: Bool {
+        (role ?? "").lowercased() == "adminbazar"
+    }
 
     private let db = Firestore.firestore()
     private var authHandle: AuthStateDidChangeListenerHandle?
@@ -41,19 +48,26 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Perfil (rol)
+    // MARK: - Perfil (rol + bazar)
     private func loadProfile() async {
         guard let uid = Auth.auth().currentUser?.uid else {
             role = nil
+            bazarId = nil
             return
         }
         do {
             let snap = try await db.collection("users").document(uid).getDocument()
             let data = snap.data() ?? [:]
+
             // Acepta "role" o "rol"
-            self.role = (data["role"] as? String) ?? (data["rol"] as? String) ?? "donador"
+            let storedRole = (data["role"] as? String) ?? (data["rol"] as? String) ?? "donador"
+            self.role = storedRole
+
+            // bazarId solo aplica para adminBazar, pero si existe lo guardamos igual
+            self.bazarId = data["bazarId"] as? String
         } catch {
             self.role = "donador"
+            self.bazarId = nil
         }
     }
 
@@ -116,7 +130,11 @@ final class AuthViewModel: ObservableObject {
                 GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { signInResult, err in
                     if let err { cont.resume(throwing: err); return }
                     guard let signInResult else {
-                        cont.resume(throwing: NSError(domain: "GoogleSignIn", code: -1, userInfo: [NSLocalizedDescriptionKey: "Resultado nulo"]))
+                        cont.resume(throwing: NSError(
+                            domain: "GoogleSignIn",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "Resultado nulo"]
+                        ))
                         return
                     }
                     cont.resume(returning: signInResult)
@@ -142,6 +160,7 @@ final class AuthViewModel: ObservableObject {
             let userDoc = db.collection("users").document(uid)
             let snap = try await userDoc.getDocument()
             if !snap.exists {
+                // Para cuentas nuevas: role = donador por defecto, sin bazarId
                 try await userDoc.setData([
                     "email": email,
                     "role": "donador",
@@ -149,11 +168,12 @@ final class AuthViewModel: ObservableObject {
                     "provider": "google"
                 ])
             } else {
-                // Al menos asegura el campo role si falta
-                try await userDoc.setData(["role": (snap.data()?["role"] as? String) ?? "donador"], merge: true)
+                // Mantener role y bazarId existentes; si no hay role, poner "donador"
+                let existingRole = (snap.data()?["role"] as? String) ?? "donador"
+                try await userDoc.setData(["role": existingRole], merge: true)
             }
 
-            // 7) Rol en memoria
+            // 7) Rol + bazarId en memoria
             await loadProfile()
 
         } catch {
@@ -167,6 +187,7 @@ final class AuthViewModel: ObservableObject {
             try Auth.auth().signOut()
             self.user = nil
             self.role = nil
+            self.bazarId = nil
             self.error = nil
         } catch {
             self.error = (error as NSError).localizedDescription
