@@ -30,6 +30,9 @@ final class DonationViewModel: ObservableObject {
 
     // MARK: - Data
     @Published var myDonations: [Donation] = []
+    
+    private var lastSnapshot: DocumentSnapshot? = nil
+    private let pageSize = 10
 
     private let db = Firestore.firestore()
 
@@ -69,7 +72,7 @@ final class DonationViewModel: ObservableObject {
                 docId: docId,
                 images: images,
                 maxDimension: 1600,
-                targetKB: 400
+                targetKB: 250
             )
 
             // 3) Guardar URLs en Firestore
@@ -89,8 +92,23 @@ final class DonationViewModel: ObservableObject {
     func loadMyDonations() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         loadingMy = true; defer { loadingMy = false }
+        lastSnapshot = nil
         do {
-            myDonations = try await FirestoreService.shared.myDonations(for: uid)
+            let (donations, lastDoc) = try await FirestoreService.shared.myDonationsPaginated(for: uid, limit: pageSize)
+            self.myDonations = donations
+            self.lastSnapshot = lastDoc
+        } catch {
+            message = "❌ \(error.localizedDescription)"
+        }
+    }
+    
+    func loadMoreDonations() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let lastDoc = lastSnapshot else { return }
+        do {
+            let (donations, lastDoc) = try await FirestoreService.shared.myDonationsPaginated(for: uid, limit: pageSize, startAfter: lastDoc)
+            self.myDonations.append(contentsOf: donations)
+            self.lastSnapshot = lastDoc
         } catch {
             message = "❌ \(error.localizedDescription)"
         }
