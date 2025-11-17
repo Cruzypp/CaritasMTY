@@ -29,7 +29,7 @@ struct SubmitButtonSection: View {
                     showValidDonation = true
                 }
             } else {
-                viewModel.errorMessage = "Debes estar autenticado para donar"
+                viewModel.errorMessage = "Debes estar autenticado para hacer una donación"
                 showErrorAlert = true
             }
         }
@@ -52,7 +52,7 @@ struct SubmitButtonSection: View {
                 } else {
                     Image(systemName: "checkmark.circle.fill")
                 }
-                Text(viewModel.isLoading ? "Subiendo..." : "Enviar Solicitud")
+                Text(viewModel.isLoading ? "Enviando..." : "Enviar Solicitud")
                     .font(.headline)
                     .fontWeight(.bold)
             }

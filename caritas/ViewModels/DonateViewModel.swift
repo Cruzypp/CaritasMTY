@@ -62,7 +62,7 @@ final class DonateViewModel: ObservableObject {
         
         // El título no puede estar vacío
         guard !title.trimmingCharacters(in: .whitespaces).isEmpty else {
-            errorMessage = "El título es requerido"
+            errorMessage = "El título es obligatorio"
             return false
         }
         
@@ -111,11 +111,11 @@ final class DonateViewModel: ObservableObject {
             )
             
             // ✅ Éxito
-            successMessage = "¡Donación subida exitosamente!"
+            successMessage = "¡Donación enviada exitosamente!"
             resetForm()
             
         } catch {
-            errorMessage = "Error al subir donación: \(error.localizedDescription)"
+            errorMessage = "Error al enviar la donación: \(error.localizedDescription)"
             print("Error en submitDonation: \(error)")
         }
         

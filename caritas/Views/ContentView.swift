@@ -12,6 +12,12 @@ struct ContentView: View {
 
     @State private var email = ""
     @State private var password = ""
+    @FocusState private var focusedField: Field?
+
+    enum Field {
+        case email
+        case password
+    }
 
     var body: some View {
         NavigationStack {
@@ -45,6 +51,9 @@ struct ContentView: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .keyboardType(.emailAddress)
+                            .focused($focusedField, equals: .email)
+                            .submitLabel(.next)
+                            .onSubmit { focusedField = .password }
                     }
 
                     VStack(alignment: .leading, spacing: 6) {
@@ -56,6 +65,9 @@ struct ContentView: View {
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
+                            .focused($focusedField, equals: .password)
+                            .submitLabel(.go)
+                            .onSubmit { focusedField = nil }
                     }
                 }
                 .padding(.horizontal, 32)

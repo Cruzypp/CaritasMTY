@@ -75,7 +75,7 @@ struct DonateView: View {
         }
         // Alertas y onChange pueden ir aquí
         .alert("Error en la Donación", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) { showErrorAlert = false }
+            Button("Aceptar", role: .cancel) { showErrorAlert = false }
         } message: {
             Text(viewModel.errorMessage ?? "Ocurrió un error desconocido")
         }
