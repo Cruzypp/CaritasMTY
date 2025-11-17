@@ -69,13 +69,35 @@ final class FirestoreService {
             .setData(["photoUrls": FieldValue.arrayUnion(urls)], merge: true)
     }
 
-    /// Donaciones del usuario autenticado (ordenadas por fecha desc).
-    func myDonations(for uid: String) async throws -> [Donation] {
+    /// Donaciones del usuario autenticado (ordenadas por fecha desc, paginadas: 10 por página).
+    func myDonations(for uid: String, limit: Int = 10) async throws -> [Donation] {
         let snap = try await db.collection("donations")
             .whereField("userId", isEqualTo: uid)
             .order(by: "day", descending: true)
+            .limit(to: limit)
             .getDocuments()
         return snap.documents.map { Donation.from(doc: $0) }
+    }
+    
+    /// Donaciones del usuario con paginación avanzada.
+    func myDonationsPaginated(for uid: String, limit: Int = 10, startAfter: DocumentSnapshot? = nil) async throws -> (donations: [Donation], lastSnapshot: DocumentSnapshot?) {
+        var query = db.collection("donations")
+            .whereField("userId", isEqualTo: uid)
+            .order(by: "day", descending: true)
+            .limit(to: limit + 1)
+        
+        if let lastSnapshot = startAfter {
+            query = query.start(afterDocument: lastSnapshot)
+        }
+        
+        let snap = try await query.getDocuments()
+        let docs = snap.documents
+        
+        let hasMore = docs.count > limit
+        let results = hasMore ? Array(docs.dropLast()) : docs
+        let lastDoc = results.last
+        
+        return (results.map { Donation.from(doc: $0) }, lastDoc)
     }
 
     // MARK: - BAZAR ADMIN FLOW
@@ -187,13 +209,35 @@ final class FirestoreService {
 
     // MARK: - ADMIN (CALIDAD) FLOW
 
-    /// Donaciones con `status == "pending"`, ordenadas por `day` desc.
-    func pendingDonations() async throws -> [Donation] {
+    /// Donaciones con `status == "pending"`, ordenadas por `day` desc (paginadas: 20 por página).
+    func pendingDonations(limit: Int = 20) async throws -> [Donation] {
         let snap = try await db.collection("donations")
             .whereField("status", isEqualTo: "pending")
             .order(by: "day", descending: true)
+            .limit(to: limit)
             .getDocuments()
         return snap.documents.map { Donation.from(doc: $0) }
+    }
+    
+    /// Donaciones con `status == "pending"`, ordenadas por `day` desc (paginación avanzada).
+    func pendingDonationsPaginated(limit: Int = 20, startAfter: DocumentSnapshot? = nil) async throws -> (donations: [Donation], lastSnapshot: DocumentSnapshot?) {
+        var query = db.collection("donations")
+            .whereField("status", isEqualTo: "pending")
+            .order(by: "day", descending: true)
+            .limit(to: limit + 1) // +1 para saber si hay más
+        
+        if let lastSnapshot = startAfter {
+            query = query.start(afterDocument: lastSnapshot)
+        }
+        
+        let snap = try await query.getDocuments()
+        let docs = snap.documents
+        
+        let hasMore = docs.count > limit
+        let results = hasMore ? Array(docs.dropLast()) : docs
+        let lastDoc = results.last
+        
+        return (results.map { Donation.from(doc: $0) }, lastDoc)
     }
 
     /// Actualiza estatus y registra quién revisó.

@@ -64,7 +64,7 @@ func compressImage(_ image: UIImage,
 /// (Opcional) Fuerza un tamaño objetivo en KB ajustando calidad.
 func compressToTargetKB(_ image: UIImage,
                         maxDimension: CGFloat = 1600,
-                        targetKB: Int = 350,
+                        targetKB: Int = 250,
                         preferHEIC: Bool = true) -> CompressedPayload? {
     // Búsqueda lineal descendente simple (suficiente en la práctica)
     var q: CGFloat = 0.8

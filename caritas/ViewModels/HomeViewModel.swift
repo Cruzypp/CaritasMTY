@@ -16,8 +16,18 @@ class HomeViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     private let firestoreService = FirestoreService.shared
+    private var bazaresCache: [Bazar]? = nil
+    private var cacheTimestamp: Date? = nil
+    private let cacheDuration: TimeInterval = 300 // 5 minutos
     
     func fetchBazares() {
+        // Usar caché si está disponible y no ha expirado
+        if let cached = bazaresCache, let timestamp = cacheTimestamp,
+           Date().timeIntervalSince(timestamp) < cacheDuration {
+            self.bazares = cached
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
@@ -25,6 +35,8 @@ class HomeViewModel: ObservableObject {
             do {
                 let bazaresData = try await firestoreService.fetchBazaars()
                 self.bazares = bazaresData
+                self.bazaresCache = bazaresData
+                self.cacheTimestamp = Date()
                 isLoading = false
             } catch {
                 errorMessage = "Error al cargar bazares: \(error.localizedDescription)"
@@ -32,6 +44,11 @@ class HomeViewModel: ObservableObject {
                 print("Error fetching bazares: \(error)")
             }
         }
+    }
+    
+    func invalidateCache() {
+        bazaresCache = nil
+        cacheTimestamp = nil
     }
     
     func searchBazares(query: String) -> [Bazar] {
