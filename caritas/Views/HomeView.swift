@@ -1,3 +1,5 @@
+//HomeView.swift
+
 import SwiftUI
 import MapKit
 
@@ -84,9 +86,9 @@ struct HomeView: View {
                             } label: {
                                 BaazarCard(
                                     nombre: bazar.nombre ?? bazar.location ?? (bazar.address ?? "Sin nombre"),
-                                    horarios: bazar.horarios ?? "—",
-                                    telefono: bazar.telefono ?? "—",
-                                    imagen: Image(.logotipo)
+                                    horarios: bazar.horarios ?? "-",
+                                    telefono: bazar.telefono ?? "-",
+                                    isAcceptingDonations: bazar.acceptingDonations ?? true
                                 )
                             }
                             .buttonStyle(.plain)
@@ -115,7 +117,8 @@ struct HomeView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { goToNotifications.toggle() } label: {
-                        Image(systemName: "bell.fill").imageScale(.large)
+                        Text("Donaciones")
+                            .fontWeight(.bold)
                     }
                 }
 
