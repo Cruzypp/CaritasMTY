@@ -81,7 +81,7 @@ private struct ReviewsScreen: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title2)
                                 .foregroundStyle(.red)
-                            Text("Error al cargar")
+                            Text("Error al cargar donaciones")
                                 .font(.headline)
                             Text(err)
                                 .font(.caption)

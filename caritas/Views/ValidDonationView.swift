@@ -48,7 +48,7 @@ struct ValidDonationView: View {
                 
                 // MARK: - Mensaje
                 VStack(spacing: 16) {
-                    Text("Te notificaremos cuando tu donación haya sido aprobada")
+                    Text("Te notificaremos cuando tu donación haya sido revisada")
                         .frame(width: 250, height: 100)
                         .font(.gotham(.regular, style: .body))
                         .foregroundColor(.secondary)
@@ -67,7 +67,7 @@ struct ValidDonationView: View {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.headline)
-                        Text("OK")
+                        Text("Aceptar")
                             .font(.gotham(.bold, style: .headline))
                     }
                     .foregroundColor(.white)

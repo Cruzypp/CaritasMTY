@@ -130,7 +130,7 @@ struct AdminDonationDetailView: View {
                         Text("Estado:")
                             .fontWeight(.semibold)
                         Spacer()
-                        Text((vm.donation.status ?? "pending").uppercased())
+                        Text(statusLabel(vm.donation.status ?? "pending"))
                             .font(.caption.weight(.bold))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -208,7 +208,7 @@ struct AdminDonationDetailView: View {
         .navigationTitle("Detalle")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Error", isPresented: .init(get: { vm.errorMessage != nil }, set: { _ in vm.errorMessage = nil })) {
-            Button("OK", role: .cancel) { }
+            Button("Aceptar", role: .cancel) { }
         } message: {
             Text(vm.errorMessage ?? "")
         }
@@ -236,6 +236,15 @@ struct AdminDonationDetailView: View {
         case "approved": return aqua
         case "rejected": return .red
         default:         return .gray
+        }
+    }
+    
+    private func statusLabel(_ status: String) -> String {
+        switch status.lowercased() {
+        case "pending": return "PENDIENTE"
+        case "approved": return "APROBADA"
+        case "rejected": return "RECHAZADA"
+        default: return status.uppercased()
         }
     }
     

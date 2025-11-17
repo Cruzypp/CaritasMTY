@@ -138,7 +138,7 @@ struct DonationDetailView: View {
                             Text("Estado:")
                                 .font(.gotham(.bold, style: .body))
                             Spacer()
-                            Text((donation.status ?? "pending").uppercased())
+                            Text(statusLabel(donation.status ?? "pending"))
                                 .font(.caption)
                                 .fontWeight(.bold)
                                 .padding(.horizontal, 12)
@@ -193,6 +193,19 @@ struct DonationDetailView: View {
                                         Text(address)
                                             .font(.caption)
                                             .foregroundColor(.secondary)
+                                    }
+                                    
+                                    // Mensaje adicional si necesita ayuda con traslado y está aprobada
+                                    if donation.needsTransportHelp == true {
+                                        if let phone = bazar.telefono, !phone.isEmpty {
+                                            Text("Por favor contactar al número telefónico: \(phone)")
+                                                .font(.gotham(.regular, style: .callout))
+                                                .foregroundColor(.secondary)
+                                        } else {
+                                            Text("Por favor contactar al número telefónico del bazar.")
+                                                .font(.gotham(.regular, style: .callout))
+                                                .foregroundColor(.secondary)
+                                        }
                                     }
                                 }
                                 .padding()
@@ -289,6 +302,15 @@ struct DonationDetailView: View {
         case "approved": return .aqua
         case "rejected": return .red
         default: return .gray
+        }
+    }
+    
+    private func statusLabel(_ status: String) -> String {
+        switch status.lowercased() {
+        case "pending": return "PENDIENTE"
+        case "approved": return "APROBADA"
+        case "rejected": return "RECHAZADA"
+        default: return status.uppercased()
         }
     }
 }

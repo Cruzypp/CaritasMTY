@@ -51,6 +51,8 @@ struct BazarAdminDonationsView: View {
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
                         .focused($searchFocused)
+                        .submitLabel(.search)
+                        .onSubmit { searchFocused = false }
                 }
                 .padding()
                 .background(Color(.systemGray6))
@@ -66,7 +68,7 @@ struct BazarAdminDonationsView: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title2)
                                 .foregroundStyle(.red)
-                            Text("Error al cargar")
+                            Text("Error al cargar donaciones")
                                 .font(.headline)
                             Text(err)
                                 .font(.caption)

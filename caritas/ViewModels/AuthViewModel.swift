@@ -81,7 +81,7 @@ final class AuthViewModel: ObservableObject {
             self.error = nil
             await loadProfile()
         } catch {
-            self.error = (error as NSError).localizedDescription
+            self.error = translateFirebaseError(error)
         }
     }
 
@@ -102,7 +102,7 @@ final class AuthViewModel: ObservableObject {
             self.error = nil
             await loadProfile()
         } catch {
-            self.error = (error as NSError).localizedDescription
+            self.error = translateFirebaseError(error)
         }
     }
 
@@ -177,7 +177,19 @@ final class AuthViewModel: ObservableObject {
             await loadProfile()
 
         } catch {
-            self.error = (error as NSError).localizedDescription
+            // Ignorar error si el usuario canceló
+            let nsError = error as NSError
+            let errorDesc = nsError.localizedDescription.lowercased()
+            
+            // Detectar cancelación por código o por mensaje
+            if nsError.code == -2 || 
+               errorDesc.contains("canceled") || 
+               errorDesc.contains("cancelled") ||
+               errorDesc.contains("user cancelled") {
+                self.error = nil
+            } else {
+                self.error = nsError.localizedDescription
+            }
         }
     }
 
@@ -195,6 +207,44 @@ final class AuthViewModel: ObservableObject {
     }
 
     // MARK: - Helpers
+    
+    /// Traduce errores de Firebase al español
+    private func translateFirebaseError(_ error: Error) -> String {
+        let nsError = error as NSError
+        
+        // Errores comunes de Firebase Auth
+        if let code = AuthErrorCode(rawValue: nsError.code) {
+            switch code {
+            case .invalidEmail:
+                return "El correo electrónico no es válido."
+            case .userNotFound:
+                return "No existe una cuenta con este correo electrónico."
+            case .wrongPassword:
+                return "La contraseña es incorrecta."
+            case .userDisabled:
+                return "Esta cuenta ha sido deshabilitada."
+            case .tooManyRequests:
+                return "Demasiados intentos fallidos. Intenta más tarde."
+            case .operationNotAllowed:
+                return "Esta operación no está permitida."
+            case .emailAlreadyInUse:
+                return "Este correo electrónico ya está registrado."
+            case .weakPassword:
+                return "La contraseña es muy débil. Debe tener al menos 6 caracteres."
+            case .accountExistsWithDifferentCredential:
+                return "Ya existe una cuenta con este correo electrónico."
+            case .requiresRecentLogin:
+                return "Debes iniciar sesión recientemente para realizar esta acción."
+            case .invalidCredential:
+                return "Las credenciales son inválidas."
+            default:
+                return nsError.localizedDescription
+            }
+        }
+        
+        return nsError.localizedDescription
+    }
+    
     /// Encuentra el UIViewController superior para presentar el flujo de Google
     private static func topViewController(base: UIViewController? = nil) -> UIViewController? {
         let scene = UIApplication.shared.connectedScenes
