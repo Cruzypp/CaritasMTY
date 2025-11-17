@@ -15,6 +15,7 @@ final class DonateViewModel: ObservableObject {
     @Published var description: String = ""
     @Published var selectedCategories: [String] = []
     @Published var selectedBazarId: String? = nil
+    @Published var needsTransportHelp: Bool = false
     
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
@@ -91,7 +92,8 @@ final class DonateViewModel: ObservableObject {
                 description: description,
                 categoryText: selectedCategories.joined(separator: ", "),
                 bazarId: bazarId,
-                photoUrls: []
+                photoUrls: [],
+                needsTransportHelp: needsTransportHelp
             )
             
             // 2. Subir las imágenes a Storage
@@ -126,6 +128,7 @@ final class DonateViewModel: ObservableObject {
         title = ""
         description = ""
         selectedCategories = []
+        needsTransportHelp = false
     }
     
     /// Agrega o quita una categoría

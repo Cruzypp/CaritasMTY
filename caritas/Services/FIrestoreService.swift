@@ -24,7 +24,8 @@ final class FirestoreService {
                         description: String,
                         categoryText: String,
                         bazarId: String? = nil,
-                        photoUrls: [String] = []) async throws -> String {
+                        photoUrls: [String] = [],
+                        needsTransportHelp: Bool = false) async throws -> String {
 
         let categories = categoryText
             .split(separator: ",")
@@ -42,7 +43,8 @@ final class FirestoreService {
             photoUrls: photoUrls, // arreglo (puede iniciar vacío)
             status: "pending",
             title: title,
-            userId: uid
+            userId: uid,
+            needsTransportHelp: needsTransportHelp
         )
 
         let ref = db.collection("donations").document()
