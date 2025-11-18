@@ -19,13 +19,13 @@ struct BaazarCard: View {
     private var statusBackground: Color {
         isAcceptingDonations
             ? Color.green.opacity(0.12)
-            : Color(.systemGray5)
+        : Color(.yellow).opacity(0.20)
     }
     
     private var statusTextColor: Color {
         isAcceptingDonations
-            ? Color.green
-            : Color(.systemGray)
+        ? Color.green.mix(with: .black, by: 0.20)
+        : Color(.yellow).mix(with: .black, by: 0.25)
     }
     
     private var statusText: String {
@@ -35,7 +35,7 @@ struct BaazarCard: View {
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top) {
             
             // Columna principal
             VStack(alignment: .leading, spacing: 10) {
@@ -44,6 +44,7 @@ struct BaazarCard: View {
                 Text(nombre)
                     .font(.gotham(.bold, style: .title3))
                     .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color(.morado))

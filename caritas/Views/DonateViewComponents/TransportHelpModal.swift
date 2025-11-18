@@ -80,7 +80,7 @@ struct TransportHelpModal: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.grisOscuro)
+                    .background(Color.azulMarino)
                     .cornerRadius(12)
                 }
             }
@@ -108,7 +108,7 @@ struct TransportHelpModal: View {
             
             Spacer()
         }
-        .presentationDetents([.fraction(0.8)])
+        .presentationDetents([.fraction(0.90)])
     }
 }
 

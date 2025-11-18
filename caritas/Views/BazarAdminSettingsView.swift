@@ -91,6 +91,7 @@ struct BazarAdminSettingsView: View {
                                     .font(.gotham(.regular, style: .caption))
                                     .foregroundStyle(.secondary)
                             }
+                            .padding()
                         }
                         .toggleStyle(SwitchToggleStyle(tint: azul))
                     }
@@ -102,6 +103,8 @@ struct BazarAdminSettingsView: View {
                             .foregroundColor(.red)
                             .padding(.horizontal)
                     }
+                    
+                    Spacer(minLength: 160)
 
                     // Botón de logout
                     Button {
@@ -118,9 +121,9 @@ struct BazarAdminSettingsView: View {
                     .padding(.horizontal)
                     .padding(.top, 8)
 
-                    Spacer(minLength: 20)
                 }
             }
+            .padding()
             .navigationTitle("Configuración")
             .navigationBarTitleDisplayMode(.inline)
         }
