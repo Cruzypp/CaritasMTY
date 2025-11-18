@@ -1,3 +1,5 @@
+//HomeView.swift
+
 import SwiftUI
 import MapKit
 
@@ -86,9 +88,9 @@ struct HomeView: View {
                             } label: {
                                 BaazarCard(
                                     nombre: bazar.nombre ?? bazar.location ?? (bazar.address ?? "Sin nombre"),
-                                    horarios: bazar.horarios ?? "—",
-                                    telefono: bazar.telefono ?? "—",
-                                    imagen: Image(.logotipo)
+                                    horarios: bazar.horarios ?? "-",
+                                    telefono: bazar.telefono ?? "-",
+                                    isAcceptingDonations: bazar.acceptingDonations ?? true
                                 )
                             }
                             .buttonStyle(.plain)
@@ -106,18 +108,24 @@ struct HomeView: View {
             .onAppear { viewModel.fetchBazares() }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { showLogoutConfirm = true } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.forward.fill")
-                            .imageScale(.medium)
-                            .foregroundColor(.black)
-                            .environment(\.layoutDirection, .rightToLeft)
+                    NavigationLink {
+                        DonorSettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .font(.title2.bold())
+                            .foregroundStyle(.gray)
+                            .frame(width: 50, height: 50)
+                            .background(Color.white.opacity(0.9))
+                            .clipShape(Circle())
+                            .shadow(radius: 3)
                     }
                     .accessibilityLabel("Cerrar sesión")
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { goToNotifications.toggle() } label: {
-                        Image(systemName: "bell.fill").imageScale(.large)
+                        Text("Donaciones")
+                            .fontWeight(.bold)
                     }
                 }
 
@@ -135,7 +143,9 @@ struct HomeView: View {
             }
             .navigationDestination(isPresented: $goToNotifications) { StatusView() }
         }
+        .navigationBarBackButtonHidden(true)
     }
+    
 }
 
 

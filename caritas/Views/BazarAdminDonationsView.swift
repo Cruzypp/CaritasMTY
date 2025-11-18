@@ -3,29 +3,22 @@
 import SwiftUI
 import FirebaseFirestore   // por Timestamp.dateValue()
 
-// MARK: - Vista principal
-
 struct BazarAdminDonationsView: View {
     @EnvironmentObject var auth: AuthViewModel
     @StateObject private var vm = BazarAdminDonationsVM()
 
-    private let azul = Color("azulMarino")
-
-    // Buscador
     @State private var searchText: String = ""
     @FocusState private var searchFocused: Bool
 
-    // Donaciones filtradas por el texto de búsqueda
-    private var filteredDonations: [Donation] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return vm.donations }
+    private let azul = Color("azulMarino")
 
-        let q = query.lowercased()
+    // Filtro por texto
+    private var filteredDonations: [Donation] {
+        guard !searchText.isEmpty else { return vm.donations }
+        let query = searchText.lowercased()
         return vm.donations.filter { donation in
-            let title = donation.title?.lowercased() ?? ""
-            let desc  = donation.description?.lowercased() ?? ""
-            let folio = donation.folio?.lowercased() ?? ""
-            return title.contains(q) || desc.contains(q) || folio.contains(q)
+            (donation.title ?? "").lowercased().contains(query) ||
+            (donation.description ?? "").lowercased().contains(query)
         }
     }
 
@@ -33,19 +26,39 @@ struct BazarAdminDonationsView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
 
+                // 🔥 Banner si el bazar NO está aceptando donaciones
+                if vm.isAcceptingDonations == false {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.title3)
+                            .foregroundColor(.orange)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Este bazar no está aceptando donaciones")
+                                .font(.gotham(.bold, style: .body))
+
+                            Text("Mientras esta opción esté desactivada, los donantes no podrán seleccionar este bazar al crear nuevas donaciones.")
+                                .font(.gotham(.regular, style: .caption))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding()
+                    .background(Color.orange.opacity(0.15))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+                }
+
                 // Título
                 Text("Donaciones asignadas")
                     .font(.largeTitle.bold())
                     .foregroundStyle(azul)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .padding(.top)
 
                 // Buscador
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
-
                     TextField("Buscar donación…", text: $searchText)
                         .font(.gotham(.regular, style: .body))
                         .textFieldStyle(.plain)
@@ -81,7 +94,7 @@ struct BazarAdminDonationsView: View {
                             Image(systemName: "tray")
                                 .font(.title2)
                                 .foregroundStyle(.secondary)
-                            Text("Aún no hay donaciones asignadas a este bazar")
+                            Text("No hay donaciones aprobadas")
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                         }
@@ -90,7 +103,6 @@ struct BazarAdminDonationsView: View {
                         List {
                             ForEach(filteredDonations, id: \.id) { donation in
                                 NavigationLink {
-                                    // Reutilizamos la vista de detalle del donante
                                     DonationDetailView(donation: donation)
                                 } label: {
                                     BazarAdminDonationRow(donation: donation)
@@ -104,6 +116,14 @@ struct BazarAdminDonationsView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            // ⚠️ Muy importante: recargar cada vez que regresamos de Configuración
+            .onAppear {
+                Task {
+                    if let bazarId = auth.bazarId {
+                        await vm.load(for: bazarId)
+                    }
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
@@ -116,18 +136,16 @@ struct BazarAdminDonationsView: View {
                 }
             }
         }
+        // Carga inicial (por si la vista aparece por primera vez)
         .task {
-            guard let bazarId = auth.bazarId else {
-                vm.error = "No tienes un bazar asignado."
-                return
+            if let bazarId = auth.bazarId {
+                await vm.load(for: bazarId)
             }
-            await vm.load(for: bazarId)
         }
     }
 }
 
-// MARK: - Row de cada donación
-
+// Row sencilla para cada donación (igual que ya la tenías)
 private struct BazarAdminDonationRow: View {
     let donation: Donation
 
@@ -195,19 +213,5 @@ private struct BazarAdminDonationRow: View {
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 6)
-    }
-}
-
-// MARK: - Preview
-
-struct BazarAdminDonationsView_Previews: PreviewProvider {
-    static var previews: some View {
-        let vm = AuthViewModel()
-        // Fake role para ver la vista en canvas
-        vm.role = "adminBazar"
-        vm.bazarId = "Alameda"
-
-        return BazarAdminDonationsView()
-            .environmentObject(vm)
     }
 }

@@ -14,9 +14,10 @@ struct BazarAdminSettingsView: View {
 
     private let azul = Color("azulMarino")
 
-
     // Alert para confirmar que se dejarán de aceptar donaciones
     @State private var showStopDonationsAlert = false
+    // Valor que el usuario intentó poner (false cuando apaga el switch)
+    @State private var pendingToggleValue: Bool? = nil
 
     var body: some View {
         NavigationStack {
@@ -54,8 +55,6 @@ struct BazarAdminSettingsView: View {
                                 .background(Color(.systemGray6))
                                 .cornerRadius(10)
                         }
-
-                        
                     }
                     .padding(.horizontal)
 
@@ -64,30 +63,36 @@ struct BazarAdminSettingsView: View {
                         Text("Operación del bazar")
                             .font(.gotham(.bold, style: .headline))
 
-                        Toggle(isOn: $vm.isAcceptingDonations) {
+                        Toggle(
+                            isOn: Binding(
+                                get: { vm.isAcceptingDonations },
+                                set: { newValue in
+                                    guard let bazarId = auth.bazarId else { return }
+
+                                    // Caso importante: estaba en true y el usuario lo apaga (true -> false)
+                                    if vm.isAcceptingDonations == true && newValue == false {
+                                        // Guardamos la intención del usuario y mostramos el alert
+                                        pendingToggleValue = newValue
+                                        showStopDonationsAlert = true
+                                    } else {
+                                        // Cualquier otro cambio (por ejemplo false -> true) se guarda directo
+                                        vm.isAcceptingDonations = newValue
+                                        Task {
+                                            await vm.save(for: bazarId)
+                                        }
+                                    }
+                                }
+                            )
+                        ) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Aceptar donaciones")
                                     .font(.gotham(.regular, style: .body))
-                                Text("¿Está seguro de que desea desactivar el estado de recepción de donaciones? Al hacerlo, el bazar dejará de aceptar nuevas donaciones hasta que el estado vuelva a activarse.")
+                                Text("Si desactivas esta opción, los donantes ya no podrán seleccionar este bazar al crear una nueva donación.")
                                     .font(.gotham(.regular, style: .caption))
                                     .foregroundStyle(.secondary)
                             }
                         }
                         .toggleStyle(SwitchToggleStyle(tint: azul))
-                        // Nuevo onChange con (oldValue, newValue) para quitar el warning
-                        .onChange(of: vm.isAcceptingDonations) { oldValue, newValue in
-                            guard let bazarId = auth.bazarId else { return }
-
-                            // Si pasan de true -> false, pedimos confirmación
-                            if oldValue == true && newValue == false {
-                                showStopDonationsAlert = true
-                            } else {
-                                // Encender o volver a true: se guarda directo
-                                Task {
-                                    await vm.save(for: bazarId)
-                                }
-                            }
-                        }
                     }
                     .padding(.horizontal)
 
@@ -120,17 +125,23 @@ struct BazarAdminSettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .task {
+            // Solo carga desde Firestore; NO dispara el alert porque
+            // el binding del Toggle solo ejecuta el setter cuando el usuario lo mueve.
             guard let bazarId = auth.bazarId else { return }
             await vm.load(for: bazarId)
         }
-        // Alert de confirmación cuando el admin apaga el switch
+        // Alert de confirmación solo cuando el admin apaga el switch
         .alert("¿Dejar de aceptar donaciones?", isPresented: $showStopDonationsAlert) {
             Button("Cancelar", role: .cancel) {
-                // Revertimos el switch a encendido
+                // Revertimos el cambio: volvemos a true
                 vm.isAcceptingDonations = true
+                pendingToggleValue = nil
             }
             Button("Confirmar", role: .destructive) {
                 guard let bazarId = auth.bazarId else { return }
+                // Aplicamos el valor pendiente (false) y guardamos
+                vm.isAcceptingDonations = pendingToggleValue ?? false
+                pendingToggleValue = nil
                 Task {
                     await vm.save(for: bazarId)
                 }
