@@ -110,9 +110,6 @@ struct AdminDonationDetailView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal)
-                .sheet(isPresented: $showAllPhotos) {
-                    AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
-                }
                 
                 // MARK: - Información (título, descripción corta, estado)
                 VStack(alignment: .leading, spacing: 15) {
@@ -207,6 +204,9 @@ struct AdminDonationDetailView: View {
         }
         .navigationTitle("Detalle")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showAllPhotos) {
+            AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
+        }
         .alert("Error", isPresented: .init(get: { vm.errorMessage != nil }, set: { _ in vm.errorMessage = nil })) {
             Button("Aceptar", role: .cancel) { }
         } message: {

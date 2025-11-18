@@ -117,11 +117,6 @@ struct DonationDetailView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     
-                    // Sheet con todas las fotos
-                    .sheet(isPresented: $showAllPhotos) {
-                        AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
-                    }
-                    
                     // MARK: - Info de la donación
                     VStack(alignment: .leading, spacing: 15) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -288,6 +283,9 @@ struct DonationDetailView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showAllPhotos) {
+                AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
+            }
         }
         .task {
             await viewModel.loadBazarDetails()
