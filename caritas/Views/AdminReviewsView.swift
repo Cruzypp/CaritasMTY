@@ -23,26 +23,42 @@ struct AdminReviewsView: View {
     }
 
     @State private var selection: Filter = .all
+    @State private var showSettings = false          // <- sheet de Configuración
 
     var body: some View {
         TabView(selection: $selection) {
-            ReviewsScreen(filter: .all, vm: vm)
+            ReviewsScreen(filter: .all,
+                          vm: vm,
+                          showSettings: $showSettings)
                 .tabItem { Label("Todas", systemImage: "tray") }
                 .tag(Filter.all)
 
-            ReviewsScreen(filter: .pending, vm: vm)
+            ReviewsScreen(filter: .pending,
+                          vm: vm,
+                          showSettings: $showSettings)
                 .tabItem { Label("Pendientes", systemImage: "clock.badge.exclamationmark") }
                 .tag(Filter.pending)
 
-            ReviewsScreen(filter: .approved, vm: vm)
+            ReviewsScreen(filter: .approved,
+                          vm: vm,
+                          showSettings: $showSettings)
                 .tabItem { Label("Aprobadas", systemImage: "checkmark.seal") }
                 .tag(Filter.approved)
 
-            ReviewsScreen(filter: .rejected, vm: vm)
+            ReviewsScreen(filter: .rejected,
+                          vm: vm,
+                          showSettings: $showSettings)
                 .tabItem { Label("Rechazadas", systemImage: "xmark.seal") }
                 .tag(Filter.rejected)
         }
         .task { await vm.loadAll() }
+        // 🔥 Configuración como SHEET a pantalla completa (tapa el TabView)
+        .sheet(isPresented: $showSettings) {
+            NavigationStack {
+                AdminSettingsView()
+                    .environmentObject(auth)
+            }
+        }
     }
 }
 
@@ -51,6 +67,8 @@ private struct ReviewsScreen: View {
     let filter: AdminReviewsView.Filter
     @ObservedObject var vm: AdminReviewsVM
     @EnvironmentObject var auth: AuthViewModel
+
+    @Binding var showSettings: Bool          // <- viene del padre
 
     private let azul  = Color("azulMarino")
 
@@ -62,6 +80,7 @@ private struct ReviewsScreen: View {
         case .rejected:  return vm.donations.filter { ($0.status ?? "").lowercased() == "rejected" }
         }
     }
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
@@ -120,14 +139,9 @@ private struct ReviewsScreen: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // Botón de logout en esquina superior derecha (menú con engrane)
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(role: .destructive) {
-                            auth.signOut()
-                        } label: {
-                            Label("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right")
-                        }
+                    Button {
+                        showSettings = true        // <- abre el sheet
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.title2.bold())
@@ -149,7 +163,8 @@ private struct AdminDonationRow: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(.systemGray6))
 
-                if let first = donation.photoUrls?.first, let url = URL(string: first) {
+                if let first = donation.photoUrls?.first,
+                   let url = URL(string: first) {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
@@ -158,10 +173,8 @@ private struct AdminDonationRow: View {
                                 .scaledToFill()
                                 .frame(width: 56, height: 56)
                                 .clipped()
-
                         case .empty:
                             ProgressView()
-
                         default:
                             Image(systemName: "photo.on.rectangle.angled")
                                 .foregroundStyle(.secondary)
@@ -236,7 +249,6 @@ final class AdminReviewsVM: ObservableObject {
             donations = try await FirestoreService.shared.fetchDonations()
             self.error = nil
         } catch {
-            // ⚠️ Evita sombrear la propiedad con la constante local del catch
             self.error = (error as NSError).localizedDescription
         }
     }
