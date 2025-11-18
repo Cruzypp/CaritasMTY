@@ -72,6 +72,12 @@ final class DonateViewModel: ObservableObject {
             return false
         }
         
+        // Debe haber un bazar seleccionado
+        guard selectedBazarId != nil && !selectedBazarId!.trimmingCharacters(in: .whitespaces).isEmpty else {
+            errorMessage = "Selecciona un bazar de entrega"
+            return false
+        }
+        
         return true
     }
     
