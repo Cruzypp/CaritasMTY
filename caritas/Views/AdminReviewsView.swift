@@ -9,10 +9,19 @@ import SwiftUI
 import Combine
 import FirebaseFirestore
 
-// MARK: - View (contenedor con TabView abajo)
+// MARK: - Helper struct para mantener el documentID
+struct DonationWithId {
+    let donation: Donation
+    let documentId: String
+    
+    var uniqueId: String { 
+        // Preferir donation.id si existe, sino usar documentId
+        donation.id ?? documentId
+    }
+}
 struct AdminReviewsView: View {
     @EnvironmentObject var auth: AuthViewModel
-    @StateObject private var vm = AdminReviewsViewModel()
+    @StateObject private var vm = AdminReviewsVM()
 
     enum Filter: String, CaseIterable, Identifiable, Hashable {
         case all = "Todas"
@@ -23,69 +32,77 @@ struct AdminReviewsView: View {
     }
 
     @State private var selection: Filter = .all
-    @State private var showSettings = false          // <- sheet de Configuración
+    @State private var showSettings = false
 
     var body: some View {
         TabView(selection: $selection) {
-            ReviewsScreen(filter: .all,
+            ReviewsScreen(filter: Filter.all,
                           vm: vm,
                           showSettings: $showSettings)
                 .tabItem { Label("Todas", systemImage: "tray") }
                 .tag(Filter.all)
 
-            ReviewsScreen(filter: .pending,
+            ReviewsScreen(filter: Filter.pending,
                           vm: vm,
                           showSettings: $showSettings)
                 .tabItem { Label("Pendientes", systemImage: "clock.badge.exclamationmark") }
                 .tag(Filter.pending)
 
-            ReviewsScreen(filter: .approved,
+            ReviewsScreen(filter: Filter.approved,
                           vm: vm,
                           showSettings: $showSettings)
                 .tabItem { Label("Aprobadas", systemImage: "checkmark.seal") }
                 .tag(Filter.approved)
 
-            ReviewsScreen(filter: .rejected,
+            ReviewsScreen(filter: Filter.rejected,
                           vm: vm,
                           showSettings: $showSettings)
                 .tabItem { Label("Rechazadas", systemImage: "xmark.seal") }
                 .tag(Filter.rejected)
         }
-        .task { await vm.loadAll() }
+        .task {
+            await vm.initialize()
+        }
         // 🔥 Configuración como SHEET a pantalla completa (tapa el TabView)
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 AdminSettingsView()
                     .environmentObject(auth)
-        .onDisappear {
-            Task {
-                vm.stopListening()
             }
         }
     }
 }
 
 // MARK: - Pantalla filtrada
-private struct ReviewsScreen: View {
+struct ReviewsScreen: View {
     let filter: AdminReviewsView.Filter
-    @ObservedObject var vm: AdminReviewsViewModel
+    @ObservedObject var vm: AdminReviewsVM
     @EnvironmentObject var auth: AuthViewModel
 
-    @Binding var showSettings: Bool          // <- viene del padre
-
-    private let azul  = Color("azulMarino")
-
-    private var filtered: [Donation] {
-        switch filter {
-        case .all:       return vm.donations
-        case .pending:   return vm.donations.filter { ($0.status ?? "pending").lowercased() == "pending" }
-        case .approved:  return vm.donations.filter { ($0.status ?? "").lowercased() == "approved" }
-        case .rejected:  return vm.donations.filter { ($0.status ?? "").lowercased() == "rejected" }
-        }
-    }
+    @Binding var showSettings: Bool
 
     var body: some View {
-        NavigationStack {
+        let azul  = Color("azulMarino")
+
+        let filtered: [DonationWithId] = {
+            let allDonations = vm.donations
+            let statusFiltered: [DonationWithId]
+            
+            switch filter {
+            case .all:
+                statusFiltered = allDonations
+            case .pending:
+                statusFiltered = allDonations.filter { ($0.donation.status ?? "pending").lowercased() == "pending" }
+            case .approved:
+                statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "approved" }
+            case .rejected:
+                statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "rejected" }
+            }
+            
+            return statusFiltered
+        }()
+
+        return NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Revisiones")
                     .font(.largeTitle.bold())
@@ -125,18 +142,17 @@ private struct ReviewsScreen: View {
 
                     } else {
                         List {
-                            ForEach(filtered, id: \.id) { donation in
+                            ForEach(filtered, id: \.documentId) { item in
                                 NavigationLink {
-                                    AdminDonationDetailView(donation: donation)
+                                    AdminDonationDetailView(donation: item.donation, donationId: item.documentId)
                                 } label: {
-                                    AdminDonationRow(donation: donation)
+                                    AdminDonationRow(donation: item.donation)
                                 }
                                 .buttonStyle(.plain)
                                 .listRowSeparator(.hidden)
                             }
                         }
                         .listStyle(.plain)
-                        .refreshable { await vm.loadAll() }
                     }
                 }
             }
@@ -144,7 +160,7 @@ private struct ReviewsScreen: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        showSettings = true        // <- abre el sheet
+                        showSettings = true
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.title2.bold())
@@ -221,7 +237,7 @@ private struct AdminDonationRow: View {
 // MARK: - Badge
 private struct StatusBadge: View {
     let status: String
-    private var config: (text: String, color: Color) {
+    var config: (text: String, color: Color) {
         switch status.lowercased() {
         case "approved": return ("Aprobada", .green.opacity(0.15))
         case "rejected": return ("Rechazada", .red.opacity(0.15))
@@ -240,19 +256,84 @@ private struct StatusBadge: View {
 // MARK: - ViewModel
 @MainActor
 final class AdminReviewsVM: ObservableObject {
-    @Published var donations: [Donation] = []
+    @Published var donations: [DonationWithId] = []
     @Published var isLoading: Bool = false
-    @Published var error: String?
+    @Published var errorMessage: String?
 
-    func loadAll() async {
+    private var listener: ListenerRegistration?
+    private var isInitialized = false
+
+    init() {
+        // Initialize with empty values
+    }
+
+    func initialize() async {
+        guard !isInitialized else { return }
+        isInitialized = true
+        
         isLoading = true
-        defer { isLoading = false }
-
+        
         do {
-            donations = try await FirestoreService.shared.fetchDonations()
-            self.error = nil
+            // Cargar donaciones iniciales - pero necesitamos el documentID
+            // Por eso usaremos directamente el listener
+            startListening()
         } catch {
-            self.error = (error as NSError).localizedDescription
+            errorMessage = (error as NSError).localizedDescription
+        }
+        
+        isLoading = false
+    }
+
+    func startListening() {
+        // No inicializa si ya hay un listener activo
+        guard listener == nil else { return }
+        
+        listener = Firestore.firestore().collection("donations")
+            .addSnapshotListener { [weak self] snapshot, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        self?.errorMessage = error.localizedDescription
+                        return
+                    }
+                    
+                    guard let snapshot = snapshot else { return }
+                    
+                    // Crear array con documentID incluido
+                    var donationsWithId: [DonationWithId] = []
+                    
+                    for doc in snapshot.documents {
+                        if var donation = try? doc.data(as: Donation.self) {
+                            // Si el donation no tiene id, asignar el documentID
+                            if donation.id == nil {
+                                donation.id = doc.documentID
+                            }
+                            donationsWithId.append(
+                                DonationWithId(donation: donation, documentId: doc.documentID)
+                            )
+                        }
+                    }
+                    
+                    // Ordenar por fecha descendente
+                    donationsWithId.sort { 
+                        let date0 = ($0.donation.day?.dateValue() ?? Date.distantPast).timeIntervalSince1970
+                        let date1 = ($1.donation.day?.dateValue() ?? Date.distantPast).timeIntervalSince1970
+                        return date0 > date1
+                    }
+                    
+                    self?.donations = donationsWithId
+                    self?.errorMessage = nil
+                }
+            }
+    }
+
+    func stopListening() {
+        listener?.remove()
+        listener = nil
+    }
+
+    deinit {
+        DispatchQueue.main.async { [weak self] in
+            self?.stopListening()
         }
     }
 }
