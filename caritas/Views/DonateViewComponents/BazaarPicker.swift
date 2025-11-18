@@ -50,6 +50,7 @@ struct BazaarPicker: View {
                                         // Solo permitimos seleccionar si sí acepta donaciones
                                         withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
                                             selectedOption = option
+                                            donateViewModel.selectedBazarId = option.id
                                         }
                                     } else {
                                         // Mostramos alerta si no acepta
