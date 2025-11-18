@@ -115,9 +115,8 @@ struct HomeView: View {
                             .font(.title2.bold())
                             .foregroundStyle(.gray)
                             .frame(width: 50, height: 50)
-                            .background(Color.white.opacity(0.9))
-                            .clipShape(Circle())
-                            .shadow(radius: 3)
+                           
+                           
                     }
                     .accessibilityLabel("Cerrar sesión")
                 }
