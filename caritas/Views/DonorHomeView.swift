@@ -29,8 +29,7 @@ struct DonorHomeView: View {
     ]
     
     var body: some View {
-        ZStack{
-            
+        ZStack {
             GradientBackgroundView()
             
             ScrollView {
@@ -39,15 +38,16 @@ struct DonorHomeView: View {
                     // LOGO + TITULAR
                     VStack(spacing: 12) {
                         // Centrado del logo
-                        HStack { Spacer()
+                        HStack {
+                            Spacer()
                             Image("Logito")
                                 .renderingMode(.template)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 400)
                                 .foregroundStyle(.white)
-                            
-                            Spacer() }
+                            Spacer()
+                        }
                         Text("Cáritas de Monterrey, A.B.P.")
                             .font(.gotham(.bold, style: .title2))
                             .foregroundStyle(.white)
@@ -60,10 +60,12 @@ struct DonorHomeView: View {
                         .multilineTextAlignment(.center)
                     }
                     
-                    
                     // HIGHLIGHTS
                     LazyVGrid(
-                        columns: [.init(.flexible(), spacing: 16, alignment: .trailing), .init(.flexible(), spacing: 16, alignment: .leading)],
+                        columns: [
+                            .init(.flexible(), spacing: 16, alignment: .trailing),
+                            .init(.flexible(), spacing: 16, alignment: .leading)
+                        ],
                         spacing: 15
                     ) {
                         ForEach(highlights, id: \.title) { h in
@@ -134,24 +136,31 @@ struct DonorHomeView: View {
                             .font(.gotham(.bold, style: .body))
                             .foregroundStyle(brand.primary)
                         
-                        LazyVGrid(columns:
-                                    [.init(.flexible(), alignment: .leading),
-                                     .init(.flexible(), alignment: .leading)], spacing: 4) {
-                                         ForEach(["Caridad", "Espiritualidad", "Servicio", "Humildad", "Respeto", "Profesionalismo", "Mejora continua"], id: \.self) { item in
-                                             HStack(spacing: 4) {
-                                                 Circle()
-                                                     .fill(brand.accent)
-                                                     .frame(width: 6, height: 6)
-                                                 Text(item)
-                                                     .font(.gotham(.regular, style: .subheadline))
-                                                     .foregroundStyle(.secondary)
-                                                     .lineLimit(2)
-                                                     .padding(.leading, 10)
-                                             }
-                                             .shadow(radius: 1)
-                                             .frame(height: 30)
-                                         }
-                                     }
+                        LazyVGrid(
+                            columns: [
+                                .init(.flexible(), alignment: .leading),
+                                .init(.flexible(), alignment: .leading)
+                            ],
+                            spacing: 4
+                        ) {
+                            ForEach(
+                                ["Caridad", "Espiritualidad", "Servicio", "Humildad", "Respeto", "Profesionalismo", "Mejora continua"],
+                                id: \.self
+                            ) { item in
+                                HStack(spacing: 4) {
+                                    Circle()
+                                        .fill(brand.accent)
+                                        .frame(width: 6, height: 6)
+                                    Text(item)
+                                        .font(.gotham(.regular, style: .subheadline))
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                        .padding(.leading, 10)
+                                }
+                                .shadow(radius: 1)
+                                .frame(height: 30)
+                            }
+                        }
                     }
                     .frame(width: 300, height: 160, alignment: .topLeading)
                     .padding(16)
@@ -177,14 +186,14 @@ struct DonorHomeView: View {
                     .padding(.bottom, 24)
                     .shadow(radius: 1)
                     
-                    // Botón OK para ir a HomeView
+                    // Botón Aceptar para ir a HomeView
                     Button(action: {
                         showHomeView = true
                     }) {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.headline)
-                            Text("OK")
+                            Text("Aceptar")
                                 .font(.gotham(.bold, style: .headline))
                         }
                         .foregroundColor(.white)
@@ -193,14 +202,12 @@ struct DonorHomeView: View {
                         .background(Color.azulMarino)
                         .cornerRadius(12)
                     }
-                    .shadow(color:.white, radius: 2, x: -1)
+                    .shadow(color: .white, radius: 2, x: -1)
                     .padding(.horizontal, 40)
                     .padding(.bottom, 24)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .background(.clear)
             }
-            .background(.clear)
             .fullScreenCover(isPresented: $showHomeView) {
                 HomeView()
             }

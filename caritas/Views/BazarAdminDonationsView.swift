@@ -8,6 +8,7 @@ struct BazarAdminDonationsView: View {
     @StateObject private var vm = BazarAdminDonationsVM()
 
     @State private var searchText: String = ""
+    @FocusState private var searchFocused: Bool
 
     private let azul = Color("azulMarino")
 
@@ -60,6 +61,11 @@ struct BazarAdminDonationsView: View {
                         .foregroundColor(.gray)
                     TextField("Buscar donación…", text: $searchText)
                         .font(.gotham(.regular, style: .body))
+                        .textFieldStyle(.plain)
+                        .autocorrectionDisabled()
+                        .focused($searchFocused)
+                        .submitLabel(.search)
+                        .onSubmit { searchFocused = false }
                 }
                 .padding()
                 .background(Color(.systemGray6))
@@ -75,7 +81,7 @@ struct BazarAdminDonationsView: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title2)
                                 .foregroundStyle(.red)
-                            Text("Error al cargar")
+                            Text("Error al cargar donaciones")
                                 .font(.headline)
                             Text(err)
                                 .font(.caption)

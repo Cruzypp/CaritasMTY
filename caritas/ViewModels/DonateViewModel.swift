@@ -15,6 +15,7 @@ final class DonateViewModel: ObservableObject {
     @Published var description: String = ""
     @Published var selectedCategories: [String] = []
     @Published var selectedBazarId: String? = nil
+    @Published var needsTransportHelp: Bool = false
     
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
@@ -61,7 +62,7 @@ final class DonateViewModel: ObservableObject {
         
         // El título no puede estar vacío
         guard !title.trimmingCharacters(in: .whitespaces).isEmpty else {
-            errorMessage = "El título es requerido"
+            errorMessage = "El título es obligatorio"
             return false
         }
         
@@ -91,7 +92,8 @@ final class DonateViewModel: ObservableObject {
                 description: description,
                 categoryText: selectedCategories.joined(separator: ", "),
                 bazarId: bazarId,
-                photoUrls: []
+                photoUrls: [],
+                needsTransportHelp: needsTransportHelp
             )
             
             // 2. Subir las imágenes a Storage
@@ -109,11 +111,11 @@ final class DonateViewModel: ObservableObject {
             )
             
             // ✅ Éxito
-            successMessage = "¡Donación subida exitosamente!"
+            successMessage = "¡Donación enviada exitosamente!"
             resetForm()
             
         } catch {
-            errorMessage = "Error al subir donación: \(error.localizedDescription)"
+            errorMessage = "Error al enviar la donación: \(error.localizedDescription)"
             print("Error en submitDonation: \(error)")
         }
         
@@ -126,6 +128,7 @@ final class DonateViewModel: ObservableObject {
         title = ""
         description = ""
         selectedCategories = []
+        needsTransportHelp = false
     }
     
     /// Agrega o quita una categoría

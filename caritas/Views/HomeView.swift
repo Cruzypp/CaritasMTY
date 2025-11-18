@@ -54,6 +54,8 @@ struct HomeView: View {
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
                         .focused($searchFocused)
+                        .submitLabel(.search)
+                        .onSubmit { searchFocused = false }
                 }
                 .padding()
                 .background(Color(.systemGray6))

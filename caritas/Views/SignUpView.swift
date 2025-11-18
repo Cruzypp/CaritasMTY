@@ -16,6 +16,12 @@ struct SignUpView: View {
     @State private var password = ""
     @State private var acceptPolicies = false
 
+    @FocusState private var focusedField: Field?
+    enum Field {
+        case email
+        case password
+    }
+
     private var canRegister: Bool { !email.isEmpty && !password.isEmpty && acceptPolicies }
 
     var body: some View {
@@ -49,6 +55,9 @@ struct SignUpView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.emailAddress)
+                        .focused($focusedField, equals: .email)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .password }
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -60,6 +69,9 @@ struct SignUpView: View {
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
+                        .focused($focusedField, equals: .password)
+                        .submitLabel(.done)
+                        .onSubmit { focusedField = nil }
                 }
             }
             .padding(.horizontal, 32)
