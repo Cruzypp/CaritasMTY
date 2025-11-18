@@ -34,17 +34,26 @@ struct SubmitButtonSection: View {
             }
         }
     }
+    
+    private func validateAndSubmit() {
+        // Validación rápida del bazar antes de proceder
+        guard viewModel.selectedBazarId != nil && !viewModel.selectedBazarId!.trimmingCharacters(in: .whitespaces).isEmpty else {
+            viewModel.errorMessage = "Selecciona un bazar de entrega"
+            showErrorAlert = true
+            return
+        }
+        
+        if needsTransportScreen {
+            // Mostrar modal de transporte
+            showTransportModal = true
+        } else {
+            // Enviar directamente
+            submitDonation()
+        }
+    }
 
     var body: some View {
-        Button(action: {
-            if needsTransportScreen {
-                // Mostrar modal de transporte
-                showTransportModal = true
-            } else {
-                // Enviar directamente
-                submitDonation()
-            }
-        }) {
+        Button(action: validateAndSubmit) {
             HStack {
                 if viewModel.isLoading {
                     ProgressView()
