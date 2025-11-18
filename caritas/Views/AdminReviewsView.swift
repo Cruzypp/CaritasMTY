@@ -12,7 +12,7 @@ import FirebaseFirestore
 // MARK: - View (contenedor con TabView abajo)
 struct AdminReviewsView: View {
     @EnvironmentObject var auth: AuthViewModel
-    @StateObject private var vm = AdminReviewsVM()
+    @StateObject private var vm = AdminReviewsViewModel()
 
     enum Filter: String, CaseIterable, Identifiable, Hashable {
         case all = "Todas"
@@ -43,13 +43,18 @@ struct AdminReviewsView: View {
                 .tag(Filter.rejected)
         }
         .task { await vm.loadAll() }
+        .onDisappear {
+            Task {
+                vm.stopListening()
+            }
+        }
     }
 }
 
 // MARK: - Pantalla filtrada
 private struct ReviewsScreen: View {
     let filter: AdminReviewsView.Filter
-    @ObservedObject var vm: AdminReviewsVM
+    @ObservedObject var vm: AdminReviewsViewModel
     @EnvironmentObject var auth: AuthViewModel
 
     private let azul  = Color("azulMarino")
@@ -76,7 +81,7 @@ private struct ReviewsScreen: View {
                     if vm.isLoading {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let err = vm.error {
+                    } else if let err = vm.errorMessage {
                         VStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title2)

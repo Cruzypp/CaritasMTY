@@ -15,33 +15,67 @@ final class AdminReviewsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    private var lastSnapshot: DocumentSnapshot? = nil
-    private let pageSize = 20
+    private var donationsListener: ListenerRegistration?
+    private let db = Firestore.firestore()
 
     func loadAll() async {
         isLoading = true
         errorMessage = nil
-        lastSnapshot = nil
-        do {
-            let (donations, lastDoc) = try await FirestoreService.shared.pendingDonationsPaginated(limit: pageSize)
-            self.donations = donations
-            self.lastSnapshot = lastDoc
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        
         isLoading = false
+        
+        // Configurar listener en tiempo real
+        setupDonationsListener()
     }
     
-    func loadMore() async {
-        guard let lastDoc = lastSnapshot else { return }
-        isLoading = true
-        do {
-            let (donations, lastDoc) = try await FirestoreService.shared.pendingDonationsPaginated(limit: pageSize, startAfter: lastDoc)
-            self.donations.append(contentsOf: donations)
-            self.lastSnapshot = lastDoc
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
+    private func setupDonationsListener() {
+        // Detener listener anterior si existe
+        donationsListener?.remove()
+        
+        // Configurar nuevo listener para TODAS las donaciones (sin filtro de status)
+        donationsListener = db.collection("donations")
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error en listener: \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("No hay documentos en snapshot")
+                    return
+                }
+                
+                print("Se recibieron \(documents.count) documentos totales")
+                
+                // Convertir documentos a Donation objects
+                var allDonations: [Donation] = []
+                for doc in documents {
+                    let donation = Donation.from(doc: doc)
+                    allDonations.append(donation)
+                }
+                
+                // Ordenar por fecha descendente
+                var sortedDonations = allDonations
+                sortedDonations.sort { (a, b) -> Bool in
+                    let ta = a.day?.dateValue() ?? .distantPast
+                    let tb = b.day?.dateValue() ?? .distantPast
+                    return ta > tb
+                }
+                
+                self.donations = sortedDonations
+                self.errorMessage = nil
+            }
+    }
+    
+    func stopListening() {
+        donationsListener?.remove()
+        donationsListener = nil
+    }
+    
+    deinit {
+        donationsListener?.remove()
     }
 }
