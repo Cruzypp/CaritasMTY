@@ -75,6 +75,8 @@ struct AllPhotosSheetView: View {
                 }
             }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }
 

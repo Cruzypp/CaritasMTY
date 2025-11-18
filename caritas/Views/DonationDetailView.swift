@@ -68,7 +68,7 @@ struct DonationDetailView: View {
                                                     image
                                                         .resizable()
                                                         .scaledToFill()
-                                                        .frame(width: 180, height: 150)
+                                                        .frame(width: 176, height: 140)
                                                         .clipped()
                                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                                         
@@ -80,7 +80,7 @@ struct DonationDetailView: View {
                                                             .scaledToFit()
                                                             .frame(width: 50, height: 50)
                                                     }
-                                                    .frame(height: 150)
+                                                    .frame(height: 140)
                                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                                                     
                                                 case .empty:
@@ -88,7 +88,7 @@ struct DonationDetailView: View {
                                                         Color(.systemGray6)
                                                         ProgressView()
                                                     }
-                                                    .frame(height: 150)
+                                                    .frame(height: 140)
                                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                                                     
                                                 @unknown default:
@@ -108,7 +108,7 @@ struct DonationDetailView: View {
                                                 .font(.gotham(.bold, style: .title2))
                                                 .foregroundColor(.white)
                                         }
-                                        .frame(height: 150)
+                                        .frame(height: 140)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                     }
                                 }
@@ -116,11 +116,6 @@ struct DonationDetailView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    // Sheet con todas las fotos
-                    .sheet(isPresented: $showAllPhotos) {
-                        AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
-                    }
                     
                     // MARK: - Info de la donación
                     VStack(alignment: .leading, spacing: 15) {
@@ -288,6 +283,9 @@ struct DonationDetailView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showAllPhotos) {
+                AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
+            }
         }
         .task {
             await viewModel.loadBazarDetails()
