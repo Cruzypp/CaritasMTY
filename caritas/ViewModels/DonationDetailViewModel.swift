@@ -22,6 +22,19 @@ final class DonationDetailViewModel: ObservableObject {
     init(donation: Donation, isPreview: Bool = false) {
         self.donation = donation
         self.isPreview = isPreview
+        
+        // Si es preview, asignar un bazar dummy
+        if isPreview {
+            self.bazar = Bazar(
+                id: "bazar-dummy",
+                address: "Av. Alameda 123, Ciudad de México",
+                location: "Alameda Centro",
+                nombre: "Bazar Alameda",
+                latitude: 19.4326,
+                longitude: -99.1332,
+                telefono: "+52 1 55 1234 5678"
+            )
+        }
     }
     
     func loadBazarDetails() async {

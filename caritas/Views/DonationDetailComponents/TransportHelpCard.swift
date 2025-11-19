@@ -52,7 +52,7 @@ struct TransportHelpCard: View {
                     Divider()
                     
                     VStack(spacing: 8) {
-                        Text("Contacto de ayuda:")
+                        Text("Comunicarse al número:")
                             .font(.gotham(.bold, style: .caption))
                             .foregroundColor(.secondary)
                         
