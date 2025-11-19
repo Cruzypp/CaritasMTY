@@ -12,13 +12,16 @@ import Combine
 
 struct AdminDonationDetailView: View {
     let donation: Donation
+    let donationId: String
     @StateObject private var vm: AdminDonationDetailVM
     @State private var selectedImageIndex: Int = 0
     @State private var showAllPhotos: Bool = false
     
-    init(donation: Donation) {
+    init(donation: Donation, donationId: String = "") {
         self.donation = donation
-        _vm = StateObject(wrappedValue: AdminDonationDetailVM(donation: donation))
+        let finalId = donationId.isEmpty ? (donation.id ?? "") : donationId
+        self.donationId = finalId
+        _vm = StateObject(wrappedValue: AdminDonationDetailVM(donation: donation, donationId: finalId))
     }
     
     // Colores desde Assets
@@ -171,7 +174,7 @@ struct AdminDonationDetailView: View {
                     } label: {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
-                            Text(vm.isWorking ? "Aprobando..." : "APROBAR")
+                            Text(vm.isWorkingApprove ? "Aprobando..." : "APROBAR")
                                 .fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity)
@@ -180,14 +183,14 @@ struct AdminDonationDetailView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .disabled(vm.isWorking)
+                    .disabled(vm.isWorkingApprove || vm.isWorkingReject)
                     
                     Button(role: .destructive) {
                         Task { await vm.updateStatus(to: "rejected") }
                     } label: {
                         HStack {
                             Image(systemName: "xmark.circle.fill")
-                            Text(vm.isWorking ? "Rechazando..." : "RECHAZAR")
+                            Text(vm.isWorkingReject ? "Rechazando..." : "RECHAZAR")
                                 .fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity)
@@ -196,7 +199,7 @@ struct AdminDonationDetailView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .disabled(vm.isWorking)
+                    .disabled(vm.isWorkingApprove || vm.isWorkingReject)
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 24)
@@ -258,21 +261,43 @@ struct AdminDonationDetailView: View {
 final class AdminDonationDetailVM: ObservableObject {
     @Published var donation: Donation
     @Published var adminComment: String = ""
-    @Published var isWorking = false
+    @Published var isWorkingApprove = false
+    @Published var isWorkingReject = false
     @Published var errorMessage: String?
     @Published var toast: String?
     
-    init(donation: Donation) {
+    private let donationId: String
+    
+    init(donation: Donation, donationId: String) {
         self.donation = donation
+        self.donationId = donationId
     }
     
     func updateStatus(to status: String) async {
-        guard let id = donation.id else { return }
-        isWorking = true; defer { isWorking = false }
+        // Determinar cuál estado estamos procesando
+        if status == "approved" {
+            isWorkingApprove = true
+        } else {
+            isWorkingReject = true
+        }
+        
+        defer {
+            if status == "approved" {
+                isWorkingApprove = false
+            } else {
+                isWorkingReject = false
+            }
+        }
+        
+        guard !donationId.isEmpty else {
+            errorMessage = "Error: No se puede obtener el ID de la donación"
+            return
+        }
+        
         do {
             let reviewer = Auth.auth().currentUser?.uid ?? "unknown"
             try await FirestoreService.shared.setDonationStatus(
-                donationId: id,
+                donationId: donationId,
                 status: status,
                 reviewerId: reviewer
             )
@@ -280,7 +305,7 @@ final class AdminDonationDetailVM: ObservableObject {
             let trimmed = adminComment.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 try await FirestoreService.shared.setAdminComment(
-                    donationId: id,
+                    donationId: donationId,
                     comment: trimmed
                 )
             }
