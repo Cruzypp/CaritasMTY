@@ -2,26 +2,31 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.467076245799-0ip4jl7k8m33jqqtioh5bra5d7p3duet</string>
-			</array>
-		</dict>
-	</array>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Gotham-Ultra.otf</string>
-		<string>Gotham-Thin.otf</string>
-		<string>Gotham-Bold.otf</string>
-		<string>Gotham-Light.otf</string>
-		<string>Gotham-Regular.otf</string>
-	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>Esta app necesita acceso a la cámara para tomar fotos.</string>
+    <!-- URL schemes de Google -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.467076245799-0ip4jl7k8m33jqqtioh5bra5d7p3duet</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Tus fuentes -->
+    <key>UIAppFonts</key>
+    <array>
+        <string>Gotham-Ultra.otf</string>
+        <string>Gotham-Thin.otf</string>
+        <string>Gotham-Bold.otf</string>
+        <string>Gotham-Light.otf</string>
+        <string>Gotham-Regular.otf</string>
+    </array>
+
+    <!-- Launch screen usando storyboard -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
 </dict>
 </plist>
