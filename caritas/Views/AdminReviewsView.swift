@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 import FirebaseFirestore
 
-// MARK: - Helper struct para mantener el documentID
+// MARK: - Helper struct para mantener el documentID (De Main)
 struct DonationWithId: Identifiable, Hashable {
     let donation: Donation
     let documentId: String
@@ -33,15 +33,16 @@ struct AdminReviewsView: View {
     @StateObject private var vm = AdminReviewsVM()
 
     enum Filter: String, CaseIterable, Identifiable, Hashable {
-        case all = "Todas"
-        case pending = "Pendientes"
+        case all      = "Todas"
+        case pending  = "Pendientes"
         case approved = "Aprobadas"
         case rejected = "Rechazadas"
+
         var id: String { rawValue }
     }
 
     @State private var selection: Filter = .all
-    @State private var showSettings = false
+    @State private var showSettings = false      // sheet de Configuración
 
     var body: some View {
         TabView(selection: $selection) {
@@ -69,14 +70,21 @@ struct AdminReviewsView: View {
                 .tabItem { Label("Rechazadas", systemImage: "xmark.seal") }
                 .tag(Filter.rejected)
         }
+        // Se prioriza el initialize() asíncrono de Main
         .task {
             await vm.initialize()
         }
-        // 🔥 Configuración como SHEET a pantalla completa (tapa el TabView)
+        // Configuración como SHEET a pantalla completa
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 AdminSettingsView()
                     .environmentObject(auth)
+            }
+        }
+        // Detener listeners al salir (De Main)
+        .onDisappear {
+            Task {
+                vm.stopListening()
             }
         }
     }
@@ -90,12 +98,14 @@ struct ReviewsScreen: View {
 
     @Binding var showSettings: Bool
 
-    // Estado para navegación programática (sin chevron)
+    // Estado para navegación programática (De Main)
     @State private var selected: DonationWithId?
+    
+    // Variable de color (Restaurada de Sprint 1, movida localmente)
+    private let azul = Color("azulMarino")
 
     var body: some View {
-        let azul  = Color("azulMarino")
-
+        // Lógica de filtrado usando DonationWithId (De Main)
         let filtered: [DonationWithId] = {
             let allDonations = vm.donations
             let statusFiltered: [DonationWithId]
@@ -127,6 +137,7 @@ struct ReviewsScreen: View {
                     if vm.isLoading {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                     } else if let err = vm.errorMessage {
                         VStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle")
@@ -197,7 +208,7 @@ struct ReviewsScreen: View {
     }
 }
 
-// MARK: - ViewModel
+// MARK: - ViewModel (Implementación Main con Listeners)
 @MainActor
 final class AdminReviewsVM: ObservableObject {
     @Published var donations: [DonationWithId] = []
@@ -276,7 +287,28 @@ final class AdminReviewsVM: ObservableObject {
     }
 }
 
-// MARK: - Preview
+// MARK: - Badge (Conservado de Sprint 1)
+private struct StatusBadge: View {
+    let status: String
+
+    private var config: (text: String, color: Color) {
+        switch status.lowercased() {
+        case "approved": return ("Aprobada", .green.opacity(0.15))
+        case "rejected": return ("Rechazada", .red.opacity(0.15))
+        default:         return ("Pendiente", .orange.opacity(0.15))
+        }
+    }
+
+    var body: some View {
+        Text(config.text)
+            .font(.caption.weight(.semibold))
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .background(Capsule().fill(config.color))
+    }
+}
+
+// MARK: - Preview (Conservado de Main)
 #if DEBUG
 private extension AdminReviewsVM {
     static func previewPopulated() -> AdminReviewsVM {
