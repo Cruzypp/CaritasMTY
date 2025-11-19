@@ -124,6 +124,11 @@ struct BazarAdminDonationsView: View {
                     }
                 }
             }
+            .onDisappear {
+                Task {
+                    vm.stopListening()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
