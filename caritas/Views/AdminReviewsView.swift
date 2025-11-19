@@ -10,15 +10,24 @@ import Combine
 import FirebaseFirestore
 
 // MARK: - Helper struct para mantener el documentID
-struct DonationWithId {
+struct DonationWithId: Identifiable, Hashable {
     let donation: Donation
     let documentId: String
     
-    var uniqueId: String { 
-        // Preferir donation.id si existe, sino usar documentId
+    var uniqueId: String {
         donation.id ?? documentId
     }
+    var id: String { uniqueId }
+    
+    // Hashable / Equatable basados en uniqueId
+    static func == (lhs: DonationWithId, rhs: DonationWithId) -> Bool {
+        lhs.uniqueId == rhs.uniqueId
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uniqueId)
+    }
 }
+
 struct AdminReviewsView: View {
     @EnvironmentObject var auth: AuthViewModel
     @StateObject private var vm = AdminReviewsVM()
@@ -81,6 +90,9 @@ struct ReviewsScreen: View {
 
     @Binding var showSettings: Bool
 
+    // Estado para navegación programática (sin chevron)
+    @State private var selected: DonationWithId?
+
     var body: some View {
         let azul  = Color("azulMarino")
 
@@ -103,7 +115,7 @@ struct ReviewsScreen: View {
         }()
 
         return NavigationStack {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text("Revisiones")
                     .font(.largeTitle.bold())
                     .foregroundStyle(azul)
@@ -142,17 +154,26 @@ struct ReviewsScreen: View {
 
                     } else {
                         List {
-                            ForEach(filtered, id: \.documentId) { item in
-                                NavigationLink {
-                                    AdminDonationDetailView(donation: item.donation, donationId: item.documentId)
-                                } label: {
-                                    AdminDonationRow(donation: item.donation)
+                            ForEach(filtered) { item in
+                                VStack(spacing: 8) {
+                                    Button {
+                                        selected = item
+                                    } label: {
+                                        AdminDonationRow(donation: item.donation)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    Divider()
+                                        .padding(.horizontal, 0)
+                                        .padding(.top, -10)
                                 }
-                                .buttonStyle(.plain)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 0, trailing: 16))
                                 .listRowSeparator(.hidden)
                             }
                         }
                         .listStyle(.plain)
+                        .environment(\.defaultMinListRowHeight, 44)
                     }
                 }
             }
@@ -168,88 +189,11 @@ struct ReviewsScreen: View {
                     }
                 }
             }
-        }
-    }
-}
-
-// MARK: - Row (miniatura con primera foto si existe)
-private struct AdminDonationRow: View {
-    let donation: Donation
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(.systemGray6))
-
-                if let first = donation.photoUrls?.first,
-                   let url = URL(string: first) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 56, height: 56)
-                                .clipped()
-                        case .empty:
-                            ProgressView()
-                        default:
-                            Image(systemName: "photo.on.rectangle.angled")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                } else {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .foregroundStyle(.secondary)
-                }
+            // Destino de navegación programática
+            .navigationDestination(item: $selected) { item in
+                AdminDonationDetailView(donation: item.donation, donationId: item.documentId)
             }
-            .frame(width: 56, height: 56)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(donation.title ?? "—")
-                    .font(.headline)
-
-                if let desc = donation.description, !desc.isEmpty {
-                    Text(desc)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                HStack(spacing: 8) {
-                    StatusBadge(status: donation.status ?? "pending")
-                    if let ts = donation.day {
-                        Text(ts.dateValue().formatted(date: .abbreviated, time: .omitted))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            Spacer()
         }
-        .padding(.vertical, 6)
-    }
-}
-
-// MARK: - Badge
-private struct StatusBadge: View {
-    let status: String
-    var config: (text: String, color: Color) {
-        switch status.lowercased() {
-        case "approved": return ("Aprobada", .green.opacity(0.15))
-        case "rejected": return ("Rechazada", .red.opacity(0.15))
-        default:         return ("Pendiente", .orange.opacity(0.15))
-        }
-    }
-    var body: some View {
-        Text(config.text)
-            .font(.caption.weight(.semibold))
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-            .background(Capsule().fill(config.color))
     }
 }
 
@@ -273,13 +217,7 @@ final class AdminReviewsVM: ObservableObject {
         
         isLoading = true
         
-        do {
-            // Cargar donaciones iniciales - pero necesitamos el documentID
-            // Por eso usaremos directamente el listener
-            startListening()
-        } catch {
-            errorMessage = (error as NSError).localizedDescription
-        }
+        startListening()
         
         isLoading = false
     }
@@ -339,7 +277,116 @@ final class AdminReviewsVM: ObservableObject {
 }
 
 // MARK: - Preview
-#Preview {
-    AdminReviewsView()
-        .environmentObject(AuthViewModel())
+#if DEBUG
+private extension AdminReviewsVM {
+    static func previewPopulated() -> AdminReviewsVM {
+        let vm = AdminReviewsVM()
+        vm.isLoading = false
+        vm.errorMessage = nil
+        vm.donations = AdminReviewsView_Previews.makeDummyDonations()
+        return vm
+    }
+    static func previewEmpty() -> AdminReviewsVM {
+        let vm = AdminReviewsVM()
+        vm.isLoading = false
+        vm.errorMessage = nil
+        vm.donations = []
+        return vm
+    }
+    static func previewLoading() -> AdminReviewsVM {
+        let vm = AdminReviewsVM()
+        vm.isLoading = true
+        vm.errorMessage = nil
+        vm.donations = []
+        return vm
+    }
+    static func previewError() -> AdminReviewsVM {
+        let vm = AdminReviewsVM()
+        vm.isLoading = false
+        vm.errorMessage = "No se pudo conectar con el servidor."
+        vm.donations = []
+        return vm
+    }
 }
+
+struct AdminReviewsView_Previews: PreviewProvider {
+    static func makeDummyDonations() -> [DonationWithId] {
+        let now = Date()
+        let urls = [
+            "https://picsum.photos/seed/1/200/200",
+            "https://picsum.photos/seed/2/200/200",
+            "https://picsum.photos/seed/3/200/200"
+        ]
+        let mk: (String, String, String, Date, [String]) -> DonationWithId = { id, status, title, date, photos in
+            let donation = Donation(
+                id: id,
+                bazarId: ["Alameda","Centro","Norte"].randomElement(),
+                categoryId: ["Ropa", "Electrodomésticos", "Muebles", "Juguetes"],
+                day: Timestamp(date: date),
+                description: "Descripción de ejemplo para \(title.lowercased()).",
+                adminComment: nil,
+                folio: "FOL-\(id)",
+                photoUrls: photos,
+                status: status,
+                title: title,
+                userId: "U-\(Int.random(in: 1...99))",
+                needsTransportHelp: Bool.random()
+            )
+            return DonationWithId(donation: donation, documentId: id)
+        }
+
+        return [
+            mk("D-001", "pending",  "Ropa de invierno", now.addingTimeInterval(-3600), [urls[0]]),
+            mk("D-002", "approved", "Silla de madera",   now.addingTimeInterval(-86400 * 1), [urls[1], urls[2]]),
+            mk("D-003", "rejected", "Juguetes varios",   now.addingTimeInterval(-86400 * 2), []),
+            mk("D-004", "pending",  "Televisor 32\"",    now.addingTimeInterval(-86400 * 3), [urls[2]]),
+            mk("D-005", "approved", "Mesa de centro",    now.addingTimeInterval(-86400 * 5), [urls[0], urls[1], urls[2]])
+        ]
+    }
+
+    static var previews: some View {
+        Group {
+            // Poblado
+            AdminReviewsViewWrapper(vm: .previewPopulated())
+                .previewDisplayName("Populado")
+
+            // Vacío
+            AdminReviewsViewWrapper(vm: .previewEmpty())
+                .previewDisplayName("Vacío")
+
+            // Cargando
+            AdminReviewsViewWrapper(vm: .previewLoading())
+                .previewDisplayName("Cargando")
+
+            // Error
+            AdminReviewsViewWrapper(vm: .previewError())
+                .previewDisplayName("Error")
+        }
+        .environmentObject(AuthViewModel())
+    }
+
+    // Wrapper para inyectar el VM de preview sin tocar la vista principal
+    private struct AdminReviewsViewWrapper: View {
+        @StateObject var vm: AdminReviewsVM
+        @State private var showSettings = false
+        @State private var selection: AdminReviewsView.Filter = .all
+
+        var body: some View {
+            TabView(selection: $selection) {
+                ReviewsScreen(filter: .all, vm: vm, showSettings: $showSettings)
+                    .tabItem { Label("Todas", systemImage: "tray") }
+                    .tag(AdminReviewsView.Filter.all)
+                ReviewsScreen(filter: .pending, vm: vm, showSettings: $showSettings)
+                    .tabItem { Label("Pendientes", systemImage: "clock.badge.exclamationmark") }
+                    .tag(AdminReviewsView.Filter.pending)
+                ReviewsScreen(filter: .approved, vm: vm, showSettings: $showSettings)
+                    .tabItem { Label("Aprobadas", systemImage: "checkmark.seal") }
+                    .tag(AdminReviewsView.Filter.approved)
+                ReviewsScreen(filter: .rejected, vm: vm, showSettings: $showSettings)
+                    .tabItem { Label("Rechazadas", systemImage: "xmark.seal") }
+                    .tag(AdminReviewsView.Filter.rejected)
+            }
+        }
+    }
+}
+#endif
