@@ -189,19 +189,6 @@ struct DonationDetailView: View {
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
-                                    
-                                    // Mensaje adicional si necesita ayuda con traslado y está aprobada
-                                    if donation.needsTransportHelp == true {
-                                        if let phone = bazar.telefono, !phone.isEmpty {
-                                            Text("Por favor contactar al número telefónico: \(phone)")
-                                                .font(.gotham(.regular, style: .callout))
-                                                .foregroundColor(.secondary)
-                                        } else {
-                                            Text("Por favor contactar al número telefónico del bazar.")
-                                                .font(.gotham(.regular, style: .callout))
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
