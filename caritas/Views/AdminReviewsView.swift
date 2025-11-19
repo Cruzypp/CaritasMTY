@@ -12,18 +12,19 @@ import FirebaseFirestore
 // MARK: - View (contenedor con TabView abajo)
 struct AdminReviewsView: View {
     @EnvironmentObject var auth: AuthViewModel
-    @StateObject private var vm = AdminReviewsViewModel()
+    @StateObject private var vm = AdminReviewsVM()
 
     enum Filter: String, CaseIterable, Identifiable, Hashable {
-        case all = "Todas"
-        case pending = "Pendientes"
+        case all      = "Todas"
+        case pending  = "Pendientes"
         case approved = "Aprobadas"
         case rejected = "Rechazadas"
+
         var id: String { rawValue }
     }
 
     @State private var selection: Filter = .all
-    @State private var showSettings = false          // <- sheet de Configuración
+    @State private var showSettings = false      // sheet de Configuración
 
     var body: some View {
         TabView(selection: $selection) {
@@ -52,11 +53,14 @@ struct AdminReviewsView: View {
                 .tag(Filter.rejected)
         }
         .task { await vm.loadAll() }
-        // 🔥 Configuración como SHEET a pantalla completa (tapa el TabView)
+        // Configuración como sheet a pantalla completa (tapa el TabView)
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 AdminSettingsView()
                     .environmentObject(auth)
+            }
+        }
+        // Si quieres detener listeners cuando sales de esta vista:
         .onDisappear {
             Task {
                 vm.stopListening()
@@ -68,19 +72,23 @@ struct AdminReviewsView: View {
 // MARK: - Pantalla filtrada
 private struct ReviewsScreen: View {
     let filter: AdminReviewsView.Filter
-    @ObservedObject var vm: AdminReviewsViewModel
+    @ObservedObject var vm: AdminReviewsVM
     @EnvironmentObject var auth: AuthViewModel
 
-    @Binding var showSettings: Bool          // <- viene del padre
+    @Binding var showSettings: Bool          // viene del padre
 
-    private let azul  = Color("azulMarino")
+    private let azul = Color("azulMarino")
 
     private var filtered: [Donation] {
         switch filter {
-        case .all:       return vm.donations
-        case .pending:   return vm.donations.filter { ($0.status ?? "pending").lowercased() == "pending" }
-        case .approved:  return vm.donations.filter { ($0.status ?? "").lowercased() == "approved" }
-        case .rejected:  return vm.donations.filter { ($0.status ?? "").lowercased() == "rejected" }
+        case .all:
+            return vm.donations
+        case .pending:
+            return vm.donations.filter { ($0.status ?? "pending").lowercased() == "pending" }
+        case .approved:
+            return vm.donations.filter { ($0.status ?? "").lowercased() == "approved" }
+        case .rejected:
+            return vm.donations.filter { ($0.status ?? "").lowercased() == "rejected" }
         }
     }
 
@@ -98,6 +106,7 @@ private struct ReviewsScreen: View {
                     if vm.isLoading {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                     } else if let err = vm.errorMessage {
                         VStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle")
@@ -144,7 +153,7 @@ private struct ReviewsScreen: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        showSettings = true        // <- abre el sheet
+                        showSettings = true    // abre el sheet
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.title2.bold())
@@ -221,6 +230,7 @@ private struct AdminDonationRow: View {
 // MARK: - Badge
 private struct StatusBadge: View {
     let status: String
+
     private var config: (text: String, color: Color) {
         switch status.lowercased() {
         case "approved": return ("Aprobada", .green.opacity(0.15))
@@ -228,6 +238,7 @@ private struct StatusBadge: View {
         default:         return ("Pendiente", .orange.opacity(0.15))
         }
     }
+
     var body: some View {
         Text(config.text)
             .font(.caption.weight(.semibold))
@@ -242,7 +253,7 @@ private struct StatusBadge: View {
 final class AdminReviewsVM: ObservableObject {
     @Published var donations: [Donation] = []
     @Published var isLoading: Bool = false
-    @Published var error: String?
+    @Published var errorMessage: String?
 
     func loadAll() async {
         isLoading = true
@@ -250,10 +261,15 @@ final class AdminReviewsVM: ObservableObject {
 
         do {
             donations = try await FirestoreService.shared.fetchDonations()
-            self.error = nil
+            self.errorMessage = nil
         } catch {
-            self.error = (error as NSError).localizedDescription
+            self.errorMessage = (error as NSError).localizedDescription
         }
+    }
+
+    // Si tienes un listener en Firestore, impleméntalo aquí
+    func stopListening() {
+        // detach listener si aplica
     }
 }
 
