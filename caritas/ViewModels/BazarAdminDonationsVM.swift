@@ -10,18 +10,20 @@ final class BazarAdminDonationsVM: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String?
     
-    /// 🔥 Nuevo: si el bazar está aceptando donaciones o no
+    /// 🔥 Si el bazar está aceptando donaciones o no
     @Published var isAcceptingDonations: Bool? = nil
     
     private var donationsListener: ListenerRegistration?
     private var bazarListener: ListenerRegistration?
     private let db = Firestore.firestore()
 
+    // MARK: - Carga inicial + listeners
+
     func load(for bazarId: String) async {
         isLoading = true
         defer { isLoading = false }
         
-        // Cargar datos iniciales
+        // Cargar datos iniciales una sola vez
         do {
             let donations = try await FirestoreService.shared
                 .fetchApprovedDonations(forBazarId: bazarId)
@@ -32,7 +34,7 @@ final class BazarAdminDonationsVM: ObservableObject {
             self.isAcceptingDonations = accepting
             self.error = nil
         } catch {
-            self.error = error.localizedDescription
+            self.error = (error as NSError).localizedDescription
         }
         
         // Configurar listeners en tiempo real
@@ -44,7 +46,7 @@ final class BazarAdminDonationsVM: ObservableObject {
         // Detener listener anterior
         donationsListener?.remove()
         
-        // Configurar nuevo listener para cambios en tiempo real
+        // Escuchar cambios en donaciones aprobadas de este bazar
         donationsListener = db.collection("donations")
             .whereField("status", isEqualTo: "approved")
             .whereField("bazarId", isEqualTo: bazarId)
@@ -53,13 +55,12 @@ final class BazarAdminDonationsVM: ObservableObject {
                 guard let self = self else { return }
                 
                 if let error = error {
-                    self.error = error.localizedDescription
+                    self.error = (error as NSError).localizedDescription
                     return
                 }
                 
                 guard let snapshot = snapshot else { return }
                 
-                // Convertir documentos a Donation objects
                 let donations = snapshot.documents.map { Donation.from(doc: $0) }
                 self.donations = donations
                 self.error = nil
@@ -70,14 +71,14 @@ final class BazarAdminDonationsVM: ObservableObject {
         // Detener listener anterior
         bazarListener?.remove()
         
-        // Configurar nuevo listener para cambios en estado del bazar
+        // Escuchar cambios en el documento del bazar
         bazarListener = db.collection("bazars")
             .document(bazarId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
                 if let error = error {
-                    self.error = error.localizedDescription
+                    self.error = (error as NSError).localizedDescription
                     return
                 }
                 
@@ -86,6 +87,39 @@ final class BazarAdminDonationsVM: ObservableObject {
                 self.isAcceptingDonations = accepting
             }
     }
+    
+   
+    // MARK: - Marcar donación como entregada
+
+    /// Marca una donación como entregada en Firestore.
+    /// Actualiza primero el arreglo local para que la UI reaccione al instante.
+    /// El listener de `donations` después lo ajusta con los datos reales.
+    func markAsDelivered(_ donation: Donation) async {
+        guard let id = donation.id else { return }
+
+        // Actualización optimista
+        if let index = donations.firstIndex(where: { $0.id == id }) {
+            donations[index].isDelivered = true
+        }
+
+        do {
+            try await db.collection("donations")
+                .document(id)
+                .updateData([
+                    "isDelivered": true,
+                    "deliveredAt": FieldValue.serverTimestamp()
+                ])
+        } catch {
+            if let index = donations.firstIndex(where: { $0.id == id }) {
+                donations[index].isDelivered = false
+            }
+            let msg = (error as NSError).localizedDescription
+            self.error = msg
+            print("❌ Error al marcar como entregada: \(msg)")
+        }
+    }
+    
+    // MARK: - Limpieza de listeners
     
     func stopListening() {
         donationsListener?.remove()
