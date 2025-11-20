@@ -75,6 +75,8 @@ struct Donation: Identifiable, Codable, Equatable {
     var userId: String?
     var needsTransportHelp: Bool?   // ¿Necesita ayuda con el traslado?
     var isDelivered: Bool?          // ✅ nueva bandera de entrega
+    var qrCode: String?             // 🔲 QR generado (base64 o URL)
+    var qrGeneratedAt: Timestamp?   // 🔲 Fecha de generación del QR
 
     // Conveniencias
     var createdAtDate: Date? { day?.dateValue() }
@@ -112,7 +114,9 @@ struct Donation: Identifiable, Codable, Equatable {
             title: d["title"] as? String,
             userId: d["userId"] as? String,
             needsTransportHelp: d["needsTransportHelp"] as? Bool,
-            isDelivered: d["isDelivered"] as? Bool          // ✅ leer bandera desde Firestore
+            isDelivered: d["isDelivered"] as? Bool,          // ✅ leer bandera desde Firestore
+            qrCode: d["qrCode"] as? String,                 // 🔲 leer QR desde Firestore
+            qrGeneratedAt: d["qrGeneratedAt"] as? Timestamp  // 🔲 leer fecha de generación
         )
     }
 
@@ -130,6 +134,8 @@ struct Donation: Identifiable, Codable, Equatable {
         if let day { m["day"] = day }
         if let needsTransportHelp { m["needsTransportHelp"] = needsTransportHelp }
         if let isDelivered { m["isDelivered"] = isDelivered }       // ✅ escribir bandera de entrega
+        if let qrCode { m["qrCode"] = qrCode }                      // 🔲 escribir QR
+        if let qrGeneratedAt { m["qrGeneratedAt"] = qrGeneratedAt } // 🔲 escribir fecha de generación
 
         // Escribir 1 o N fotos
         if let photos = photoUrls, !photos.isEmpty {

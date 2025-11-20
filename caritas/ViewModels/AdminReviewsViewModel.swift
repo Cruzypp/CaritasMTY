@@ -17,6 +17,7 @@ final class AdminReviewsViewModel: ObservableObject {
     
     private var donationsListener: ListenerRegistration?
     private let db = Firestore.firestore()
+    private let firestoreService = FirestoreService.shared
 
     func loadAll() async {
         isLoading = true
@@ -68,6 +69,35 @@ final class AdminReviewsViewModel: ObservableObject {
                 self.donations = sortedDonations
                 self.errorMessage = nil
             }
+    }
+    
+    /// Aprueba una donación y genera su código QR.
+    func approveDonation(donationId: String, reviewerId: String) async {
+        do {
+            try await firestoreService.approveDonationWithQR(
+                donationId: donationId,
+                reviewerId: reviewerId
+            )
+            print("✅ Donación aprobada y QR generado para: \(donationId)")
+        } catch {
+            errorMessage = "Error al aprobar donación: \(error.localizedDescription)"
+            print("❌ Error al aprobar donación: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Rechaza una donación.
+    func rejectDonation(donationId: String, reviewerId: String) async {
+        do {
+            try await firestoreService.setDonationStatus(
+                donationId: donationId,
+                status: "rejected",
+                reviewerId: reviewerId
+            )
+            print("✅ Donación rechazada: \(donationId)")
+        } catch {
+            errorMessage = "Error al rechazar donación: \(error.localizedDescription)"
+            print("❌ Error al rechazar donación: \(error.localizedDescription)")
+        }
     }
     
     func stopListening() {

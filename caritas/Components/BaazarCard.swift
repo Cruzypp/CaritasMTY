@@ -12,7 +12,7 @@ struct BaazarCard: View {
     let nombre: String
     let horarios: String
     let telefono: String
-    /// 🔥 Nuevo: estado del bazar
+
     let isAcceptingDonations: Bool
     
     // Colores de estado

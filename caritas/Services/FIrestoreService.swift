@@ -253,6 +253,26 @@ final class FirestoreService {
             ], merge: true)
         
     }
+    
+    /// Aprueba una donación y genera su código QR.
+    func approveDonationWithQR(donationId: String,
+                               reviewerId: String) async throws {
+        // Generar QR basado en el ID de la donación
+        guard let qrCodeBase64 = QRGenerationService.shared.generateQRCode(for: donationId) else {
+            throw NSError(domain: "QRGenerationError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No se pudo generar el código QR"])
+        }
+
+        // Actualizar la donación con estado "approved" y el QR generado
+        try await db.collection("donations")
+            .document(donationId)
+            .setData([
+                "status": "approved",
+                "reviewerId": reviewerId,
+                "reviewedAt": FieldValue.serverTimestamp(),
+                "qrCode": qrCodeBase64,
+                "qrGeneratedAt": FieldValue.serverTimestamp()
+            ], merge: true)
+    }
     /// Guarda o actualiza el comentario del admin para una donación.
     func setAdminComment(donationId: String, comment: String) async throws {
         try await db.collection("donations")
@@ -269,6 +289,16 @@ final class FirestoreService {
 
             return snapshot.documents.map { Donation.from(doc: $0) }
         }
+    
+    /// Obtiene una donación específica por su ID, incluyendo el QR.
+    func fetchDonation(by id: String) async throws -> Donation? {
+        let snapshot = try await db.collection("donations")
+            .document(id)
+            .getDocument()
+        
+        guard snapshot.exists else { return nil }
+        return Donation.from(doc: snapshot)
+    }
     // MARK: - BAZAR ADMIN
     /// Actualiza si un bazar está recibiendo donaciones o no.
     func updateBazarAcceptingDonations(bazarId: String, isAccepting: Bool) async throws {
