@@ -74,6 +74,7 @@ struct Donation: Identifiable, Codable, Equatable {
     var title: String?
     var userId: String?
     var needsTransportHelp: Bool?   // ¿Necesita ayuda con el traslado?
+    var isDelivered: Bool?          // ✅ nueva bandera de entrega
 
     // Conveniencias
     var createdAtDate: Date? { day?.dateValue() }
@@ -110,7 +111,8 @@ struct Donation: Identifiable, Codable, Equatable {
             status: d["status"] as? String,
             title: d["title"] as? String,
             userId: d["userId"] as? String,
-            needsTransportHelp: d["needsTransportHelp"] as? Bool
+            needsTransportHelp: d["needsTransportHelp"] as? Bool,
+            isDelivered: d["isDelivered"] as? Bool          // ✅ leer bandera desde Firestore
         )
     }
 
@@ -127,6 +129,7 @@ struct Donation: Identifiable, Codable, Equatable {
         if let userId { m["userId"] = userId }
         if let day { m["day"] = day }
         if let needsTransportHelp { m["needsTransportHelp"] = needsTransportHelp }
+        if let isDelivered { m["isDelivered"] = isDelivered }       // ✅ escribir bandera de entrega
 
         // Escribir 1 o N fotos
         if let photos = photoUrls, !photos.isEmpty {
