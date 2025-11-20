@@ -263,6 +263,20 @@ struct DonationDetailView: View {
                             Divider()
                                 .padding(.vertical, 10)
                         }
+                        
+                        // MARK: - QR Code (solo si está aprobada y tiene QR)
+                        if let qrCode = donation.qrCode {
+                            VStack(alignment: .center, spacing: 16) {
+                                QRDisplayView(
+                                    qrCodeBase64: qrCode,
+                                    donationId: donation.id ?? "",
+                                    folioNumber: donation.folio
+                                )
+                            }
+                            
+                            Divider()
+                                .padding(.vertical, 10)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)

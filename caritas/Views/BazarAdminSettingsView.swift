@@ -19,6 +19,9 @@ struct BazarAdminSettingsView: View {
     // Valor que el usuario intentó poner (false cuando apaga el switch)
     @State private var pendingToggleValue: Bool? = nil
 
+    private var gradientColors: Gradient {
+        Gradient(colors: [.naranja, .aqua])
+    }
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -28,7 +31,16 @@ struct BazarAdminSettingsView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "person.crop.circle.fill")
                             .font(.system(size: 80))
-                            .foregroundStyle(azul)
+                            .foregroundStyle(.azulMarino)
+                            .overlay(
+                                Circle()
+                                    .stroke(
+                                        LinearGradient(gradient: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                                        lineWidth: 5
+                                    )
+                                    .shadow(color: .naranja, radius: 6, x: 0, y: 0)
+                                    .frame(width: 90, height: 80)
+                            )
 
                         Text("Administrador de bazar")
                             .font(.headline)
@@ -104,7 +116,7 @@ struct BazarAdminSettingsView: View {
                             .padding(.horizontal)
                     }
                     
-                    Spacer(minLength: 160)
+                    Spacer(minLength: 130)
 
                     // Botón de logout
                     Button {

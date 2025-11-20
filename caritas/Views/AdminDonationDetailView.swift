@@ -296,11 +296,7 @@ final class AdminDonationDetailVM: ObservableObject {
         
         do {
             let reviewer = Auth.auth().currentUser?.uid ?? "unknown"
-            try await FirestoreService.shared.setDonationStatus(
-                donationId: donationId,
-                status: status,
-                reviewerId: reviewer
-            )
+            
             // Guarda comentario si hay
             let trimmed = adminComment.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
@@ -309,8 +305,24 @@ final class AdminDonationDetailVM: ObservableObject {
                     comment: trimmed
                 )
             }
+            
+            // Usar método específico para aprobación con QR
+            if status == "approved" {
+                try await FirestoreService.shared.approveDonationWithQR(
+                    donationId: donationId,
+                    reviewerId: reviewer
+                )
+            } else {
+                // Para rechazar, usar setDonationStatus
+                try await FirestoreService.shared.setDonationStatus(
+                    donationId: donationId,
+                    status: status,
+                    reviewerId: reviewer
+                )
+            }
+            
             donation.status = status
-            toast = status == "approved" ? "Donación aprobada" : "Donación rechazada"
+            toast = status == "approved" ? "Donación aprobada con QR generado" : "Donación rechazada"
         } catch {
             errorMessage = error.localizedDescription
         }

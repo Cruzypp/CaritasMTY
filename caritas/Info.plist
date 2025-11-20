@@ -28,5 +28,9 @@
     <!-- Launch screen usando storyboard -->
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
+    
+    <!-- Permisos de cámara para escaneo QR -->
+    <key>NSCameraUsageDescription</key>
+    <string>Se necesita acceso a la cámara para escanear códigos QR de donaciones</string>
 </dict>
 </plist>

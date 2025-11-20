@@ -23,6 +23,9 @@ struct BazarAdminDonationsView: View {
     // Para la alerta de confirmación
     @State private var pendingDelivery: Donation?
     @State private var showConfirmAlert = false
+    
+    // Para el escaneo QR
+    @State private var showQRScanner = false
 
     private let azul  = Color("azulMarino")
     private let aqua  = Color("aqua")
@@ -131,16 +134,13 @@ struct BazarAdminDonationsView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
 
-                    } else if let err = vm.error {
+                    } else if vm.error != nil {
                         VStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title2)
                                 .foregroundStyle(.red)
                             Text("Error al cargar donaciones")
                                 .font(.headline)
-                            Text(err)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
                         }
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -200,12 +200,22 @@ struct BazarAdminDonationsView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink {
-                        BazarAdminSettingsView()
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .font(.title2.bold())
-                            .foregroundStyle(.gray)
+                    HStack(spacing: 12) {
+                        // Botón de escaneo QR
+                        Button(action: { showQRScanner = true }) {
+                            Image(systemName: "qrcode.viewfinder")
+                                .font(.title2.bold())
+                                .foregroundStyle(.gray)
+                        }
+
+                        // Botón de configuración
+                        NavigationLink {
+                            BazarAdminSettingsView()
+                        } label: {
+                            Image(systemName: "gearshape")
+                                .font(.title2.bold())
+                                .foregroundStyle(.gray)
+                        }
                     }
                 }
             }
@@ -228,6 +238,11 @@ struct BazarAdminDonationsView: View {
             }
         } message: { donation in
             Text("¿Confirmas que la donación \"\(donation.title ?? "Sin título")\" fue entregada en el bazar?")
+        }
+        
+        // Sheet del escáner QR
+        .sheet(isPresented: $showQRScanner) {
+            QRScannerView()
         }
     }
 
@@ -324,3 +339,121 @@ private struct BazarAdminDonationRow: View {
         .padding(.vertical, 6)
     }
 }
+
+// MARK: - Previews
+
+#if DEBUG
+private extension BazarAdminDonationsVM {
+    static func previewPopulated() -> BazarAdminDonationsVM {
+        let vm = BazarAdminDonationsVM()
+        vm.isLoading = false
+        vm.error = nil
+        vm.isAcceptingDonations = true
+
+        let now = Date()
+        vm.donations = [
+            Donation(
+                id: "D-001",
+                bazarId: "Alameda",
+                categoryId: ["Ropa"],
+                day: Timestamp(date: now.addingTimeInterval(-3600)),
+                description: "Ropa de invierno en buen estado.",
+                adminComment: nil,
+                folio: "FOL-001",
+                photoUrls: ["https://picsum.photos/seed/1/200/200"],
+                status: "approved",
+                title: "Ropa de invierno",
+                userId: "U-1",
+                needsTransportHelp: false,
+                isDelivered: false
+            ),
+            Donation(
+                id: "D-002",
+                bazarId: "Alameda",
+                categoryId: ["Muebles"],
+                day: Timestamp(date: now.addingTimeInterval(-7200)),
+                description: "Silla de madera.",
+                adminComment: nil,
+                folio: "FOL-002",
+                photoUrls: ["https://picsum.photos/seed/2/200/200"],
+                status: "approved",
+                title: "Silla",
+                userId: "U-2",
+                needsTransportHelp: true,
+                isDelivered: true
+            )
+        ]
+        return vm
+    }
+
+    static func previewEmpty() -> BazarAdminDonationsVM {
+        let vm = BazarAdminDonationsVM()
+        vm.isLoading = false
+        vm.error = nil
+        vm.isAcceptingDonations = true
+        vm.donations = []
+        return vm
+    }
+
+    static func previewNotAccepting() -> BazarAdminDonationsVM {
+        let vm = BazarAdminDonationsVM()
+        vm.isLoading = false
+        vm.error = nil
+        vm.isAcceptingDonations = false
+        vm.donations = [
+            Donation(
+                id: "D-003",
+                bazarId: "Alameda",
+                categoryId: ["Electrodomésticos"],
+                day: Timestamp(date: Date()),
+                description: "Microondas en buen estado.",
+                adminComment: nil,
+                folio: "FOL-003",
+                photoUrls: ["https://picsum.photos/seed/3/200/200"],
+                status: "approved",
+                title: "Microondas",
+                userId: "U-3",
+                needsTransportHelp: false,
+                isDelivered: false
+            )
+        ]
+        return vm
+    }
+}
+
+private struct BazarAdminDonationsViewWrapper: View {
+    @StateObject var vm: BazarAdminDonationsVM
+    @StateObject var auth = AuthViewModel()
+
+    @State private var selectedSegment: BazarDonationsSegment = .assigned
+
+    init(vm: BazarAdminDonationsVM) {
+        _vm = StateObject(wrappedValue: vm)
+    }
+
+    var body: some View {
+        BazarAdminDonationsView()
+            .environmentObject(auth)
+            .onAppear {
+                // Simular contexto de admin de bazar
+                auth.role = "adminBazar"
+                auth.bazarId = "Alameda"
+            }
+    }
+}
+
+struct BazarAdminDonationsView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            BazarAdminDonationsViewWrapper(vm: .previewPopulated())
+                .previewDisplayName("Populado")
+
+            BazarAdminDonationsViewWrapper(vm: .previewEmpty())
+                .previewDisplayName("Vacío")
+
+            BazarAdminDonationsViewWrapper(vm: .previewNotAccepting())
+                .previewDisplayName("No acepta donaciones")
+        }
+    }
+}
+#endif
