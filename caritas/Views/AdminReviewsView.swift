@@ -37,6 +37,7 @@ struct AdminReviewsView: View {
         case pending  = "Pendientes"
         case approved = "Aprobadas"
         case rejected = "Rechazadas"
+        case delivered = "Entregadas"
 
         var id: String { rawValue }
     }
@@ -69,6 +70,12 @@ struct AdminReviewsView: View {
                           showSettings: $showSettings)
                 .tabItem { Label("Rechazadas", systemImage: "xmark.seal") }
                 .tag(Filter.rejected)
+            
+            ReviewsScreen(filter: .delivered,
+                            vm: vm,
+                            showSettings: $showSettings)
+                .tabItem { Label("Entregadas", systemImage: "checkmark.circle") }
+                .tag(Filter.delivered)
         }
         // Se prioriza el initialize() asíncrono de Main
         .task {
@@ -119,6 +126,8 @@ struct ReviewsScreen: View {
                 statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "approved" }
             case .rejected:
                 statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "rejected" }
+            case .delivered:
+                statusFiltered = allDonations.filter { $0.donation.isDelivered == true }
             }
             
             return statusFiltered
@@ -417,6 +426,12 @@ struct AdminReviewsView_Previews: PreviewProvider {
                 ReviewsScreen(filter: .rejected, vm: vm, showSettings: $showSettings)
                     .tabItem { Label("Rechazadas", systemImage: "xmark.seal") }
                     .tag(AdminReviewsView.Filter.rejected)
+                ReviewsScreen(filter: .delivered,
+                                      vm: vm,
+                                      showSettings: $showSettings)
+                            .tabItem { Label("Entregadas", systemImage: "checkmark.circle") }
+                            .tag(AdminReviewsView.Filter.delivered)
+                
             }
         }
     }
