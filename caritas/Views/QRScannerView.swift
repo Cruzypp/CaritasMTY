@@ -2,11 +2,12 @@
 //  QRScannerView.swift
 //  caritas
 //
-//  Vista para escanear códigos QR de donaciones.
+//  Vista para escanear códigos QR usando AVFoundation (compatible iOS 16+).
 //
 
 import SwiftUI
-@preconcurrency import AVFoundation
+import AVFoundation
+import AudioToolbox
 import Combine
 
 struct QRScannerView: View {
@@ -15,14 +16,9 @@ struct QRScannerView: View {
 
     var body: some View {
         ZStack {
-            // Cámara de fondo
-            QRScannerCameraView(
-                session: viewModel.captureSession,
-                onQRDetected: { qrContent in
-                    viewModel.handleQRDetected(qrContent)
-                }
-            )
-            .ignoresSafeArea()
+            // Cámara usando AVFoundation
+            QRCameraView(viewModel: viewModel)
+                .ignoresSafeArea()
 
             VStack {
                 // Header
@@ -37,7 +33,6 @@ struct QRScannerView: View {
                         .font(.gotham(.bold, style: .headline))
                         .foregroundColor(.white)
                     Spacer()
-                    // Placeholder para alineación
                     Image(systemName: "xmark")
                         .font(.title2.bold())
                         .foregroundColor(.clear)
@@ -47,9 +42,8 @@ struct QRScannerView: View {
 
                 Spacer()
 
-                // Indicador/Overlay
+                // Overlay con indicador
                 VStack(spacing: 20) {
-                    // Marco de escaneo
                     RoundedRectangle(cornerRadius: 20)
                         .stroke(Color.aqua, lineWidth: 3)
                         .frame(width: 250, height: 250)
@@ -59,16 +53,14 @@ struct QRScannerView: View {
                         .foregroundColor(.white)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black.opacity(0.4))
+                .ignoresSafeArea()
 
                 Spacer()
 
-                // Footer con información de carga
                 if viewModel.isLoading {
                     VStack(spacing: 12) {
                         ProgressView()
                             .tint(.aqua)
-
                         Text("Buscando donación...")
                             .font(.gotham(.regular, style: .body))
                             .foregroundColor(.white)
@@ -78,12 +70,12 @@ struct QRScannerView: View {
                     .background(Color.black.opacity(0.7))
                 }
 
+                // Mensaje de error
                 if let error = viewModel.errorMessage {
                     VStack(spacing: 8) {
                         Image(systemName: "exclamationmark.circle.fill")
                             .font(.title2)
                             .foregroundColor(.red)
-
                         Text(error)
                             .font(.gotham(.regular, style: .body))
                             .foregroundColor(.white)
@@ -95,123 +87,204 @@ struct QRScannerView: View {
                 }
             }
 
-            // Sheet para mostrar donación encontrada
-            if let donation = viewModel.foundDonation {
-                NavigationStack {
-                    DonationDetailView(donation: donation)
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button(action: {
-                                    viewModel.foundDonation = nil
-                                    viewModel.startScanning()
-                                }) {
-                                    Image(systemName: "chevron.left")
-                                        .foregroundColor(.azulMarino)
-                                }
+        }
+        .sheet(item: $viewModel.foundDonation) { donation in
+            NavigationStack {
+                DonationDetailView(donation: donation)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button(action: {
+                                viewModel.foundDonation = nil
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .foregroundColor(.azulMarino)
                             }
                         }
-                }
-                .presentationDetents([.large, .medium])
-                .presentationDragIndicator(.visible)
+                    }
             }
+            .presentationDetents([.large, .medium])
+            .presentationDragIndicator(.visible)
         }
         .onAppear {
             viewModel.requestCameraPermission()
-            viewModel.startScanning()
         }
         .onDisappear {
-            viewModel.stopScanning()
+            viewModel.cleanup()
         }
     }
 }
 
-// MARK: - Camera View Controller
+// MARK: - Camera View
 
-struct QRScannerCameraView: UIViewControllerRepresentable {
-    let session: AVCaptureSession
-    let onQRDetected: (String) -> Void
+struct QRCameraView: UIViewControllerRepresentable {
+    let viewModel: QRScannerViewModel
 
-    func makeUIViewController(context: Context) -> QRScannerViewController {
-        let controller = QRScannerViewController()
-        controller.captureSession = session
-        controller.onQRDetected = onQRDetected
+    func makeUIViewController(context: Context) -> QRScannerController {
+        let controller = QRScannerController(viewModel: viewModel)
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: QRScannerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: QRScannerController, context: Context) {}
 }
 
-// MARK: - QR Scanner View Controller
+// MARK: - Scanner Controller
 
-class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class QRScannerController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     var captureSession: AVCaptureSession?
     var previewLayer: AVCaptureVideoPreviewLayer?
-    var onQRDetected: ((String) -> Void)?
+    weak var viewModel: QRScannerViewModel?
+    
     private var lastDetectedCode: String?
     private var lastDetectionTime: Date?
+    private var isSetup = false
+
+    init(viewModel: QRScannerViewModel) {
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel = viewModel
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("✅ QRScannerController.viewDidLoad")
+        setupCamera()
+    }
 
-        guard let session = captureSession else { return }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("✅ QRScannerController.viewDidAppear")
+        if !isSetup {
+            startScanning()
+            isSetup = true
+        }
+    }
 
-        // Configurar preview layer
-        previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer?.videoGravity = .resizeAspectFill
-        previewLayer?.frame = view.layer.bounds
-        view.layer.addSublayer(previewLayer!)
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        print("⏹️ QRScannerController.viewWillDisappear")
+        // Stop scanning deterministically before the controller begins deallocation.
+        stopScanning()
+        // Break delegate callback path to avoid late calls.
+        if let outputs = captureSession?.outputs {
+            for output in outputs {
+                if let metadata = output as? AVCaptureMetadataOutput {
+                    metadata.setMetadataObjectsDelegate(nil, queue: nil)
+                }
+            }
+        }
+    }
 
-        // Configurar metadata output
+    private func setupCamera() {
+        print("🎬 Setting up camera...")
+        
+        let session = AVCaptureSession()
+        captureSession = session
+
+        // Input de video
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            print("❌ No video device found")
+            return
+        }
+
+        do {
+            let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            if session.canAddInput(videoInput) {
+                session.addInput(videoInput)
+                print("✅ Video input added")
+            }
+        } catch {
+            print("❌ Error adding video input: \(error)")
+            return
+        }
+
+        // Output de metadata
         let metadataOutput = AVCaptureMetadataOutput()
         if session.canAddOutput(metadataOutput) {
             session.addOutput(metadataOutput)
             metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             metadataOutput.metadataObjectTypes = [.qr]
+            print("✅ Metadata output added")
         }
 
-        // No iniciar la sesión aquí; el ViewModel controla start/stop en su propia cola.
+        // Preview layer
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        self.previewLayer = previewLayer
+        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.frame = view.layer.bounds
+        view.layer.addSublayer(previewLayer)
+        print("✅ Preview layer added")
     }
 
-    func metadataOutput(_ output: AVCaptureMetadataOutput,
-                        didOutput metadataObjects: [AVMetadataObject],
-                        from connection: AVCaptureConnection) {
-        guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-              metadataObject.type == .qr,
-              let stringValue = metadataObject.stringValue else { return }
-
-        // Evitar detectar el mismo código varias veces en corto tiempo
-        let now = Date()
-        if lastDetectedCode == stringValue,
-           let lastTime = lastDetectionTime,
-           now.timeIntervalSince(lastTime) < 1.0 {
-            return
+    // Make start/stop synchronous on main to avoid races during dismissal.
+    func startScanning() {
+        print("▶️ Starting QR scanning...")
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            self?.captureSession?.startRunning()
+            print("✅ Capture session started")
         }
+    }
 
-        lastDetectedCode = stringValue
-        lastDetectionTime = now
-
-        // Vibrar para feedback
-        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-
-        // Parar la sesión para evitar múltiples detecciones en segundo plano
-        if let session = captureSession, session.isRunning {
-            DispatchQueue.global(qos: .userInitiated).async {
-                session.stopRunning()
-            }
+    func stopScanning() {
+        guard captureSession?.isRunning == true else { return }
+        print("⏹️ Stopping QR scanning...")
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            self?.captureSession?.stopRunning()
+            print("✅ Capture session stopped")
         }
+    }
 
-        // Llamar el callback
-        onQRDetected?(stringValue)
+    func resetScanning() {
+        print("🔄 Resetting scanning...")
+        lastDetectedCode = nil
+        lastDetectionTime = nil
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         previewLayer?.frame = view.layer.bounds
     }
+
+    // MARK: - AVCaptureMetadataOutputObjectsDelegate
+
+    func metadataOutput(_ output: AVCaptureMetadataOutput,
+                        didOutput metadataObjects: [AVMetadataObject],
+                        from connection: AVCaptureConnection) {
+        print("📲 metadataOutput: \(metadataObjects.count) objects")
+
+        guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
+              metadataObject.type == .qr,
+              let stringValue = metadataObject.stringValue else {
+            return
+        }
+
+        print("✅ QR detected: \(stringValue)")
+
+        // Antidebounce
+        let now = Date()
+        if lastDetectedCode == stringValue,
+           let lastTime = lastDetectionTime,
+           now.timeIntervalSince(lastTime) < 1.0 {
+            print("⏱️ Debounced - same code")
+            return
+        }
+
+        lastDetectedCode = stringValue
+        lastDetectionTime = now
+
+        // Vibración
+        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+
+        // Notificar al ViewModel
+        print("📞 Calling viewModel.handleQRDetected")
+        viewModel?.handleQRDetected(stringValue)
+    }
 }
 
-// MARK: - View Model
+// MARK: - ViewModel
 
 @MainActor
 class QRScannerViewModel: NSObject, ObservableObject {
@@ -219,70 +292,48 @@ class QRScannerViewModel: NSObject, ObservableObject {
     @Published var errorMessage: String?
     @Published var foundDonation: Donation?
 
-    let captureSession = AVCaptureSession()
     private let firestoreService = FirestoreService.shared
 
-    override init() {
-        super.init()
-        setupCaptureSession()
-    }
-
-    private func setupCaptureSession() {
-        // All interactions with captureSession happen on the main actor
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
-        do {
-            let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-            if captureSession.canAddInput(videoInput) {
-                captureSession.addInput(videoInput)
-            }
-        } catch {
-            print("Error setting up video input: \(error)")
-        }
-    }
-
     func requestCameraPermission() {
-        AVCaptureDevice.requestAccess(for: .video) { granted in
-            if !granted {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Se requiere permiso de cámara para escanear QR."
+        print("🔐 Requesting camera permission...")
+        AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+            DispatchQueue.main.async {
+                if granted {
+                    print("✅ Camera permission granted")
+                } else {
+                    print("❌ Camera permission denied")
+                    self?.errorMessage = "Se requiere permiso de cámara"
                 }
             }
         }
     }
 
     func handleQRDetected(_ qrContent: String) {
+        print("🔍 handleQRDetected: \(qrContent)")
         isLoading = true
         errorMessage = nil
 
         Task {
             do {
-                // El contenido del QR es el ID de la donación
+                print("🔎 Fetching donation: \(qrContent)")
                 if let donation = try await firestoreService.fetchDonation(by: qrContent) {
+                    print("✅ Donation found!")
                     self.foundDonation = donation
                 } else {
-                    self.errorMessage = "Donación no encontrada."
-                    startScanning()
+                    print("❌ Donation not found")
+                    self.errorMessage = "Donación no encontrada"
                 }
             } catch {
-                self.errorMessage = "Error al buscar donación: \(error.localizedDescription)"
-                startScanning()
+                print("⚠️ Error: \(error.localizedDescription)")
+                self.errorMessage = "Error: \(error.localizedDescription)"
             }
             self.isLoading = false
         }
     }
 
-    func startScanning() {
-        // Ensure on main actor
-        if !captureSession.isRunning {
-            captureSession.startRunning()
-        }
-    }
-
-    func stopScanning() {
-        // Ensure on main actor
-        if captureSession.isRunning {
-            captureSession.stopRunning()
-        }
+    func cleanup() {
+        print("🧹 Cleaning up...")
+        // No back-reference to controller anymore; nothing to stop here.
     }
 }
 
