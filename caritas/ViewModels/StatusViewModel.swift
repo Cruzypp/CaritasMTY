@@ -15,10 +15,54 @@ final class StatusViewModel: ObservableObject {
     @Published var donations: [Donation] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
+    @Published var selectedStatus: DonationStatus = .pending
     
     private let firestoreService = FirestoreService.shared
+    private let isDummyMode: Bool
+    
+    init(isDummy: Bool = false) {
+        self.isDummyMode = isDummy
+        if isDummy {
+            self.donations = Self.getDummyDonationsForPreview()
+        }
+    }
+    
+    enum DonationStatus: String, CaseIterable {
+        case pending = "Pendiente"
+        case rejected = "Rechazado"
+        case approved = "Aprobado"
+        case delivered = "Entregado"
+        
+        var firebaseValue: String {
+            switch self {
+            case .pending: return "pending"
+            case .rejected: return "rejected"
+            case .approved: return "approved"
+            case .delivered: return "delivered"
+            }
+        }
+    }
+    
+    var filteredAndSortedDonations: [Donation] {
+        var filtered = donations
+        
+        // Filtrar por status
+        filtered = filtered.filter { $0.status == selectedStatus.firebaseValue }
+        
+        // Ordenar por fecha (más recientes primero)
+        filtered.sort { donation1, donation2 in
+            let date1 = donation1.day?.dateValue() ?? Date.distantPast
+            let date2 = donation2.day?.dateValue() ?? Date.distantPast
+            return date1 > date2
+        }
+        
+        return filtered
+    }
     
     func loadDonations() async {
+        // No cargar en modo dummy
+        if isDummyMode { return }
+        
         isLoading = true
         errorMessage = nil
         
@@ -90,6 +134,21 @@ final class StatusViewModel: ObservableObject {
                 status: "rejected",
                 title: "Juguetes para niños",
                 userId: currentUserId
+            ),
+            Donation(
+                id: "D004",
+                bazarId: "B001",
+                categoryId: ["electrónica"],
+                day: Timestamp(date: Date(timeIntervalSinceNow: -86400 * 15)),
+                description: "Laptop en buen estado funcional.",
+                folio: "FOL-004",
+                photoUrls: [
+                    "https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3"
+                ],
+                status: "delivered",
+                title: "Laptop usada",
+                userId: currentUserId,
+                isDelivered: true
             )
         ]
     }

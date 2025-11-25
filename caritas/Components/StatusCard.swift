@@ -65,13 +65,13 @@ struct StatusCard: View {
                         
                         Spacer()
                         
-                        Text(statusLabel(status: donation.status ?? "pending"))
+                        Text(statusLabel(status: getDisplayStatus()))
                             .font(.gotham(.bold, style: .caption))
                             .frame(height: 20)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .frame(width: 80)
                             .padding(5)
-                            .background(colorEstado(status: donation.status ?? "pending"))
+                            .background(colorEstado(status: getDisplayStatus()))
                             .foregroundStyle(.white)
                             .clipShape(.rect(cornerRadius: 15))
                     }
@@ -93,6 +93,7 @@ struct StatusCard: View {
         case "pending": return .gray
         case "rejected": return .red
         case "approved": return .aqua
+        case "delivered": return .green
         default: return .gray
         }
     }
@@ -102,8 +103,16 @@ struct StatusCard: View {
         case "pending": return "Pendiente"
         case "approved": return "Aprobada"
         case "rejected": return "Rechazada"
+        case "delivered": return "Entregado"
         default: return status.uppercased()
         }
+    }
+    
+    func getDisplayStatus() -> String {
+        if donation.isDelivered == true {
+            return "delivered"
+        }
+        return donation.status ?? "pending"
     }
 
     func formatDate(_ date: Date) -> String {
@@ -125,7 +134,8 @@ struct StatusCard: View {
         photoUrls: ["https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3"],
         status: "rejected",
         title: "Donacion jejejejeje",
-        userId: "U001"
+        userId: "U001",
+        isDelivered: true,
     )
     StatusCard(donation: testDonation)
 }
