@@ -2,111 +2,196 @@
 //  DonationDetailView.swift
 //  caritas
 //
-//  Created by Cruz Yael Pérez González on 04/11/25.
-//
 
 import SwiftUI
 import MapKit
 import FirebaseCore
 
 struct DonationDetailView: View {
+
     let donation: Donation
-    @StateObject private var viewModel: DonationDetailViewModel
-    @State private var showAllPhotos: Bool = false
-    
+
+    // ViewModels
+    @StateObject private var detailVM: DonationDetailViewModel
+    @EnvironmentObject var auth: AuthViewModel
+    @StateObject private var adminVM = BazarAdminDonationsVM()
+
+    // UI State
+    @State private var showAllPhotos = false
+    @State private var showConfirmAlert = false
+
+    // Para regresar a la vista anterior (admin bazar)
+    @Environment(\.dismiss) private var dismiss
+
     init(donation: Donation, isPreview: Bool = false) {
         self.donation = donation
-        _viewModel = StateObject(
+        _detailVM = StateObject(
             wrappedValue: DonationDetailViewModel(
                 donation: donation,
                 isPreview: isPreview
             )
         )
     }
-    
-    /// Cómodo para no repetir comparaciones
+
     private var isApproved: Bool {
         (donation.status ?? "").lowercased() == "approved"
     }
-    
-    /// Determina si es donación de electrodoméstico o mueble
+
     private var isLargeItem: Bool {
-        guard let categories = donation.categoryId else { return false }
-        return categories.contains { cat in
-            cat.lowercased().contains("electrodoméstico") || 
-            cat.lowercased().contains("electrodomestico") ||
-            cat.lowercased().contains("mueble")
+        (donation.categoryId ?? []).contains { c in
+            c.lowercased().contains("electro") || c.lowercased().contains("mueble")
         }
     }
 
+    private var isDelivered: Bool {
+        donation.isDelivered ?? false
+    }
+
+    /// ¿Está entrando como admin de bazar?
+    private var isBazarAdmin: Bool {
+        auth.role == "adminBazar"
+    }
+
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    
-                    // MARK: - Título (folio)
-                    Text("FOLIO: \(donation.folio ?? "")")
-                        .font(.gotham(.bold, style: .body))
-                        .foregroundColor(.azulMarino)
-                        .padding(.top, 20)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
-                    
-                    // MARK: - Galería de Imágenes (Grid 2x2)
-                    VStack(spacing: 10) {
-                        if let photoUrls = donation.photoUrls, !photoUrls.isEmpty {
-                            // Grid de 2x2
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 10) {
-                                // Primeras 3 fotos
-                                ForEach(Array(photoUrls.prefix(3).enumerated()), id: \.offset) { index, urlString in
-                                    if let url = URL(string: urlString) {
-                                        Button(action: { showAllPhotos = true }) {
-                                            AsyncImage(url: url) { phase in
-                                                switch phase {
-                                                case .success(let image):
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 176, height: 140)
-                                                        .clipped()
-                                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                        
-                                                case .failure(_):
-                                                    ZStack {
-                                                        Color(.systemGray6)
-                                                        Image(.logotipo)
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: 50, height: 50)
-                                                    }
-                                                    .frame(height: 140)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                    
-                                                case .empty:
-                                                    ZStack {
-                                                        Color(.systemGray6)
-                                                        ProgressView()
-                                                    }
-                                                    .frame(height: 140)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                    
-                                                @unknown default:
-                                                    EmptyView()
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                // Botón "+N" en la 4ta posición
-                                if photoUrls.count > 3 {
-                                    Button(action: { showAllPhotos = true }) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+
+                // =========================
+                // FOLIO
+                // =========================
+                Text("FOLIO: \(donation.folio ?? "—")")
+                    .font(.gotham(.bold, style: .body))
+                    .foregroundColor(.azulMarino)
+                    .padding(.top, 20)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                // =========================
+                // GALERÍA
+                // =========================
+                gallerySection
+
+                // =========================
+                // INFO
+                // =========================
+                infoSection
+                Divider().padding(.vertical, 10)
+
+                // =========================
+                // FEEDBACK
+                // =========================
+                feedbackSection
+                Divider().padding(.vertical, 10)
+
+                // =========================
+                // TRANSPORTE
+                // =========================
+                if isLargeItem {
+                    TransportHelpCard(needsHelp: donation.needsTransportHelp)
+                    Divider().padding(.vertical, 10)
+                }
+
+                // =========================
+                // BAZAR
+                // =========================
+                bazarSection
+                Divider().padding(.vertical, 10)
+
+                // =========================
+                // UBICACIÓN
+                // =========================
+                locationSection
+                Divider().padding(.vertical, 10)
+
+                // =========================
+                // QR (SOLO DONANTE)
+                // =========================
+                if isApproved,
+                   !isBazarAdmin,                          // 👈 IMPORTANTE: solo si NO es admin de bazar
+                   let qrCode = donation.qrCode {
+
+                    VStack(alignment: .center, spacing: 16) {
+                        QRDisplayView(
+                            qrCodeBase64: qrCode,
+                            donationId: donation.id ?? "",
+                            folioNumber: donation.folio
+                        )
+                    }
+
+                    Divider().padding(.vertical, 10)
+                }
+
+                // =========================
+                // ACCIÓN ADMIN (SOLO ADMIN BAZAR)
+                // =========================
+                if isBazarAdmin {
+                    adminActionSection
+                }
+
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 40)
+        }
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showAllPhotos) {
+            AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
+        }
+        .onAppear {
+            Task { await detailVM.loadBazarDetails() }
+        }
+        // Alerta para marcar como entregada (solo usada por admin)
+        .alert("Marcar como entregada",
+               isPresented: $showConfirmAlert) {
+
+            Button("Cancelar", role: .cancel) {}
+
+            Button("Marcar como entregada", role: .destructive) {
+                Task {
+                    await adminVM.markAsDelivered(donation)
+
+                    // 🔥 Regresar a la lista después de marcar
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        dismiss()
+                    }
+                }
+            }
+
+        } message: {
+            Text("¿Confirmas que la donación \"\(donation.title ?? "Sin título")\" fue entregada en el bazar?")
+        }
+    }
+}
+
+
+
+// ======================================================
+// MARK: - SECCIONES
+// ======================================================
+
+extension DonationDetailView {
+
+    // 📌 GALERÍA
+    private var gallerySection: some View {
+        VStack(spacing: 10) {
+            if let urls = donation.photoUrls, !urls.isEmpty {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 10) {
+
+                    ForEach(Array(urls.prefix(3).enumerated()), id: \.offset) { _, urlString in
+                        if let url = URL(string: urlString) {
+                            Button { showAllPhotos = true } label: {
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(height: 140)
+                                            .clipped()
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    default:
                                         ZStack {
-                                            Color(.gray.opacity(0.8))
-                                            Text("+\(photoUrls.count - 3)")
-                                                .font(.gotham(.bold, style: .title2))
-                                                .foregroundColor(.white)
+                                            Color(.systemGray6)
+                                            ProgressView()
                                         }
                                         .frame(height: 140)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -115,186 +200,177 @@ struct DonationDetailView: View {
                             }
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    // MARK: - Info de la donación
-                    VStack(alignment: .leading, spacing: 15) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(donation.title ?? "Sin título")
-                                .font(.gotham(.bold, style: .title3))
-                            
-                            Text(donation.description ?? "Sin descripción")
-                                .font(.gotham(.regular, style: .callout))
-                                .foregroundColor(.secondary)
-                                .lineLimit(3)
-                        }
-                        
-                        HStack {
-                            Text("Estado:")
-                                .font(.gotham(.bold, style: .body))
-                            Spacer()
-                            Text(statusLabel(donation.status ?? "pending"))
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(statusColor(donation.status ?? "pending"))
-                                .foregroundColor(.white)
-                                .cornerRadius(20)
-                        }
-                    }
-                    .padding(.top, 5)
-                    
-                    Divider()
-                        .padding(.vertical, 10)
-                    
-                    // MARK: - Comentario del admin
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Feedback")
-                            .font(.gotham(.bold, style: .headline))
-                        
-                        Text(donation.adminComment ?? "Sin comentarios")
-                            .font(.gotham(.regular, style: .body))
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(.secondary)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                    }
-                    
-                    Divider()
-                        .padding(.vertical, 10)
-                    
-                    // MARK: - Ayuda con traslado (solo para electrodomésticos/muebles)
-                    if isLargeItem {
-                        TransportHelpCard(needsHelp: donation.needsTransportHelp)
-                        
-                        Divider()
-                            .padding(.vertical, 10)
-                    }
-                    
-                    // MARK: - Bazar a entregar (solo si está aprobada)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Bazar a entregar")
-                            .font(.gotham(.bold, style: .headline))
-                        
-                        if isApproved {
-                            if let bazar = viewModel.bazar {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(bazar.nombre ?? bazar.location ?? "Bazar Cáritas")
-                                        .font(.gotham(.regular, style: .body))
-                                    
-                                    if let address = bazar.address {
-                                        Text(address)
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(10)
-                            } else {
-                                Text("No se pudo cargar la información del bazar.")
-                                    .font(.gotham(.regular, style: .body))
-                                    .foregroundColor(.secondary)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(10)
+
+                    if urls.count > 3 {
+                        Button { showAllPhotos = true } label: {
+                            ZStack {
+                                Color(.gray.opacity(0.85))
+                                Text("+\(urls.count - 3)")
+                                    .font(.title2.bold())
+                                    .foregroundColor(.white)
                             }
-                        } else {
-                            Text("El bazar se mostrará cuando tu donación sea aprobada.")
-                                .font(.gotham(.regular, style: .body))
-                                .foregroundColor(.secondary)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(10)
-                        }
-                    }
-                    
-                    Divider()
-                        .padding(.vertical, 10)
-                    
-                    // MARK: - Ubicación (solo si está aprobada y hay bazar con coords)
-                    if isApproved {
-                        if let bazar = viewModel.bazar,
-                           let lat = bazar.latitude,
-                           let lon = bazar.longitude {
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Ubicación")
-                                    .font(.gotham(.bold, style: .headline))
-                                
-                                NavigationLink {
-                                    FullMapComponent(
-                                        nombre: bazar.nombre ?? bazar.location ?? "Bazar Cáritas",
-                                        lat: lat,
-                                        lon: lon
-                                    )
-                                } label: {
-                                    MapComponent(
-                                        nombre: bazar.nombre ?? bazar.location ?? "Bazar Cáritas",
-                                        lat: lat,
-                                        lon: lon,
-                                        address: bazar.address ?? "Sin dirección"
-                                    )
-                                }
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 10)
-                        } else {
-                            // Aprobada pero sin coordenadas
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Ubicación")
-                                    .font(.gotham(.bold, style: .headline))
-                                
-                                Text("Ubicación no disponible.")
-                                    .font(.gotham(.regular, style: .body))
-                                    .foregroundColor(.secondary)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(10)
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 10)
-                        }
-                        
-                        // MARK: - QR Code (solo si está aprobada y tiene QR)
-                        if let qrCode = donation.qrCode {
-                            VStack(alignment: .center, spacing: 16) {
-                                QRDisplayView(
-                                    qrCodeBase64: qrCode,
-                                    donationId: donation.id ?? "",
-                                    folioNumber: donation.folio
-                                )
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 10)
+                            .frame(height: 140)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showAllPhotos) {
-                AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
-            }
-        }
-        .task {
-            await viewModel.loadBazarDetails()
         }
     }
-    
-    // MARK: - Helper
-    
+
+    // 📌 INFO
+    private var infoSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(donation.title ?? "Sin título")
+                .font(.gotham(.bold, style: .title3))
+
+            Text(donation.description ?? "Sin descripción")
+                .font(.gotham(.regular, style: .callout))
+                .foregroundColor(.secondary)
+
+            HStack {
+                Text("Estado:")
+                    .font(.gotham(.bold, style: .body))
+
+                Spacer()
+
+                Text(statusLabel(donation.status ?? "pending"))
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(statusColor(donation.status ?? "pending"))
+                    .foregroundColor(.white)
+                    .cornerRadius(20)
+            }
+        }
+    }
+
+    // 📌 FEEDBACK
+    private var feedbackSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Feedback")
+                .font(.gotham(.bold, style: .headline))
+
+            Text(donation.adminComment ?? "Sin comentarios")
+                .font(.gotham(.regular, style: .body))
+                .foregroundColor(.secondary)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+        }
+    }
+
+    // 📌 BAZAR
+    private var bazarSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Bazar asignado")
+                .font(.gotham(.bold, style: .headline))
+
+            if isApproved {
+                if let bazar = detailVM.bazar {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(bazar.nombre ?? "Bazar Cáritas")
+                        Text(bazar.address ?? "")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+
+                } else {
+                    Text("No se pudo cargar la información del bazar.")
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                }
+
+            } else {
+                Text("El bazar se mostrará cuando la donación sea aprobada.")
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+            }
+        }
+    }
+
+    // 📌 UBICACIÓN
+    private var locationSection: some View {
+        Group {
+            if isApproved,
+               let bazar = detailVM.bazar,
+               let lat = bazar.latitude,
+               let lon = bazar.longitude {
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Ubicación")
+                        .font(.gotham(.bold, style: .headline))
+
+                    NavigationLink {
+                        FullMapComponent(
+                            nombre: bazar.nombre ?? "",
+                            lat: lat,
+                            lon: lon
+                        )
+                    } label: {
+                        MapComponent(
+                            nombre: bazar.nombre ?? "",
+                            lat: lat,
+                            lon: lon,
+                            address: bazar.address ?? ""
+                        )
+                    }
+                }
+
+            } else if isApproved {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Ubicación")
+                        .font(.gotham(.bold, style: .headline))
+
+                    Text("Ubicación no disponible.")
+                        .font(.gotham(.regular, style: .body))
+                        .foregroundColor(.secondary)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                }
+            }
+        }
+    }
+
+    // 📌 ACCIÓN ADMIN
+    private var adminActionSection: some View {
+        VStack{
+
+            if isDelivered {
+                Text("Esta donación ya fue entregada.")
+                    .font(.gotham(.bold, style: .body))
+                    .foregroundColor(.green)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+            } else {
+                Button(action: { showConfirmAlert = true }) {
+                    Text("Marcar como ENTREGADA")
+                        .font(.gotham(.bold, style: .headline))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.aqua)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+            }
+        }
+    }
+}
+
+
+
+// ======================================================
+// MARK: - HELPERS
+// ======================================================
+
+extension DonationDetailView {
+
     private func statusColor(_ status: String) -> Color {
         switch status.lowercased() {
         case "pending": return .gray
@@ -303,7 +379,7 @@ struct DonationDetailView: View {
         default: return .gray
         }
     }
-    
+
     private func statusLabel(_ status: String) -> String {
         switch status.lowercased() {
         case "pending": return "PENDIENTE"
@@ -313,6 +389,7 @@ struct DonationDetailView: View {
         }
     }
 }
+
 
 // MARK: - Preview
 
@@ -329,15 +406,15 @@ struct DonationDetailView: View {
             "https://picsum.photos/400/300",
             "https://picsum.photos/400/300",
             "https://picsum.photos/400/300",
-            "https://picsum.photos/400/300",
-            "https://picsum.photos/400/300",
-            "https://picsum.photos/400/300",
+            "https://picsum.photos/400/300"
         ],
         status: "approved",
         title: "Y x",
         userId: "U001",
-        needsTransportHelp: true
+        needsTransportHelp: true,
+        qrCode: "MI_QR_BASE64_DE_EJEMPLO"
     )
-    
+
     DonationDetailView(donation: testDonation, isPreview: true)
+        .environmentObject(AuthViewModel())
 }
