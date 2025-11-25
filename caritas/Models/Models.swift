@@ -60,7 +60,7 @@ struct BazarUI: Identifiable, Codable, Equatable {
 ///   - Escribe:
 ///       * `photoUrl` si hay 1 foto
 ///       * `photoUrls` si hay 2 o más
-struct Donation: Identifiable, Codable, Equatable {
+struct Donation: Identifiable, Codable, Equatable, Hashable {
     var id: String?
     var bazarId: String?
     var categoryId: [String]?
@@ -147,6 +147,17 @@ struct Donation: Identifiable, Codable, Equatable {
         }
 
         return m
+    }
+
+    // MARK: - Hashable
+    func hash(into hasher: inout Hasher) {
+        // Use a stable, unique identifier for hashing
+        hasher.combine(id)
+    }
+
+    // Optional: ensure Equatable aligns with Hashable semantics (by id)
+    static func == (lhs: Donation, rhs: Donation) -> Bool {
+        return lhs.id == rhs.id
     }
 }
 

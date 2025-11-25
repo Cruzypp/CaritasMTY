@@ -8,17 +8,33 @@
 import SwiftUI
 import Foundation
 
+
 struct StatusView: View {
-    @StateObject private var viewModel = StatusViewModel()
+    @StateObject private var viewModel: StatusViewModel
+    @State private var selectedDonation: Donation?
+    
+    init(isDummy: Bool = false) {
+        _viewModel = StateObject(wrappedValue: StatusViewModel(isDummy: isDummy))
+    }
 
     var body: some View {
         NavigationStack{
-            VStack(alignment: .leading){
+            VStack(alignment: .leading, spacing: 0){
                 Text("Estatus de\nDonaciones")
                     .padding(.top, 40)
                     .padding(.leading, 20)
                     .font(.gotham(.bold, style: .largeTitle))
                     .foregroundColor(.azulMarino)
+                
+                // Picker Segmentado
+                Picker("Estado", selection: $viewModel.selectedStatus) {
+                    ForEach(StatusViewModel.DonationStatus.allCases, id: \.self) { status in
+                        Text(status.rawValue).tag(status)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
                 
                 if viewModel.isLoading {
                     ProgressView()
@@ -36,7 +52,7 @@ struct StatusView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                } else if viewModel.donations.isEmpty {
+                } else if viewModel.filteredAndSortedDonations.isEmpty {
                     VStack(spacing: 10) {
                         Image(systemName: "box.circle")
                             .font(.title)
@@ -47,15 +63,25 @@ struct StatusView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 } else {
                     List{
-                        ForEach(viewModel.donations, id: \.id) { donation in
-                            NavigationLink(destination: DonationDetailView(donation: donation)) {
-                                StatusCard(donation: donation)
-                                    .padding(.vertical, -9)
-                            }
+                        ForEach(viewModel.filteredAndSortedDonations, id: \.id) { donation in
+                            StatusCard(donation: donation)
+                                .padding(.vertical, -9)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedDonation = donation
+                                }
                             .listRowSeparator(.hidden)
+                            .buttonStyle(.plain)
                         }
                     }
                     .listStyle(.plain)
+                    .refreshable {
+                        await viewModel.loadDonations()
+                    }
+                    .environment(\.defaultMinListRowHeight, 0)
+                    .navigationDestination(item: $selectedDonation) { donation in
+                        DonationDetailView(donation: donation)
+                    }
                 }
             }
         }
@@ -66,5 +92,5 @@ struct StatusView: View {
 }
 
 #Preview {
-    StatusView()
+    StatusView(isDummy: true)
 }
