@@ -14,7 +14,7 @@ struct SignUpView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var acceptPolicies = false
+    @State private var acceptPolicies = true
 
     @FocusState private var focusedField: Field?
     enum Field {
@@ -126,7 +126,7 @@ struct SignUpView: View {
             // Botón Registro
             Button {
                 Task {
-                    await auth.signUp(email: email, password: password, acceptedPolicies: acceptPolicies)
+                    await auth.signUp(email: email, password: password, acceptedPolicies: <#Bool#>)
                     if auth.error == nil && auth.user != nil {
                         showSuccessMessage = true
                         // Navega automáticamente después de 1.5 segundos
