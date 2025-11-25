@@ -14,7 +14,7 @@ struct SignUpView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var acceptPolicies = false
+    @State private var acceptPolicies = true
 
     @FocusState private var focusedField: Field?
     enum Field {
@@ -22,7 +22,7 @@ struct SignUpView: View {
         case password
     }
 
-    private var canRegister: Bool { !email.isEmpty && !password.isEmpty && acceptPolicies }
+    private var canRegister: Bool { !email.isEmpty && !password.isEmpty }
 
     var body: some View {
         VStack(spacing: 24) {
@@ -47,7 +47,7 @@ struct SignUpView: View {
                     Text("EMAIL")
                         .font(.gotham(.bold, style: .caption))
                         .foregroundColor(.gray)
-                    TextField("hello@reallygreatsite.com", text: $email)
+                    TextField("correo", text: $email)
                         .font(.gotham(.regular, style: .body))
                         .padding()
                         .background(Color(.systemGray6))
