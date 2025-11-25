@@ -80,27 +80,32 @@ struct SignUpView: View {
             }
 
             // Aceptación de políticas
-            HStack {
+            VStack {
                 Button(action: {
                     withAnimation(.spring(duration: 0.18)) { acceptPolicies.toggle() }
                 }) {
+                    /*
                     RoundedRectangle(cornerRadius: 6)
                         .fill(acceptPolicies ? Color("azulMarino") : .clear)
                         .frame(width: 26, height: 26)
                         .overlay(
+                            
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color("azulMarino"), lineWidth: 2)
                         )
+                     
                         .overlay(
                             Image(systemName: "checkmark")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundStyle(acceptPolicies ? .white : .clear)
                         )
                         .contentShape(Rectangle()) // hace tap fácil
+                     */
                 }
                 .accessibilityLabel("Aceptar políticas de privacidad")
                 .accessibilityValue(acceptPolicies ? "Activado" : "Desactivado")
-                Text("Acepto el")
+                
+                Text("Al crear una cuenta aceptas el")
                     .font(.gotham(.regular, style: .callout))
                     .foregroundColor(.gray)
 
