@@ -8,27 +8,37 @@
 import SwiftUI
 import MapKit
 
-
 struct BazaarDetailView: View {
-    
+
     let bazar: Bazar
     @State private var showCallAlert = false
     @State private var phoneNumber: String = ""
     @State private var goToMap: Bool = false
-    
+
+    // 👉 Navegación al DonateView
+    @State private var goToDonate = false
+
+    // 👉 Alerta cuando el bazar no acepta donaciones
+    @State private var showClosedDonateAlert = false
+
     private let columns = [
         GridItem(.adaptive(minimum: 120), spacing: 10, alignment: .leading)
     ]
-    
+
     var body: some View {
-        
-        ScrollView{
-            VStack{
+
+        ScrollView {
+            VStack(spacing: 20) {
+
+                // ==========================
+                // HEADER FOTO
+                // ==========================
                 ZStack(alignment: .bottomLeading) {
-                    
+
                     Image(.bazar)
                         .resizable()
                         .scaledToFill()
+
                     LinearGradient(
                         gradient: Gradient(colors: [
                             Color(.azulMarino).opacity(0.8),
@@ -37,88 +47,179 @@ struct BazaarDetailView: View {
                         startPoint: .bottom,
                         endPoint: .center
                     )
-                    
+
                     Text(bazar.nombre ?? "Sin ubicación")
                         .font(.gotham(.bold, style: .title))
                         .padding(15)
-                        .foregroundStyle(Color(.white))
+                        .foregroundStyle(.white)
                 }
                 .frame(width: 350, height: 250)
                 .clipped()
-                .clipShape(.rect(cornerRadius: 15))
+                .clipShape(RoundedRectangle(cornerRadius: 15))
                 .shadow(radius: 3)
-                
-                VStack() {
+
+                // ==========================
+                // BANNER NO ACEPTANDO DONACIONES
+                // ==========================
+                if bazar.acceptingDonations == false {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.headline)
+                            .foregroundColor(.yellow)
+
+                        Text("Actualmente NO está aceptando donaciones")
+                            .font(.gotham(.regular, style: .subheadline))
+                            .foregroundColor(.primary)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.yellow.opacity(0.25))
+                    .cornerRadius(12)
+                    .padding(.horizontal, 20)
+                }
+
+                // ==========================
+                // CATEGORÍAS
+                // ==========================
+                VStack(alignment: .leading) {
                     Text("Categorías")
                         .font(.gotham(.bold, style: .headline))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                    
+                        .padding(.horizontal)
+
                     FlowLayout(spacingX: 10, spacingY: 12) {
                         ForEach(Array(bazar.categorias ?? [:]), id: \.key) { key, value in
-                            
                             PillComponent(categoria: value)
                         }
                     }
                     .padding(.horizontal, 36)
                 }
-                .padding(.horizontal)
-                
-                VStack{
+
+                // ==========================
+                // HORARIOS
+                // ==========================
+                VStack {
                     ScheduleComponent(horario: bazar.horarios ?? "")
                 }
-                .padding()
-                
-                HStack{
+                .padding(.horizontal)
+
+                // ==========================
+                // TELÉFONO
+                // ==========================
+                HStack {
                     Text("Teléfono:")
                         .font(.gotham(.bold, style: .headline))
                         .padding(.horizontal)
-                    
+
                     Spacer()
-                    
+
                     if let numero = bazar.telefono?.replacingOccurrences(of: " ", with: "") {
-                        Button{
+                        Button {
                             phoneNumber = numero
                             showCallAlert.toggle()
                         } label: {
-                            Label(bazar.telefono ?? "00 0000 0000", systemImage: "phone.fill")
+                            Label(bazar.telefono ?? "00 0000 0000",
+                                  systemImage: "phone.fill")
                                 .foregroundStyle(.aqua)
                         }
                         .padding(.trailing)
                     }
-                    
                 }
-                .padding()
-                
-                
-                Button{
+                .padding(.vertical, 5)
+
+                // ==========================
+                // MAPA
+                // ==========================
+                Button {
                     goToMap.toggle()
                 } label: {
-                    MapComponent(nombre: bazar.nombre ?? "bazar", lat: bazar.latitude ?? 0.0, lon: bazar.longitude ?? 0.0, address: bazar.address ?? "Sin dirección")
+                    MapComponent(
+                        nombre: bazar.nombre ?? "bazar",
+                        lat: bazar.latitude ?? 0.0,
+                        lon: bazar.longitude ?? 0.0,
+                        address: bazar.address ?? "Sin dirección"
+                    )
                 }
-                .padding()
+                .padding(.horizontal)
+
+                // ==========================
+                // NAVEGACIÓN OCULTA -> DONATE VIEW
+                // ==========================
+                .navigationDestination(isPresented: $goToDonate) {
+                    DonateView(preselectedBazar: bazar)
+                }
+
+                // ==========================
+                // BOTÓN DONAR
+                // ==========================
+                Button {
+
+                    if bazar.acceptingDonations == false {
+                        showClosedDonateAlert = true
+                        return
+                    }
+
+                    goToDonate = true
+
+                } label: {
+                    Text("DONAR")
+                        .font(.gotham(.bold, style: .title2))
+                        .frame(width: 250, height: 60)
+                        .foregroundStyle(.white)
+                        .background(
+                            RadialGradient(
+                                gradient: Gradient(colors: [
+                                    Color.aqua,
+                                    Color.aqua.mix(with: .white, by: 0.10).opacity(0.9)
+                                ]),
+                                center: .center,
+                                startRadius: 30,
+                                endRadius: 220
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        )
+                }
+                .tint(Color.aqua)
+                .shadow(radius: 10)
+                .padding(.top, 10)
+
             }
         }
+        // ==========================
+        // ALERTA: LLAMADA
+        // ==========================
         .alert("¿Llamar a \(phoneNumber)?", isPresented: $showCallAlert) {
             Button("Cancelar", role: .cancel) { }
-            Button("Llamar") {
-                call(to: phoneNumber)
-            }
+            Button("Llamar") { call(to: phoneNumber) }
         }
-        .navigationDestination(isPresented: $goToMap){
-            FullMapComponent(nombre: bazar.nombre ?? "bazar", lat: bazar.latitude ?? 0.0, lon: bazar.longitude ?? 0.0)
+
+        // ==========================
+        // ALERTA: BAZAR CERRADO AL DONAR
+        // ==========================
+        .alert("Bazar no disponible", isPresented: $showClosedDonateAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("\(bazar.nombre ?? "Este bazar") actualmente no está aceptando donaciones. Por favor elige otro bazar.")
+        }
+
+        // ==========================
+        // NAVEGACIÓN -> MAPA COMPLETO
+        // ==========================
+        .navigationDestination(isPresented: $goToMap) {
+            FullMapComponent(
+                nombre: bazar.nombre ?? "bazar",
+                lat: bazar.latitude ?? 0.0,
+                lon: bazar.longitude ?? 0.0
+            )
         }
     }
+
     private func call(to rawNumber: String?) {
-        
-        // Hacer que solo sean dígitos
         let digits = (rawNumber ?? "")
             .components(separatedBy: CharacterSet.decimalDigits.inverted)
             .joined()
-        
+
         if let url = URL(string: "telprompt://\(digits)") {
             UIApplication.shared.open(url)
-            return
         }
     }
 }
@@ -126,7 +227,7 @@ struct BazaarDetailView: View {
 #Preview {
     let bazar = Bazar(
         id: "bazar_001",
-        acceptingDonations: true,
+        acceptingDonations: false,
         address: "Florencio Antillón 1223, Centro, Monterrey, N.L., C.P 64720",
         categoryIds: ["0", "1", "2"],
         location: "Divina Providencia",
@@ -143,6 +244,9 @@ struct BazaarDetailView: View {
             "4": "Personal"
         ]
     )
-    BazaarDetailView( bazar: bazar)
-        .environmentObject(AuthViewModel())
+
+    NavigationStack {
+        BazaarDetailView(bazar: bazar)
+            .environmentObject(AuthViewModel())
+    }
 }
