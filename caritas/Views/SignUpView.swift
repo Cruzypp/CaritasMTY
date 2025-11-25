@@ -22,7 +22,7 @@ struct SignUpView: View {
         case password
     }
 
-    private var canRegister: Bool { !email.isEmpty && !password.isEmpty && acceptPolicies }
+    private var canRegister: Bool { !email.isEmpty && !password.isEmpty }
 
     var body: some View {
         VStack(spacing: 24) {
@@ -47,7 +47,7 @@ struct SignUpView: View {
                     Text("EMAIL")
                         .font(.gotham(.bold, style: .caption))
                         .foregroundColor(.gray)
-                    TextField("hello@reallygreatsite.com", text: $email)
+                    TextField("correo", text: $email)
                         .font(.gotham(.regular, style: .body))
                         .padding()
                         .background(Color(.systemGray6))
@@ -126,7 +126,7 @@ struct SignUpView: View {
             // Botón Registro
             Button {
                 Task {
-                    await auth.signUp(email: email, password: password, acceptedPolicies: <#Bool#>)
+                    await auth.signUp(email: email, password: password, acceptedPolicies: acceptPolicies)
                     if auth.error == nil && auth.user != nil {
                         showSuccessMessage = true
                         // Navega automáticamente después de 1.5 segundos
