@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseCore
 
 enum Status: String, CaseIterable {
     case pendiente = "Pendiente"
@@ -20,16 +21,16 @@ struct StatusCard: View {
                             image
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width: 100, height: 100)
+                                .frame(width: 120, height: 120)
                                 .clipShape(.rect(cornerRadius: 15))
                         case .failure(_):
                             Image(.logotipo)
                                 .resizable()
-                                .frame(width: 100, height: 100)
+                                .frame(width: 120, height: 120)
                                 .clipShape(.rect(cornerRadius: 15))
                         case .empty:
                             ProgressView()
-                                .frame(width: 100, height: 100)
+                                .frame(width: 120, height: 120)
                         @unknown default:
                             EmptyView()
                         }
@@ -37,30 +38,53 @@ struct StatusCard: View {
                 } else {
                     Image(.logotipo)
                         .resizable()
-                        .frame(width: 100, height: 100)
+                        .frame(width: 120, height: 120)
                         .clipShape(.rect(cornerRadius: 15))
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(donation.folio ?? "")
+                    
+                    Text(donation.title ?? "Sin título")
                         .font(.gotham(.bold, style: .headline))
-                        .frame(maxWidth: 200, alignment: .center)
-                        .padding(5)
-                        .background(Color.naranja)
-                        .foregroundStyle(.white)
-                        .clipShape(.rect(cornerRadius: 8))
-
-                    Text(statusLabel(status: donation.status ?? "pending"))
-                        .font(.gotham(.bold, style: .title3))
-                        .frame(height: 40)
-                        .frame(maxWidth: 200, alignment: .center)
-                        .padding(5)
-                        .background(colorEstado(status: donation.status ?? "pending"))
-                        .foregroundStyle(.white)
-                        .clipShape(.rect(cornerRadius: 8))
-                }
+                        .lineLimit(2)
+                        .foregroundStyle(.azulMarino)
+                    
+                    Divider()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .foregroundStyle(Color(.systemGray4))
+                    
+                    HStack{
+                        
+                        if let day = donation.day?.dateValue() {
+                            Text(formatDate(day))
+                                .font(.gotham(.bold, style: .footnote))
+                                .foregroundStyle(.azulMarino)
+                                .padding(.top, 2)
+                            
+                        }
+                        
+                        Spacer()
+                        
+                        Text(statusLabel(status: donation.status ?? "pending"))
+                            .font(.gotham(.bold, style: .caption))
+                            .frame(height: 20)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .frame(width: 80)
+                            .padding(5)
+                            .background(colorEstado(status: donation.status ?? "pending"))
+                            .foregroundStyle(.white)
+                            .clipShape(.rect(cornerRadius: 15))
+                    }
+    
+            
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(.white)
+                    .clipShape(.rect(cornerRadius: 8))
+                    .foregroundColor(.black)
             }
-            .shadow(radius: 2)
+            .shadow(color: .white.mix(with: .black, by: 0.2), radius: 2)
         }
     }
 
@@ -75,11 +99,18 @@ struct StatusCard: View {
 
     func statusLabel(status: String) -> String {
         switch status.lowercased() {
-        case "pending": return "PENDIENTE"
-        case "approved": return "APROBADA"
-        case "rejected": return "RECHAZADA"
+        case "pending": return "Pendiente"
+        case "approved": return "Aprobada"
+        case "rejected": return "Rechazada"
         default: return status.uppercased()
         }
+    }
+
+    func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+        formatter.dateFormat = "d MMM yyyy"
+        return formatter.string(from: date)
     }
 }
 
@@ -88,12 +119,12 @@ struct StatusCard: View {
         id: "D001",
         bazarId: "B001",
         categoryId: ["ropa"],
-        day: nil,
+        day: Timestamp(),
         description: "Test",
         folio: "FOL-001",
         photoUrls: ["https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3"],
         status: "rejected",
-        title: "Test Donation",
+        title: "Donacion jejejejeje",
         userId: "U001"
     )
     StatusCard(donation: testDonation)
