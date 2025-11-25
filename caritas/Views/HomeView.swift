@@ -157,7 +157,7 @@ struct HomeView: View {
                 }
                 
             }
-            .padding(.top, 30)
+            .padding(.top, 5)
             .onAppear { viewModel.fetchBazares() }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
