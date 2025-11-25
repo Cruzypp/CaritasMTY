@@ -10,13 +10,22 @@ import UIKit
 import Combine
 
 final class DonateViewModel: ObservableObject {
+
+    // MARK: - Datos de la donación
     @Published var selectedImages: [UIImage] = []
     @Published var title: String = ""
     @Published var description: String = ""
     @Published var selectedCategories: [String] = []
+
+    /// 🔥 NUEVO: almacena el bazar preseleccionado que viene desde BazaarDetailView
+    @Published var preselectedBazar: Bazar? = nil
+
+    /// ID del bazar seleccionado (ya sea manual o preseleccionado)
     @Published var selectedBazarId: String? = nil
+
     @Published var needsTransportHelp: Bool = false
     
+    // MARK: - Estado UI
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
     @Published var successMessage: String? = nil
@@ -24,15 +33,13 @@ final class DonateViewModel: ObservableObject {
     private let firestoreService = FirestoreService.shared
     private let storageService = StorageService.shared
     
-    // Límite máximo de fotos permitidas
+    // MARK: - Límites de fotos
     let maxPhotos: Int = 10
     
-    // Calcula cuántas fotos más se pueden agregar
     var remainingPhotos: Int {
         max(0, maxPhotos - selectedImages.count)
     }
     
-    // Verifica si se pueden agregar más fotos
     var canAddMorePhotos: Bool {
         selectedImages.count < maxPhotos
     }
@@ -46,34 +53,30 @@ final class DonateViewModel: ObservableObject {
         case muebles = "Muebles"
         case personal = "Personal"
         
-        var nombre: String {
-            return self.rawValue
-        }
+        var nombre: String { self.rawValue }
     }
     
-    
-    /// Valida los datos de la donación
+    // MARK: - VALIDACIÓN
     func validateDonation() -> Bool {
-        // Debe haber al menos 2 imágenes
+        
         guard selectedImages.count >= 2 else {
             errorMessage = "Debes seleccionar al menos 2 fotos"
             return false
         }
         
-        // El título no puede estar vacío
         guard !title.trimmingCharacters(in: .whitespaces).isEmpty else {
             errorMessage = "El título es obligatorio"
             return false
         }
         
-        // Debe haber al menos 1 categoría
         guard !selectedCategories.isEmpty else {
             errorMessage = "Selecciona al menos una categoría"
             return false
         }
         
-        // Debe haber un bazar seleccionado
-        guard selectedBazarId != nil && !selectedBazarId!.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard selectedBazarId != nil,
+              !(selectedBazarId?.trimmingCharacters(in: .whitespaces).isEmpty ?? true)
+        else {
             errorMessage = "Selecciona un bazar de entrega"
             return false
         }
@@ -81,7 +84,8 @@ final class DonateViewModel: ObservableObject {
         return true
     }
     
-    /// Sube la donación a Firebase
+    
+    // MARK: - SUBMIT DONACIÓN
     @MainActor
     func submitDonation(userId: String, bazarId: String? = nil) async {
         guard validateDonation() else { return }
@@ -91,18 +95,18 @@ final class DonateViewModel: ObservableObject {
         successMessage = nil
         
         do {
-            // 1. Crear la donación en Firestore (sin fotos aún)
+            // Crear la donación
             let donationId = try await firestoreService.createDonation(
                 for: userId,
                 title: title,
                 description: description,
                 categoryText: selectedCategories.joined(separator: ", "),
-                bazarId: bazarId,
+                bazarId: bazarId ?? selectedBazarId,
                 photoUrls: [],
                 needsTransportHelp: needsTransportHelp
             )
             
-            // 2. Subir las imágenes a Storage
+            // Subir fotos
             let photoUrls = try await storageService.uploadDonationImages(
                 docId: donationId,
                 images: selectedImages,
@@ -110,13 +114,12 @@ final class DonateViewModel: ObservableObject {
                 targetKB: 350
             )
             
-            // 3. Actualizar la donación con las URLs de las fotos
+            // Actualizar documento con URLs
             try await firestoreService.updateDonationPhotoURLs(
                 docId: donationId,
                 urls: photoUrls
             )
             
-            // ✅ Éxito
             successMessage = "¡Donación enviada exitosamente!"
             resetForm()
             
@@ -128,16 +131,19 @@ final class DonateViewModel: ObservableObject {
         isLoading = false
     }
     
-    /// Reinicia el formulario
+    
+    // MARK: - Resetear UI
     private func resetForm() {
         selectedImages = []
         title = ""
         description = ""
         selectedCategories = []
+        selectedBazarId = nil
+        preselectedBazar = nil
         needsTransportHelp = false
     }
     
-    /// Agrega o quita una categoría
+    // MARK: - Categorías
     func toggleCategory(_ category: String) {
         if selectedCategories.contains(category) {
             selectedCategories.removeAll { $0 == category }
