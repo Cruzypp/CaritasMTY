@@ -47,7 +47,13 @@ final class StatusViewModel: ObservableObject {
         var filtered = donations
         
         // Filtrar por status
-        filtered = filtered.filter { $0.status == selectedStatus.firebaseValue }
+        if selectedStatus.firebaseValue == "delivered" {
+            // Si buscamos "Entregado", filtramos por isDelivered = true
+            filtered = filtered.filter { $0.isDelivered == true }
+        } else {
+            // Si no, filtramos por el status y excluimos entregadas
+            filtered = filtered.filter { $0.status == selectedStatus.firebaseValue && $0.isDelivered != true }
+        }
         
         // Ordenar por fecha (más recientes primero)
         filtered.sort { donation1, donation2 in
@@ -145,7 +151,7 @@ final class StatusViewModel: ObservableObject {
                 photoUrls: [
                     "https://firebasestorage.googleapis.com/v0/b/lostemplariosbackend.firebasestorage.app/o/donations%2FbZSA5wOLJFRo5J2skLKU%2Fphoto_0.heic?alt=media&token=8b5cf846-9cb7-4669-ba7d-853e42a59ee3"
                 ],
-                status: "delivered",
+                status: "approved",
                 title: "Laptop usada",
                 userId: currentUserId,
                 isDelivered: true
