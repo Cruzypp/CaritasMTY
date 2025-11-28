@@ -74,6 +74,7 @@ struct TransportHelpCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.systemGray6))
             .cornerRadius(12)
+            .padding(.horizontal)
             .alert("Llamar", isPresented: $showCallAlert) {
                 Button("Llamar") {
                     if let url = URL(string: "tel://\(phoneNumber)") {
@@ -85,6 +86,7 @@ struct TransportHelpCard: View {
                 Text("¿Deseas llamar al número \(phoneNumber)?")
             }
         }
+        .padding(.horizontal)
     }
 }
 

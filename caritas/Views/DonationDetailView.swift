@@ -17,7 +17,6 @@ struct DonationDetailView: View {
     @StateObject private var adminVM = BazarAdminDonationsVM()
 
     // UI State
-    @State private var showAllPhotos = false
     @State private var showConfirmAlert = false
 
     // Para regresar a la vista anterior (admin bazar)
@@ -65,48 +64,40 @@ struct DonationDetailView: View {
                     .padding(.top, 20)
                     .frame(maxWidth: .infinity, alignment: .center)
 
-                // =========================
-                // GALERÍA
-                // =========================
-                gallerySection
+                // MARK: Galería
+                GallerySection(photoUrls: donation.photoUrls)
+                    .padding(.horizontal)
 
-                // =========================
-                // INFO
-                // =========================
-                infoSection
+                // MARK: Información
+                InfoSection(donation: donation)
+                
                 Divider().padding(.vertical, 10)
 
-                // =========================
-                // FEEDBACK
-                // =========================
-                feedbackSection
+                // MARK: Feedback
+                FeedbackSection(adminComment: donation.adminComment)
                 Divider().padding(.vertical, 10)
 
-                // =========================
-                // TRANSPORTE
-                // =========================
+                // MARK: Transporte
                 if isLargeItem {
                     TransportHelpCard(needsHelp: donation.needsTransportHelp)
                     Divider().padding(.vertical, 10)
                 }
 
-                // =========================
-                // BAZAR
-                // =========================
-                bazarSection
+                // MARK: Bazar
+                BazarSection(
+                    isApproved: isApproved,
+                    bazar: detailVM.bazar,
+                    isLoading: detailVM.isLoading
+                )
                 Divider().padding(.vertical, 10)
 
-                // =========================
-                // UBICACIÓN
-                // =========================
-                locationSection
+                // MARK: Ubicación
+                LocationSection(isApproved: isApproved, bazar: detailVM.bazar)
+                    .padding(.horizontal)
                 Divider().padding(.vertical, 10)
 
-                // =========================
-                // QR (SOLO DONANTE)
-                // =========================
-                if isApproved,
-                   !isBazarAdmin,                          // 👈 IMPORTANTE: solo si NO es admin de bazar
+                // MARK: QR de Donante
+                if isApproved && !isBazarAdmin,
                    let qrCode = donation.qrCode {
 
                     VStack(alignment: .center, spacing: 16) {
@@ -116,15 +107,19 @@ struct DonationDetailView: View {
                             folioNumber: donation.folio
                         )
                     }
+                    .padding()
 
                     Divider().padding(.vertical, 10)
                 }
 
-                // =========================
-                // ACCIÓN ADMIN (SOLO ADMIN BAZAR)
-                // =========================
+                
                 if isBazarAdmin {
-                    adminActionSection
+                    AdminActionSection(
+                        isDelivered: isDelivered,
+                        donation: donation,
+                        onMarkDelivered: { showConfirmAlert = true }
+                    )
+                        .padding(.horizontal)
                 }
 
             }
@@ -133,9 +128,6 @@ struct DonationDetailView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showAllPhotos) {
-            AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
-        }
         .onAppear {
             Task { await detailVM.loadBazarDetails() }
         }
@@ -158,234 +150,6 @@ struct DonationDetailView: View {
 
         } message: {
             Text("¿Confirmas que la donación \"\(donation.title ?? "Sin título")\" fue entregada en el bazar?")
-        }
-    }
-}
-
-
-
-// ======================================================
-// MARK: - SECCIONES
-// ======================================================
-
-extension DonationDetailView {
-
-    // 📌 GALERÍA
-    private var gallerySection: some View {
-        VStack(spacing: 10) {
-            if let urls = donation.photoUrls, !urls.isEmpty {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 10) {
-
-                    ForEach(Array(urls.prefix(3).enumerated()), id: \.offset) { _, urlString in
-                        if let url = URL(string: urlString) {
-                            Button { showAllPhotos = true } label: {
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(height: 140)
-                                            .clipped()
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    default:
-                                        ZStack {
-                                            Color(.systemGray6)
-                                            ProgressView()
-                                        }
-                                        .frame(height: 140)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if urls.count > 3 {
-                        Button { showAllPhotos = true } label: {
-                            ZStack {
-                                Color(.gray.opacity(0.85))
-                                Text("+\(urls.count - 3)")
-                                    .font(.title2.bold())
-                                    .foregroundColor(.white)
-                            }
-                            .frame(height: 140)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 📌 INFO
-    private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(donation.title ?? "Sin título")
-                .font(.gotham(.bold, style: .title3))
-
-            Text(donation.description ?? "Sin descripción")
-                .font(.gotham(.regular, style: .callout))
-                .foregroundColor(.secondary)
-
-            HStack {
-                Text("Estado:")
-                    .font(.gotham(.bold, style: .body))
-
-                Spacer()
-
-                Text(statusLabel(donation.status ?? "pending"))
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(statusColor(donation.status ?? "pending"))
-                    .foregroundColor(.white)
-                    .cornerRadius(20)
-            }
-        }
-    }
-
-    // 📌 FEEDBACK
-    private var feedbackSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Feedback")
-                .font(.gotham(.bold, style: .headline))
-
-            Text(donation.adminComment ?? "Sin comentarios")
-                .font(.gotham(.regular, style: .body))
-                .foregroundColor(.secondary)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-        }
-    }
-
-    // 📌 BAZAR
-    private var bazarSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Bazar asignado")
-                .font(.gotham(.bold, style: .headline))
-
-            if isApproved {
-                if let bazar = detailVM.bazar {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(bazar.nombre ?? "Bazar Cáritas")
-                        Text(bazar.address ?? "")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-
-                } else {
-                    Text("No se pudo cargar la información del bazar.")
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                }
-
-            } else {
-                Text("El bazar se mostrará cuando la donación sea aprobada.")
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-            }
-        }
-    }
-
-    // 📌 UBICACIÓN
-    private var locationSection: some View {
-        Group {
-            if isApproved,
-               let bazar = detailVM.bazar,
-               let lat = bazar.latitude,
-               let lon = bazar.longitude {
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Ubicación")
-                        .font(.gotham(.bold, style: .headline))
-
-                    NavigationLink {
-                        FullMapComponent(
-                            nombre: bazar.nombre ?? "",
-                            lat: lat,
-                            lon: lon
-                        )
-                    } label: {
-                        MapComponent(
-                            nombre: bazar.nombre ?? "",
-                            lat: lat,
-                            lon: lon,
-                            address: bazar.address ?? ""
-                        )
-                    }
-                }
-
-            } else if isApproved {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Ubicación")
-                        .font(.gotham(.bold, style: .headline))
-
-                    Text("Ubicación no disponible.")
-                        .font(.gotham(.regular, style: .body))
-                        .foregroundColor(.secondary)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                }
-            }
-        }
-    }
-
-    // 📌 ACCIÓN ADMIN
-    private var adminActionSection: some View {
-        VStack{
-
-            if isDelivered {
-                Text("Esta donación ya fue entregada.")
-                    .font(.gotham(.bold, style: .body))
-                    .foregroundColor(.green)
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-            } else {
-                Button(action: { showConfirmAlert = true }) {
-                    Text("Marcar como ENTREGADA")
-                        .font(.gotham(.bold, style: .headline))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.aqua)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-            }
-        }
-    }
-}
-
-
-
-// ======================================================
-// MARK: - HELPERS
-// ======================================================
-
-extension DonationDetailView {
-
-    private func statusColor(_ status: String) -> Color {
-        switch status.lowercased() {
-        case "pending": return .gray
-        case "approved": return .aqua
-        case "rejected": return .red
-        default: return .gray
-        }
-    }
-
-    private func statusLabel(_ status: String) -> String {
-        switch status.lowercased() {
-        case "pending": return "PENDIENTE"
-        case "approved": return "APROBADA"
-        case "rejected": return "RECHAZADA"
-        default: return status.uppercased()
         }
     }
 }
