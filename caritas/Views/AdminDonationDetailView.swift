@@ -124,7 +124,9 @@ struct AdminDonationDetailView: View {
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .lineLimit(3)
+                            .padding(.horizontal)
                     }
+                    .padding(.horizontal)
                     
                     HStack {
                         Text("Estado:")
@@ -138,13 +140,13 @@ struct AdminDonationDetailView: View {
                             .foregroundStyle(.white)
                             .clipShape(Capsule())
                     }
+                    .padding(.horizontal)
                 }
                 .padding(.horizontal)
                 .padding(.top, 10)
                 
                 Divider().padding(.horizontal)
                 
-                // MARK: - Ayuda con traslado (solo para electrodomésticos/muebles) - replicado
                 if isLargeItem {
                     TransportHelpCard(needsHelp: donation.needsTransportHelp)
                         .padding(.horizontal)
@@ -156,7 +158,8 @@ struct AdminDonationDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Comentario para el donante (opcional)")
                         .font(.headline.weight(.bold))
-                        .foregroundStyle(azul)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
                     
                     TextEditor(text: $vm.adminComment)
                         .scrollContentBackground(.hidden)
@@ -164,8 +167,11 @@ struct AdminDonationDetailView: View {
                         .padding(10)
                         .background(Color(.systemGray6))
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .padding(.horizontal, 32)
                 }
                 .padding(.horizontal)
+                
+                Divider().padding(.horizontal)
                 
                 // MARK: - Acciones
                 VStack(spacing: 12) {
@@ -183,6 +189,7 @@ struct AdminDonationDetailView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    .padding(.horizontal)
                     .disabled(vm.isWorkingApprove || vm.isWorkingReject)
                     
                     Button(role: .destructive) {
@@ -199,6 +206,7 @@ struct AdminDonationDetailView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    .padding(.horizontal)
                     .disabled(vm.isWorkingApprove || vm.isWorkingReject)
                 }
                 .padding(.horizontal)

@@ -12,6 +12,10 @@ struct AdminSettingsView: View {
     @EnvironmentObject var auth: AuthViewModel
 
     private let azul = Color("azulMarino")
+    
+    private var gradientColors: Gradient {
+        Gradient(colors: [.naranja, .aqua])
+    }
 
     var body: some View {
         NavigationStack {
@@ -23,6 +27,15 @@ struct AdminSettingsView: View {
                         Image(systemName: "person.crop.circle.fill")
                             .font(.system(size: 80))
                             .foregroundStyle(azul)
+                            .overlay(
+                                Circle()
+                                    .stroke(
+                                        LinearGradient(gradient: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                                        lineWidth: 5
+                                    )
+                                    .shadow(color: .naranja, radius: 6, x: 0, y: 0)
+                                    .frame(width: 90, height: 80)
+                            )
 
                         Text("Administrador de Calidad")
                             .font(.headline)
