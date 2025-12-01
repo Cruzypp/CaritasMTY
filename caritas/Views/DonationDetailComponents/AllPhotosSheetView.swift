@@ -24,7 +24,7 @@ struct AllPhotosSheetView: View {
                                         image
                                             .resizable()
                                             .scaledToFill()
-                                            .frame(height: 250)
+                                            .frame(width: 340, height: 250)
                                             .clipped()
                                             .clipShape(RoundedRectangle(cornerRadius: 12))
                                             
@@ -34,7 +34,7 @@ struct AllPhotosSheetView: View {
                                             Image(.logotipo)
                                                 .resizable()
                                                 .scaledToFit()
-                                                .frame(width: 80, height: 80)
+                                                .frame(width: 340, height: 250)
                                         }
                                         .frame(height: 250)
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -44,7 +44,7 @@ struct AllPhotosSheetView: View {
                                             Color(.systemGray6)
                                             ProgressView()
                                         }
-                                        .frame(height: 250)
+                                        .frame(width: 340, height: 250)
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
                                         
                                     @unknown default:
@@ -55,6 +55,7 @@ struct AllPhotosSheetView: View {
                                 Text("Foto \(index + 1) de \(photoUrls.count)")
                                     .font(.gotham(.regular, style: .caption))
                                     .foregroundColor(.secondary)
+                                    .padding(.leading)
                             }
                         }
                     }

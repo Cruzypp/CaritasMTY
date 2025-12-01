@@ -8,7 +8,7 @@
 import SwiftUI
 import FirebaseFirestore
 
-// MARK: - Donation Row (thumbnail, title, description, status, date)
+// MARK: - Donation Row 
 struct AdminDonationRow: View {
     let donation: Donation
 
@@ -37,14 +37,20 @@ struct AdminDonationRow: View {
                         case .empty:
                             ProgressView()
                         default:
-                            Image(systemName: "photo.on.rectangle.angled")
-                                .foregroundStyle(.secondary)
+                            ZStack{
+                                Image(systemName: "photo.on.rectangle.angled")
+                                    .foregroundStyle(.secondary)
+                                    .offset(y: -80)
+                                    .padding(.bottom, -20)
+                            }
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 } else {
                     Image(systemName: "photo.on.rectangle.angled")
                         .foregroundStyle(.secondary)
+                        .offset(y: -80)
+                        .padding(.bottom, -20)
                 }
             }
             .frame(width: 350, height: 150)
@@ -56,7 +62,7 @@ struct AdminDonationRow: View {
                     
                     Spacer()
                     
-                    StatusBadge(status: donation.status ?? "pending")
+                    StatusBadge(status: donation.status ?? "pending", isDelivered: donation.isDelivered ?? false)
                 }
                 .padding(.top, -15)
                 
@@ -87,9 +93,16 @@ struct AdminDonationRow: View {
 // MARK: - Status Badge
 private struct StatusBadge: View {
     let status: String
+    let isDelivered: Bool
+    
     var config: (text: String, color: Color) {
+        // Si está entregada, mostrar "Entregada" en verde
+        if isDelivered {
+            return ("Entregada", .green.opacity(0.15))
+        }
+        
         switch status.lowercased() {
-        case "approved": return ("Aprobada", .green.opacity(0.15))
+        case "approved": return ("Aprobada", .cyan.opacity(0.15))
         case "rejected": return ("Rechazada", .red.opacity(0.15))
         default:         return ("Pendiente", .orange.opacity(0.15))
         }
@@ -112,11 +125,12 @@ private struct StatusBadge: View {
         description: "Descripción de ejemplo para ropa de invierno.",
         adminComment: nil,
         folio: "FOL-D-001",
-        photoUrls: ["https://picsum.photos/seed/row/200/200"],
-        status: "pending",
+        photoUrls: [],
+        status: "approved",
         title: "Ropa de invierno",
         userId: "U-1",
-        needsTransportHelp: false
+        needsTransportHelp: false,
+        isDelivered: true
     )
     return AdminDonationRow(donation: donation)
         .padding()

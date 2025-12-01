@@ -123,7 +123,7 @@ struct ReviewsScreen: View {
             case .pending:
                 statusFiltered = allDonations.filter { ($0.donation.status ?? "pending").lowercased() == "pending" }
             case .approved:
-                statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "approved" }
+                statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "approved" && $0.donation.isDelivered == nil}
             case .rejected:
                 statusFiltered = allDonations.filter { ($0.donation.status ?? "").lowercased() == "rejected" }
             case .delivered:

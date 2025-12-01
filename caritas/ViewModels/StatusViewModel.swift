@@ -48,11 +48,14 @@ final class StatusViewModel: ObservableObject {
         
         // Filtrar por status
         if selectedStatus.firebaseValue == "delivered" {
-            // Si buscamos "Entregado", filtramos por isDelivered = true
+            // Si buscamos "Entregado", filtramos solo por isDelivered = true
             filtered = filtered.filter { $0.isDelivered == true }
         } else {
-            // Si no, filtramos por el status y excluimos entregadas
-            filtered = filtered.filter { $0.status == selectedStatus.firebaseValue && $0.isDelivered != true }
+            // Para cualquier otro status, filtramos por status coincidente
+            // Y excluimos cualquier donación que ya esté entregada
+            filtered = filtered.filter { 
+                $0.status == selectedStatus.firebaseValue && $0.isDelivered != true
+            }
         }
         
         // Ordenar por fecha (más recientes primero)

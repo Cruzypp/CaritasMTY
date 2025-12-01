@@ -161,62 +161,89 @@ struct AdminDonationDetailView: View {
                         .foregroundStyle(.black)
                         .padding(.horizontal)
                     
-                    TextEditor(text: $vm.adminComment)
-                        .scrollContentBackground(.hidden)
-                        .frame(minHeight: 120)
-                        .padding(10)
-                        .background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .padding(.horizontal, 32)
+                    if isDelivered {
+                        // Si está entregada, mostrar como texto
+                        Text(vm.adminComment.isEmpty ? "Sin comentarios" : vm.adminComment)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
+                            .foregroundStyle(vm.adminComment.isEmpty ? .secondary : .primary)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .padding(.horizontal, 32)
+                    } else {
+                        // Si no está entregada, permitir editar
+                        TextEditor(text: $vm.adminComment)
+                            .scrollContentBackground(.hidden)
+                            .frame(minHeight: 120)
+                            .padding(10)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .padding(.horizontal, 32)
+                    }
                 }
                 .padding(.horizontal)
                 
                 Divider().padding(.horizontal)
                 
-                // MARK: - Acciones
-                VStack(spacing: 12) {
-                    Button {
-                        Task { await vm.updateStatus(to: "approved") }
-                    } label: {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                            Text(vm.isWorkingApprove ? "Aprobando..." : "APROBAR")
-                                .fontWeight(.semibold)
+                // MARK: - Acciones (solo si no está entregada)
+                if !isDelivered {
+                    VStack(spacing: 12) {
+                        Button {
+                            Task { await vm.updateStatus(to: "approved") }
+                        } label: {
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                Text(vm.isWorkingApprove ? "Aprobando..." : "APROBAR")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(azul)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(azul)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .padding(.horizontal)
+                        .disabled(vm.isWorkingApprove || vm.isWorkingReject)
+                        
+                        Button(role: .destructive) {
+                            Task { await vm.updateStatus(to: "rejected") }
+                        } label: {
+                            HStack {
+                                Image(systemName: "xmark.circle.fill")
+                                Text(vm.isWorkingReject ? "Rechazando..." : "RECHAZAR")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemRed))
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        }
+                        .padding(.horizontal)
+                        .disabled(vm.isWorkingApprove || vm.isWorkingReject)
                     }
                     .padding(.horizontal)
-                    .disabled(vm.isWorkingApprove || vm.isWorkingReject)
-                    
-                    Button(role: .destructive) {
-                        Task { await vm.updateStatus(to: "rejected") }
-                    } label: {
-                        HStack {
-                            Image(systemName: "xmark.circle.fill")
-                            Text(vm.isWorkingReject ? "Rechazando..." : "RECHAZAR")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemRed))
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .padding(.bottom, 24)
+                } else {
+                    VStack(spacing: 12) {
+                        Text("✓ Donación entregada")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.green)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .padding(.horizontal)
-                    .disabled(vm.isWorkingApprove || vm.isWorkingReject)
+                    .padding(.bottom, 24)
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 24)
             }
         }
         .navigationTitle("Detalle")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showAllPhotos) {
             AllPhotosSheetView(photoUrls: donation.photoUrls ?? [])
+                .padding(.horizontal)
         }
         .alert("Error", isPresented: .init(get: { vm.errorMessage != nil }, set: { _ in vm.errorMessage = nil })) {
             Button("Aceptar", role: .cancel) { }
@@ -241,7 +268,16 @@ struct AdminDonationDetailView: View {
     }
     
     // MARK: - Helpers
+    private var isDelivered: Bool {
+        donation.isDelivered ?? false
+    }
+    
     private func statusColor(_ status: String) -> Color {
+        // Si está entregada, mostrar verde
+        if isDelivered {
+            return .green
+        }
+        
         switch status.lowercased() {
         case "pending":  return .gray
         case "approved": return aqua
@@ -251,6 +287,11 @@ struct AdminDonationDetailView: View {
     }
     
     private func statusLabel(_ status: String) -> String {
+        // Si está entregada, mostrar "ENTREGADA"
+        if isDelivered {
+            return "ENTREGADA"
+        }
+        
         switch status.lowercased() {
         case "pending": return "PENDIENTE"
         case "approved": return "APROBADA"
@@ -279,6 +320,8 @@ final class AdminDonationDetailVM: ObservableObject {
     init(donation: Donation, donationId: String) {
         self.donation = donation
         self.donationId = donationId
+        // Cargar el comentario existente si lo hay
+        self._adminComment = Published(initialValue: donation.adminComment ?? "")
     }
     
     func updateStatus(to status: String) async {
@@ -356,7 +399,8 @@ final class AdminDonationDetailVM: ObservableObject {
         status: "pending",
         title: "Ropa de invierno",
         userId: "U001",
-        needsTransportHelp: true
+        needsTransportHelp: true,
+        isDelivered: true
     )
     return NavigationStack {
         AdminDonationDetailView(donation: testDonation)
