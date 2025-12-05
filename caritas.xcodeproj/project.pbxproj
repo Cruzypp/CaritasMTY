@@ -323,12 +323,11 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = caritas/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Cáritas MTY";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Esta app necesita acceso a la cámara para tomar fotos.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para escanear códigos QR de donaciones";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -360,12 +359,11 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = caritas/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Cáritas MTY";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Esta app necesita acceso a la cámara para tomar fotos.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para escanear códigos QR de donaciones";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -412,16 +410,16 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.0;
+				kind = exactVersion;
+				version = 9.0.0;
 			};
 		};
 		FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.5.0;
+				kind = exactVersion;
+				version = 12.5.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
