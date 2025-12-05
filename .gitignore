@@ -1,0 +1,17 @@
+# Xcode project files
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Firebase/Secrets
+GoogleService-Info.plist
+*.plist.backup
+.env
+.env.local
+Secrets.swift
+
+# macOS system files
+.DS_Store
+
+# Optional: ignore this file only if it MUST be private
+# ARQUITECTURA_EXPLICACION.md

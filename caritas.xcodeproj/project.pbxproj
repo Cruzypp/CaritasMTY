@@ -1,0 +1,481 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		614218BF2EBEA43F00742768 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 614218BE2EBEA43F00742768 /* GoogleSignIn */; };
+		614218C12EBEA43F00742768 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 614218C02EBEA43F00742768 /* GoogleSignInSwift */; };
+		6198C42C2EB81A580051A14E /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 6198C42B2EB81A580051A14E /* FirebaseStorage */; };
+		61B3EB892ECD10F5008D2124 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61B3EB882ECD10F5008D2124 /* LaunchScreen.storyboard */; };
+		FCEC6FD82EB3DDE200B4FC17 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FD72EB3DDE200B4FC17 /* FirebaseAnalytics */; };
+		FCEC6FDA2EB3DDE200B4FC17 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FD92EB3DDE200B4FC17 /* FirebaseAnalyticsCore */; };
+		FCEC6FDC2EB3DDE200B4FC17 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FDB2EB3DDE200B4FC17 /* FirebaseAuth */; };
+		FCEC6FDE2EB3DDE200B4FC17 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FDD2EB3DDE200B4FC17 /* FirebaseCore */; };
+		FCEC6FE02EB3DDE200B4FC17 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FDF2EB3DDE200B4FC17 /* FirebaseDatabase */; };
+		FCEC6FE22EB3DDE200B4FC17 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FE12EB3DDE200B4FC17 /* FirebaseFirestore */; };
+		FCEC6FE42EB3DDE200B4FC17 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = FCEC6FE32EB3DDE200B4FC17 /* FirebaseFirestoreCombine-Community */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		61B3EB882ECD10F5008D2124 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FCEC6FC32EB3DCCB00B4FC17 /* caritas.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = caritas.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FCBC81D02EBBE8B500355381 /* Exceptions for "caritas" folder in "caritas" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FCEC6FC22EB3DCCB00B4FC17 /* caritas */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		FCEC6FC52EB3DCCB00B4FC17 /* caritas */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FCBC81D02EBBE8B500355381 /* Exceptions for "caritas" folder in "caritas" target */,
+			);
+			path = caritas;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FCEC6FC02EB3DCCB00B4FC17 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCEC6FE02EB3DDE200B4FC17 /* FirebaseDatabase in Frameworks */,
+				FCEC6FD82EB3DDE200B4FC17 /* FirebaseAnalytics in Frameworks */,
+				FCEC6FDC2EB3DDE200B4FC17 /* FirebaseAuth in Frameworks */,
+				FCEC6FDE2EB3DDE200B4FC17 /* FirebaseCore in Frameworks */,
+				FCEC6FDA2EB3DDE200B4FC17 /* FirebaseAnalyticsCore in Frameworks */,
+				614218C12EBEA43F00742768 /* GoogleSignInSwift in Frameworks */,
+				6198C42C2EB81A580051A14E /* FirebaseStorage in Frameworks */,
+				FCEC6FE22EB3DDE200B4FC17 /* FirebaseFirestore in Frameworks */,
+				FCEC6FE42EB3DDE200B4FC17 /* FirebaseFirestoreCombine-Community in Frameworks */,
+				614218BF2EBEA43F00742768 /* GoogleSignIn in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6198C42A2EB81A580051A14E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FCEC6FBA2EB3DCCB00B4FC17 = {
+			isa = PBXGroup;
+			children = (
+				61B3EB882ECD10F5008D2124 /* LaunchScreen.storyboard */,
+				FCEC6FC52EB3DCCB00B4FC17 /* caritas */,
+				6198C42A2EB81A580051A14E /* Frameworks */,
+				FCEC6FC42EB3DCCB00B4FC17 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FCEC6FC42EB3DCCB00B4FC17 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FCEC6FC32EB3DCCB00B4FC17 /* caritas.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FCEC6FC22EB3DCCB00B4FC17 /* caritas */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCEC6FCE2EB3DCCC00B4FC17 /* Build configuration list for PBXNativeTarget "caritas" */;
+			buildPhases = (
+				FCEC6FBF2EB3DCCB00B4FC17 /* Sources */,
+				FCEC6FC02EB3DCCB00B4FC17 /* Frameworks */,
+				FCEC6FC12EB3DCCB00B4FC17 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FCEC6FC52EB3DCCB00B4FC17 /* caritas */,
+			);
+			name = caritas;
+			packageProductDependencies = (
+				FCEC6FD72EB3DDE200B4FC17 /* FirebaseAnalytics */,
+				FCEC6FD92EB3DDE200B4FC17 /* FirebaseAnalyticsCore */,
+				FCEC6FDB2EB3DDE200B4FC17 /* FirebaseAuth */,
+				FCEC6FDD2EB3DDE200B4FC17 /* FirebaseCore */,
+				FCEC6FDF2EB3DDE200B4FC17 /* FirebaseDatabase */,
+				FCEC6FE12EB3DDE200B4FC17 /* FirebaseFirestore */,
+				FCEC6FE32EB3DDE200B4FC17 /* FirebaseFirestoreCombine-Community */,
+				6198C42B2EB81A580051A14E /* FirebaseStorage */,
+				614218BE2EBEA43F00742768 /* GoogleSignIn */,
+				614218C02EBEA43F00742768 /* GoogleSignInSwift */,
+			);
+			productName = caritas;
+			productReference = FCEC6FC32EB3DCCB00B4FC17 /* caritas.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FCEC6FBB2EB3DCCB00B4FC17 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					FCEC6FC22EB3DCCB00B4FC17 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+				};
+			};
+			buildConfigurationList = FCEC6FBE2EB3DCCB00B4FC17 /* Build configuration list for PBXProject "caritas" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FCEC6FBA2EB3DCCB00B4FC17;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				614218BD2EBEA43F00742768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FCEC6FC42EB3DCCB00B4FC17 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FCEC6FC22EB3DCCB00B4FC17 /* caritas */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FCEC6FC12EB3DCCB00B4FC17 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61B3EB892ECD10F5008D2124 /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FCEC6FBF2EB3DCCB00B4FC17 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		FCEC6FCC2EB3DCCC00B4FC17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = YKZJR6NCMN;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FCEC6FCD2EB3DCCC00B4FC17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = YKZJR6NCMN;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FCEC6FCF2EB3DCCC00B4FC17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YKZJR6NCMN;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = caritas/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cáritas MTY";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para escanear códigos QR de donaciones";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = LosMisioneros.caritas;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FCEC6FD02EB3DCCC00B4FC17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YKZJR6NCMN;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = caritas/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cáritas MTY";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para escanear códigos QR de donaciones";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = LosMisioneros.caritas;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FCEC6FBE2EB3DCCB00B4FC17 /* Build configuration list for PBXProject "caritas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCEC6FCC2EB3DCCC00B4FC17 /* Debug */,
+				FCEC6FCD2EB3DCCC00B4FC17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FCEC6FCE2EB3DCCC00B4FC17 /* Build configuration list for PBXNativeTarget "caritas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCEC6FCF2EB3DCCC00B4FC17 /* Debug */,
+				FCEC6FD02EB3DCCC00B4FC17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		614218BD2EBEA43F00742768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = exactVersion;
+				version = 9.0.0;
+			};
+		};
+		FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 12.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		614218BE2EBEA43F00742768 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 614218BD2EBEA43F00742768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		614218C02EBEA43F00742768 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 614218BD2EBEA43F00742768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		6198C42B2EB81A580051A14E /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		FCEC6FD72EB3DDE200B4FC17 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		FCEC6FD92EB3DDE200B4FC17 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		FCEC6FDB2EB3DDE200B4FC17 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		FCEC6FDD2EB3DDE200B4FC17 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		FCEC6FDF2EB3DDE200B4FC17 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		FCEC6FE12EB3DDE200B4FC17 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		FCEC6FE32EB3DDE200B4FC17 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCEC6FD62EB3DDE200B4FC17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = FCEC6FBB2EB3DCCB00B4FC17 /* Project object */;
+}
